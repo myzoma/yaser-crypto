@@ -1,20 +1,16 @@
 class YaserCrypto {
     constructor() {
         this.coins = [];
-        this.config = null;
+        this.config = {
+            apiUrl: "https://www.okx.com/api/v5",
+            requestDelay: 500,
+            maxCoins: 50,
+            minChange: 1,
+            maxChange: 15,
+            minVolume: 100000
+        };
         this.requestDelay = 500;
-        this.loadConfig();
-    }
-
-    async loadConfig() {
-        try {
-            const response = await fetch('config.json');
-            this.config = await response.json();
-            this.init();
-        } catch (error) {
-            console.error('خطأ في تحميل الإعدادات:', error);
-            this.showError('خطأ في تحميل الإعدادات');
-        }
+        this.init();
     }
 
     async init() {
@@ -36,26 +32,26 @@ class YaserCrypto {
         try {
             console.log('جاري جلب العملات المرشحة...');
             const candidateSymbols = await this.fetchTopGainers();
-            
+                        
             if (candidateSymbols.length === 0) {
                 throw new Error('لم يتم العثور على عملات مرشحة');
             }
-            
+                        
             console.log(`🎯 سيتم تحليل ${candidateSymbols.length} عملة مرشحة`);
-            
+                        
             const results = [];
-            
+                        
             for (let i = 0; i < candidateSymbols.length; i++) {
                 const symbol = candidateSymbols[i];
                 console.log(`جاري تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
-                
+                                
                 try {
                     const coin = await this.fetchCoinData(symbol);
                     if (coin && !isNaN(coin.change24h)) {
                         results.push(coin);
                         console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
                     }
-                    
+                                        
                     if (i < candidateSymbols.length - 1) {
                         await this.delay(this.requestDelay);
                     }
@@ -64,15 +60,15 @@ class YaserCrypto {
                     continue;
                 }
             }
-            
+                        
             this.coins = results;
-            
+                        
             if (this.coins.length === 0) {
                 throw new Error('لم يتم العثور على عملات تحقق المعايير');
             }
-            
+                        
             console.log(`🏆 تم العثور على ${this.coins.length} عملة مرشحة`);
-            
+                    
         } catch (error) {
             console.error('خطأ في جلب البيانات:', error);
             this.showError(`خطأ في جلب البيانات: ${error.message}`);
@@ -82,27 +78,25 @@ class YaserCrypto {
     async fetchTopGainers() {
         try {
             console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
-            
+                        
             const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-
             if (!response.ok) {
                 throw new Error(`فشل في جلب البيانات: ${response.status}`);
             }
-
             const data = await response.json();
-            
+                        
             const usdtPairs = data.data
                 .filter(ticker => ticker.instId.endsWith('-USDT'))
                 .map(ticker => {
                     const currentPrice = parseFloat(ticker.last);
                     const openPrice = parseFloat(ticker.open24h);
                     const change24h = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
-                    
+                                        
                     return {
                         symbol: ticker.instId.replace('-USDT', ''),
                         change24h: change24h,
@@ -113,11 +107,9 @@ class YaserCrypto {
                 .filter(coin => coin.volume > 100000)
                 .sort((a, b) => b.change24h - a.change24h)
                 .slice(0, 50);
-
             console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
-            
+                        
             return usdtPairs.map(coin => coin.symbol);
-
         } catch (error) {
             console.error('خطأ:', error);
             throw error;
@@ -131,7 +123,7 @@ class YaserCrypto {
     async fetchCoinData(symbol) {
         try {
             const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
-            
+                        
             const tickerResponse = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
@@ -139,24 +131,24 @@ class YaserCrypto {
                     'Content-Type': 'application/json'
                 }
             });
-            
+                        
             if (!tickerResponse.ok) {
                 throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
             }
-            
+                        
             const tickerData = await tickerResponse.json();
-            
+                        
             if (!tickerData.data || tickerData.data.length === 0) {
                 throw new Error(`لا توجد بيانات لـ ${symbol}`);
             }
-            
+                        
             const ticker = tickerData.data[0];
-            
+                        
             const currentPrice = parseFloat(ticker.last);
             const openPrice24h = parseFloat(ticker.open24h);
-            const change24h = openPrice24h > 0 ? 
-                ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0;
-            
+            const change24h = openPrice24h > 0 ?
+                 ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0;
+                        
             const coin = {
                 symbol: symbol,
                 name: symbol,
@@ -171,11 +163,10 @@ class YaserCrypto {
                 conditions: {},
                 targets: {}
             };
-
             this.calculateTechnicalIndicators(coin);
-            
+                        
             return coin;
-            
+                    
         } catch (error) {
             console.error(`خطأ في جلب بيانات ${symbol}:`, error);
             throw error;
@@ -186,7 +177,7 @@ class YaserCrypto {
         const currentPrice = coin.price;
         const high24h = coin.high24h;
         const low24h = coin.low24h;
-        
+                
         coin.technicalIndicators = {
             rsi: this.estimateRSIFromChange(coin.change24h),
             macd: coin.change24h > 0 ? 0.1 : -0.1,
@@ -200,7 +191,7 @@ class YaserCrypto {
             mfi: this.estimateMFIFromVolume(coin.volume, coin.change24h),
             fibonacci: this.calculateFibonacci([high24h], [low24h])
         };
-        
+                
         this.calculateTargets(coin);
     }
 
@@ -223,7 +214,7 @@ class YaserCrypto {
         const high = Math.max(...highs);
         const low = Math.min(...lows);
         const diff = high - low;
-        
+                
         return {
             level0: high,
             level236: high - (diff * 0.236),
@@ -238,7 +229,7 @@ class YaserCrypto {
     calculateTargets(coin) {
         const fib = coin.technicalIndicators.fibonacci;
         const currentPrice = coin.price;
-        
+                
         coin.targets = {
             entry: this.findNearestSupport(currentPrice, fib),
             stopLoss: fib.level786 * 0.98,
@@ -253,7 +244,7 @@ class YaserCrypto {
         const levels = [fib.level618, fib.level500, fib.level382, fib.level236];
         let nearest = levels[0];
         let minDiff = Math.abs(price - nearest);
-        
+                
         for (const level of levels) {
             const diff = Math.abs(price - level);
             if (diff < minDiff && level < price) {
@@ -261,7 +252,7 @@ class YaserCrypto {
                 minDiff = diff;
             }
         }
-        
+                
         return nearest;
     }
 
@@ -269,9 +260,9 @@ class YaserCrypto {
         this.coins.forEach(coin => {
             this.calculateScore(coin);
         });
-        
+                
         this.coins.sort((a, b) => b.score - a.score);
-        
+                
         this.coins.forEach((coin, index) => {
             coin.rank = index + 1;
         });
@@ -293,27 +284,22 @@ class YaserCrypto {
             score += 10;
             conditions.rise3Percent = true;
         }
-
         if (changePercent >= 4) {
             score += 15;
             conditions.rise4Percent = true;
         }
-
         if (currentPrice > ema20 && currentPrice > ema50) {
             score += 25;
             conditions.breakoutMA = true;
         }
-
         if (rsi > 50) {
             score += 40;
             conditions.rsiBullish = true;
         }
-
         if (macd > macdSignal) {
             score += 60;
             conditions.macdBullish = true;
         }
-
         if (mfi > 50) {
             score += 80;
             conditions.mfiBullish = true;
@@ -324,7 +310,6 @@ class YaserCrypto {
             score += 90;
             conditions.strongRise = true;
         }
-
         if (changePercent > 9 && totalConditions >= 6) {
             score += 100;
             conditions.perfectScore = true;
@@ -347,11 +332,11 @@ class YaserCrypto {
         const card = document.createElement('div');
         card.className = 'coin-card';
         card.onclick = () => this.showCoinDetails(coin);
-        
+                
         const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
         const changeSign = coin.change24h >= 0 ? '+' : '';
         const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
-        
+                
         let rankBadgeStyle = '';
         if (coin.rank === 1) {
             rankBadgeStyle = 'background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);';
@@ -374,7 +359,7 @@ class YaserCrypto {
                     <div class="coin-price">
                         $${coin.price.toFixed(4)}
                         <span class="price-change ${changeClass}">
-                            ${changeSign}${coin.change24h.toFixed(2)}
+                                                       ${changeSign}${coin.change24h.toFixed(2)}%
                         </span>
                     </div>
                 </div>
@@ -405,7 +390,7 @@ class YaserCrypto {
                 <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
             </div>
         `;
-        
+                
         return card;
     }
 
@@ -540,7 +525,7 @@ class YaserCrypto {
                 </div>
             </div>
         `;
-        
+                
         modal.style.display = 'block';
     }
 
@@ -576,20 +561,6 @@ function closeModal() {
     document.getElementById('coinModal').style.display = 'none';
 }
 
-// الدوال العامة
-function closeModal() {
-    document.getElementById('coinModal').style.display = 'none';
-}
-
-// إغلاق النافذة المنبثقة عند النقر خارجها
-window.onclick = function(event) {
-    const modal = document.getElementById('coinModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-}
-
-
 // إغلاق النافذة المنبثقة عند النقر خارجها
 window.onclick = function(event) {
     const modal = document.getElementById('coinModal');
@@ -602,3 +573,4 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
 });
+

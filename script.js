@@ -576,11 +576,19 @@ function closeModal() {
     document.getElementById('coinModal').style.display = 'none';
 }
 
-function refreshData() {
-    if (window.yaserCrypto) {
-        window.yaserCrypto.init();
+// الدوال العامة
+function closeModal() {
+    document.getElementById('coinModal').style.display = 'none';
+}
+
+// إغلاق النافذة المنبثقة عند النقر خارجها
+window.onclick = function(event) {
+    const modal = document.getElementById('coinModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
 }
+
 
 // إغلاق النافذة المنبثقة عند النقر خارجها
 window.onclick = function(event) {

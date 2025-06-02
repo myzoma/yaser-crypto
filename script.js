@@ -77,7 +77,29 @@ class YaserCrypto {
             this.showError('خطأ في تحميل الإعدادات');
         }
     }
+ // أضف هذه الدالة
+    async init() {
+        try {
+            await this.fetchData();
+            this.analyzeCoins();
+            this.renderCoins();
+        } catch (error) {
+            console.error('خطأ في التهيئة:', error);
+            this.showError('خطأ في تحميل البيانات');
+        }
+    }
 
+    showError(message) {
+        const coinsGrid = document.getElementById('coinsGrid');
+        coinsGrid.innerHTML = `
+            <div class="loading-container">
+                <div style="color: #ff4757; font-size: 1.5rem;">
+                    <i class="fas fa-exclamation-triangle" style="margin-left: 10px;"></i>
+                    ${message}
+                </div>
+            </div>
+        `;
+    }
     showError(message) {
         const coinsGrid = document.getElementById('coinsGrid');
         coinsGrid.innerHTML = `

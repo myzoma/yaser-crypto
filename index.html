@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YASER CRYPTO</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>YASER CRYPTO</h1>
+        <div class="refresh-btn" onclick="refreshData()">تحديث البيانات</div>
+    </header>
+
+    <main>
+        <div class="ranking-container">
+            <h2>ترتيب العملات حسب الاستراتيجية</h2>
+            <div class="coins-grid" id="coinsGrid">
+                <!-- البطاقات ستظهر هنا -->
+            </div>
+        </div>
+    </main>
+
+    <!-- النافذة المنبثقة -->
+    <div class="modal" id="coinModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="modal-body" id="modalBody">
+                <!-- تفاصيل العملة ستظهر هنا -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

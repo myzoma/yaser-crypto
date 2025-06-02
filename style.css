@@ -1,9 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
-
-body {
-    font-family: 'Tajawal', Arial, sans-serif;
-  
-}
 
 * {
     margin: 0;
@@ -95,6 +89,53 @@ header h1 {
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, #00d4aa, #00a085);
+}
+/* ألوان خلفية أرقام المراكز */
+.rank-badge {
+    /* الأنماط الموجودة تبقى كما هي */
+}
+
+/* المركز الأول - ذهبي */
+.coin-card:nth-child(1) .rank-badge {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* المركز الثاني - فضي */
+.coin-card:nth-child(2) .rank-badge {
+    background: linear-gradient(45deg, #C0C0C0, #A8A8A8);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+}
+
+/* المركز الثالث - برونزي */
+.coin-card:nth-child(3) .rank-badge {
+    background: linear-gradient(45deg, #CD7F32, #B8860B);
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+}
+
+/* المراكز 4-10 - أخضر */
+.coin-card:nth-child(4) .rank-badge,
+.coin-card:nth-child(5) .rank-badge,
+.coin-card:nth-child(6) .rank-badge,
+.coin-card:nth-child(7) .rank-badge,
+.coin-card:nth-child(8) .rank-badge,
+.coin-card:nth-child(9) .rank-badge,
+.coin-card:nth-child(10) .rank-badge {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
+    font-weight: bold;
+}
+
+/* باقي المراكز - رمادي */
+.coin-card:nth-child(n+11) .rank-badge {
+    background: linear-gradient(45deg, #666, #555);
+    color: #fff;
 }
 
 .rank-badge {

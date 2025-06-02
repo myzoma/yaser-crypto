@@ -22,7 +22,6 @@ class LoadingManager {
                 </div>
             </div>
         `;
-        
         this.startCounter();
     }
 
@@ -33,70 +32,50 @@ class LoadingManager {
         
         this.interval = setInterval(() => {
             this.counter += Math.random() * 15 + 5;
-            
             if (this.counter >= this.maxCount) {
                 this.counter = this.maxCount;
                 clearInterval(this.interval);
             }
-            
             const percentage = Math.floor(this.counter);
-            if (counterElement) {
-                counterElement.textContent = `${percentage}%`;
-            }
-            if (progressBar) {
-                progressBar.style.width = `${percentage}%`;
-            }
+            if (counterElement) counterElement.textContent = `${percentage}%`;
+            if (progressBar) progressBar.style.width = `${percentage}%`;
         }, 100);
     }
 
     hide() {
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
+        if (this.interval) clearInterval(this.interval);
     }
 }
 
-// YaserCrypto Class - محدث
+// YaserCrypto Class
 class YaserCrypto {
     constructor() {
         this.coins = [];
         this.config = null;
         this.requestDelay = 500;
-        this.loadingManager = new LoadingManager(); // إضافة LoadingManager
+        this.loadingManager = new LoadingManager();
         this.loadConfig();
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async loadConfig() {
         try {
-            // إظهار شاشة التحميل
             this.loadingManager.show();
+            await this.delay(2000);
             
             const response = await fetch('config.json');
             this.config = await response.json();
             
-            // محاكاة وقت التحميل
-            await this.delay(2000);
-            
-            // إخفاء شاشة التحميل
             this.loadingManager.hide();
-            
-            // بدء التطبيق
             this.init();
         } catch (error) {
             console.error('خطأ في تحميل الإعدادات:', error);
             this.loadingManager.hide();
             this.showError('خطأ في تحميل الإعدادات');
         }
-    }
-
-    async init() {
-        await this.fetchData();
-        this.analyzeCoins();
-        this.renderCoins();
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     showError(message) {
@@ -107,63 +86,10 @@ class YaserCrypto {
                     <i class="fas fa-exclamation-triangle" style="margin-left: 10px;"></i>
                     ${message}
                 </div>
-                <div style="color: #aaa; margin-top: 15px;">
-                    يرجى المحاولة مرة أخرى لاحقاً
-                </div>
             </div>
         `;
     }
-
-    // باقي الدوال تبقى كما هي...
-    async fetchData() {
-        try {
-            console.log('جاري جلب العملات المرشحة...');
-            const candidateSymbols = await this.fetchTopGainers();
-                        
-            if (candidateSymbols.length === 0) {
-                throw new Error('لم يتم العثور على عملات مرشحة');
-            }
-                        
-            console.log(`🎯 سيتم تحليل ${candidateSymbols.length} عملة مرشحة`);
-                        
-            const results = [];
-                        
-            for (let i = 0; i < candidateSymbols.length; i++) {
-                const symbol = candidateSymbols[i];
-                console.log(`جاري تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
-                                
-                try {
-                    const coin = await this.fetchCoinData(symbol);
-                    if (coin && !isNaN(coin.change24h)) {
-                        results.push(coin);
-                        console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
-                    }
-                                        
-                    if (i < candidateSymbols.length - 1) {
-                        await this.delay(this.requestDelay);
-                    }
-                } catch (error) {
-                    console.warn(`❌ فشل تحليل ${symbol}:`, error.message);
-                    continue;
-                }
-            }
-                        
-            this.coins = results;
-                        
-            if (this.coins.length === 0) {
-                throw new Error('لم يتم العثور على عملات تحقق المعايير');
-            }
-                        
-            console.log(`🏆 تم العثور على ${this.coins.length} عملة مرشحة`);
-                    
-        } catch (error) {
-            console.error('خطأ في جلب البيانات:', error);
-            this.showError(`خطأ في جلب البيانات: ${error.message}`);
-        }
-    }
-
-    // باقي الدوال... (نسخ الدوال الأخرى كما هي)
-   async fetchTopGainers() {
+async fetchTopGainers() {
         try {
             console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
             
@@ -207,8 +133,12 @@ class YaserCrypto {
             throw error;
         }
     }
-       
-async fetchCoinData(symbol) {
+
+  delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async fetchCoinData(symbol) {
         try {
             const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
             
@@ -262,7 +192,7 @@ async fetchCoinData(symbol) {
         }
     }
 
-calculateTechnicalIndicators(coin) {
+    calculateTechnicalIndicators(coin) {
         const currentPrice = coin.price;
         const high24h = coin.high24h;
         const low24h = coin.low24h;

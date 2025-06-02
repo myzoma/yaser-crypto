@@ -1,23 +1,70 @@
+class LoadingManager {
+    constructor() {
+        this.progressBar = document.getElementById('progressBar');
+        this.loadingCounter = document.getElementById('loadingCounter');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.currentProgress = 0;
+    }
+
+    updateProgress(percentage) {
+        this.currentProgress = Math.min(percentage, 100);
+        this.progressBar.style.width = this.currentProgress + '%';
+        this.loadingCounter.textContent = Math.round(this.currentProgress) + '%';
+    }
+
+    hide() {
+        setTimeout(() => {
+            this.loadingScreen.style.opacity = '0';
+            this.loadingScreen.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                this.loadingScreen.style.display = 'none';
+            }, 500);
+        }, 500);
+    }
+
+    simulateProgress() {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                this.updateProgress(progress);
+                this.hide();
+            } else {
+                this.updateProgress(progress);
+            }
+        }, 200);
+    }
+}
+
+// تحديث كلاس YaserCrypto
 class YaserCrypto {
     constructor() {
-        this.coins = [];
+        this.loadingManager = new LoadingManager();
         this.config = {
-            apiUrl: "https://www.okx.com/api/v5",
-            requestDelay: 500,
+            updateInterval: 30000,
             maxCoins: 50,
-            minChange: 1,
-            maxChange: 15,
-            minVolume: 100000
+            apiRetries: 3
         };
-        this.requestDelay = 500;
+        this.coins = [];
         this.init();
     }
 
     async init() {
-        this.showLoading();
-        await this.fetchData();
-        this.analyzeCoins();
-        this.renderCoins();
+        try {
+            this.loadingManager.updateProgress(10);
+            await this.fetchData();
+            this.loadingManager.updateProgress(70);
+            this.renderCoins();
+            this.loadingManager.updateProgress(90);
+            this.startAutoUpdate();
+            this.loadingManager.updateProgress(100);
+        } catch (error) {
+            console.error('خطأ في التهيئة:', error);
+            this.showError('فشل في تحميل البيانات');
+            this.loadingManager.hide();
+        }
     }
 
     showLoading() {

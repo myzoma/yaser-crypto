@@ -526,7 +526,7 @@ class YaserCrypto {
         const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
 
         card.innerHTML = `
-            <div class="rank-badge">#${coin.rank}</div>
+            <div class="rank-badge">#${coin.rank}${coin.rank === 1 ? ' 🥇' : coin.rank === 2 ? ' 🥈' : coin.rank === 3 ? ' 🥉' : ''}</div>
             <div class="coin-header">
                 <div class="coin-logo">${coin.symbol.charAt(0)}</div>
                 <div class="coin-info">

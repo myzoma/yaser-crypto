@@ -395,3 +395,75 @@ header h1 {
     background: linear-gradient(45deg, #666, #555) !important;
     color: #fff !important;
 }
+header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 20px 0;
+    box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+    border-bottom: 2px solid #00d4aa;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.crypto-icon {
+    font-size: 2.5rem;
+    color: #00d4aa;
+    text-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
+    animation: pulse 2s infinite;
+}
+
+.site-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, #00d4aa, #00ff88, #40e0d0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+    margin: 0;
+    letter-spacing: 2px;
+    animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+    }
+    to {
+        text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(64, 224, 208, 0.6);
+    }
+}
+
+/* تأثيرات إضافية للموبايل */
+@media (max-width: 768px) {
+    .crypto-icon {
+        font-size: 2rem;
+    }
+    
+    .site-title {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .logo-section {
+        gap: 10px;
+    }
+}

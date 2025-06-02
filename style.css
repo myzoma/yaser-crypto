@@ -351,28 +351,30 @@ header h1 {
     .technical-indicators {
         grid-template-columns: 1fr;
     }
-  /* المركز الأول - ذهبي */
+/* ألوان خلفية أرقام المراكز - يجب أن تكون في النهاية */
+
+/* المركز الأول - ذهبي */
 .coin-card:nth-child(1) .rank-badge {
-    background: linear-gradient(45deg, #FFD700, #FFA500);
-    color: #000;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
 }
 
 /* المركز الثاني - فضي */
 .coin-card:nth-child(2) .rank-badge {
-    background: linear-gradient(45deg, #C0C0C0, #A8A8A8);
-    color: #000;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+    background: linear-gradient(45deg, #C0C0C0, #A8A8A8) !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.5) !important;
 }
 
 /* المركز الثالث - برونزي */
 .coin-card:nth-child(3) .rank-badge {
-    background: linear-gradient(45deg, #CD7F32, #B8860B);
-    color: #fff;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+    background: linear-gradient(45deg, #CD7F32, #B8860B) !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important;
 }
 
 /* المراكز 4-10 - أخضر */
@@ -383,13 +385,13 @@ header h1 {
 .coin-card:nth-child(8) .rank-badge,
 .coin-card:nth-child(9) .rank-badge,
 .coin-card:nth-child(10) .rank-badge {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: #fff;
-    font-weight: bold;
+    background: linear-gradient(45deg, #4CAF50, #45a049) !important;
+    color: #fff !important;
+    font-weight: bold !important;
 }
 
 /* باقي المراكز - رمادي */
 .coin-card:nth-child(n+11) .rank-badge {
-    background: linear-gradient(45deg, #666, #555);
-    color: #fff;
+    background: linear-gradient(45deg, #666, #555) !important;
+    color: #fff !important;
 }

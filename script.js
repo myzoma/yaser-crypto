@@ -1,61 +1,3 @@
-// أضف LoadingManager في بداية الملف
-class LoadingManager {
-    constructor() {
-        this.counter = 0;
-        this.maxCount = 100;
-        this.interval = null;
-    }
-
-    show() {
-        const coinsGrid = document.getElementById('coinsGrid');
-        coinsGrid.innerHTML = `
-            <div class="loading-container">
-                <div class="loading-text">جاري تحميل البيانات...</div>
-                <div class="loading-counter" id="loadingCounter">0%</div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                <div class="loading-dots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-            </div>
-        `;
-        
-        this.startCounter();
-    }
-
-    startCounter() {
-        this.counter = 0;
-        const counterElement = document.getElementById('loadingCounter');
-        const progressBar = document.getElementById('progressBar');
-        
-        this.interval = setInterval(() => {
-            this.counter += Math.random() * 15 + 5;
-            
-            if (this.counter >= this.maxCount) {
-                this.counter = this.maxCount;
-                clearInterval(this.interval);
-            }
-            
-            const percentage = Math.floor(this.counter);
-            if (counterElement) {
-                counterElement.textContent = `${percentage}%`;
-            }
-            if (progressBar) {
-                progressBar.style.width = `${percentage}%`;
-            }
-        }, 100);
-    }
-
-    hide() {
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
-    }
-}
-
 // تحديث كلاس YaserCrypto
 class YaserCrypto {
     constructor() {
@@ -98,25 +40,13 @@ class YaserCrypto {
         }
     }
 
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+class YaserCrypto {
+    constructor() {
+        this.coins = [];
+        this.config = null;
+        this.requestDelay = 500;
+        this.loadConfig();
     }
-
-    showError() {
-        const coinsGrid = document.getElementById('coinsGrid');
-        coinsGrid.innerHTML = `
-            <div class="loading-container">
-                <div style="color: #ff4757; font-size: 1.5rem;">
-                    <i class="fas fa-exclamation-triangle" style="margin-left: 10px;"></i>
-                    خطأ في تحميل البيانات
-                </div>
-                <div style="color: #aaa; margin-top: 15px;">
-                    يرجى المحاولة مرة أخرى لاحقاً
-                </div>
-            </div>
-        `;
-    }
-
 
     async loadConfig() {
         try {

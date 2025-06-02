@@ -1,4 +1,130 @@
-delay(ms) {
+class YaserCrypto {
+    constructor() {
+        this.coins = [];
+        this.config = null;
+        this.requestDelay = 500;
+        this.loadConfig();
+    }
+
+    async loadConfig() {
+        try {
+            const response = await fetch('config.json');
+            this.config = await response.json();
+            this.init();
+        } catch (error) {
+            console.error('خطأ في تحميل الإعدادات:', error);
+            this.showError('خطأ في تحميل الإعدادات');
+        }
+    }
+
+    async init() {
+        this.showLoading();
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
+    }
+
+    showLoading() {
+        document.getElementById('coinsGrid').innerHTML = '<div class="loading">جاري تحميل البيانات...</div>';
+    }
+
+    showError(message) {
+        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    async fetchData() {
+        try {
+            console.log('جاري جلب العملات المرشحة...');
+            const candidateSymbols = await this.fetchTopGainers();
+            
+            if (candidateSymbols.length === 0) {
+                throw new Error('لم يتم العثور على عملات مرشحة');
+            }
+            
+            console.log(`🎯 سيتم تحليل ${candidateSymbols.length} عملة مرشحة`);
+            
+            const results = [];
+            
+            for (let i = 0; i < candidateSymbols.length; i++) {
+                const symbol = candidateSymbols[i];
+                console.log(`جاري تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
+                
+                try {
+                    const coin = await this.fetchCoinData(symbol);
+                    if (coin && !isNaN(coin.change24h)) {
+                        results.push(coin);
+                        console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
+                    }
+                    
+                    if (i < candidateSymbols.length - 1) {
+                        await this.delay(this.requestDelay);
+                    }
+                } catch (error) {
+                    console.warn(`❌ فشل تحليل ${symbol}:`, error.message);
+                    continue;
+                }
+            }
+            
+            this.coins = results;
+            
+            if (this.coins.length === 0) {
+                throw new Error('لم يتم العثور على عملات تحقق المعايير');
+            }
+            
+            console.log(`🏆 تم العثور على ${this.coins.length} عملة مرشحة`);
+            
+        } catch (error) {
+            console.error('خطأ في جلب البيانات:', error);
+            this.showError(`خطأ في جلب البيانات: ${error.message}`);
+        }
+    }
+
+    async fetchTopGainers() {
+        try {
+            console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
+            
+            const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`فشل في جلب البيانات: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            const usdtPairs = data.data
+                .filter(ticker => ticker.instId.endsWith('-USDT'))
+                .map(ticker => {
+                    const currentPrice = parseFloat(ticker.last);
+                    const openPrice = parseFloat(ticker.open24h);
+                    const change24h = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
+                    
+                    return {
+                        symbol: ticker.instId.replace('-USDT', ''),
+                        change24h: change24h,
+                        volume: parseFloat(ticker.vol24h)
+                    };
+                })
+                .filter(coin => coin.change24h > 1 && coin.change24h < 15)
+                .filter(coin => coin.volume > 100000)
+                .sort((a, b) => b.change24h - a.change24h)
+                .slice(0, 50);
+
+            console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
+            
+            return usdtPairs.map(coin => coin.symbol);
+
+        } catch (error) {
+            console.error('خطأ:', error);
+            throw error;
+        }
+    }
+
+    delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 

@@ -516,10 +516,14 @@ class YaserCrypto {
 }
 
 
-   createCoinCard(coin) {
+  createCoinCard(coin) {
     const card = document.createElement('div');
     card.className = 'coin-card';
-    card.onclick = () => this.showDetails(coin.symbol);
+    
+    // تغيير طريقة onclick
+    card.addEventListener('click', () => {
+        this.showCoinDetails(coin.symbol);
+    });
 
     const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
     const changeSymbol = coin.change24h >= 0 ? '+' : '';

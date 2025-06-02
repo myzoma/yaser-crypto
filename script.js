@@ -517,77 +517,57 @@ class YaserCrypto {
 
 
   createCoinCard(coin) {
-    const card = document.createElement('div');
-    card.className = 'coin-card';
-    
-    // حفظ مرجع للكلاس
-    const self = this;
-    card.onclick = function() {
-        self.showDetails(coin.symbol);
-    };
+        const card = document.createElement('div');
+        card.className = 'coin-card';
+        card.onclick = () => this.showCoinDetails(coin);
 
-    const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
-    const changeSymbol = coin.change24h >= 0 ? '+' : '';
-    
-    // إضافة الميداليات فقط
-    let rankDisplay = coin.rank;
-    if (coin.rank === 1) rankDisplay = coin.rank + ' 🥇';
-    else if (coin.rank === 2) rankDisplay = coin.rank + ' 🥈';
-    else if (coin.rank === 3) rankDisplay = coin.rank + ' 🥉';
+        const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
+        const changeSign = coin.change24h >= 0 ? '+' : '';
+        const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
 
-    let scoreClass = 'score-badge';
-    if (coin.score >= 90) scoreClass += ' perfect';
-    else if (coin.score >= 70) scoreClass += ' high';
-
-    const liquidityPercent = Math.min((coin.volume / 10000000) * 100, 100);
-
-    card.innerHTML = `
-        <div class="coin-header">
-            <div class="coin-info">
-                <div class="rank">${rankDisplay}</div>
+        card.innerHTML = `
+            <div class="rank-badge">#${coin.rank}</div>
+            <div class="coin-header">
                 <div class="coin-logo">${coin.symbol.charAt(0)}</div>
-                <div class="coin-details">
-                    <h3>${coin.symbol}</h3>
-                    <div class="coin-price">$${coin.price.toFixed(6)}</div>
+                <div class="coin-info">
+                    <h3>${coin.name}</h3>
+                    <div class="coin-price">
+                        $${coin.price.toFixed(4)}
+                        <span class="price-change ${changeClass}">
+                            ${changeSign}${coin.change24h.toFixed(2)}%
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="${scoreClass}">${coin.score}</div>
-        </div>
-        
-        <div class="coin-stats">
-            <div class="stat-item">
-                <div class="stat-label">التغيير 24س</div>
-                <div class="stat-value ${changeClass}">
-                    ${changeSymbol}${coin.change24h.toFixed(2)}%
+            <div class="coin-metrics">
+                <div class="metric-row">
+                    <span class="metric-label">النقاط:</span>
+                    <span class="metric-value">${coin.score}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">حجم التداول:</span>
+                    <span class="metric-value">${this.formatVolume(coin.volume)}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">RSI:</span>
+                    <span class="metric-value">${(coin.technicalIndicators.rsi || 0).toFixed(1)}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">MFI:</span>
+                    <span class="metric-value">${(coin.technicalIndicators.mfi || 0).toFixed(1)}</span>
                 </div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">الحجم</div>
-                <div class="stat-value">
-                    ${coin.volume.toLocaleString()}
-                </div>
+            <div class="score-bar">
+                <div class="score-fill" style="width: ${Math.min(coin.score, 100)}%"></div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">أعلى 24س</div>
-                <div class="stat-value positive">
-                    $${coin.high24h.toFixed(6)}
-                </div>
+            <div style="margin-top: 5px; font-size: 0.8rem; color: #aaa;">شريط السيولة</div>
+            <div class="liquidity-bar">
+                <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">أقل 24س</div>
-                <div class="stat-value negative">
-                    $${coin.low24h.toFixed(6)}
-                </div>
-            </div>
-        </div>
-        
-        <div class="liquidity-bar">
-            <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
-        </div>
-    `;
+        `;
 
-    return card;
-}
+        return card;
+    }
 
 
     formatVolume(volume) {

@@ -506,7 +506,7 @@ class YaserCrypto {
         coin.conditions = conditions;
     }
 
-    renderCoins() {
+  renderCoins() {
     const grid = document.getElementById('coinsGrid');
     grid.innerHTML = '';
     this.coins.forEach(coin => {
@@ -515,26 +515,20 @@ class YaserCrypto {
     });
 }
 
-createCoinCard(coin) {
+
+      createCoinCard(coin) {
     const card = document.createElement('div');
-    
-    // إضافة فئات الترتيب للبطاقة
-    let cardClasses = 'coin-card';
-    if (coin.rank === 1) cardClasses += ' rank-1';
-    else if (coin.rank === 2) cardClasses += ' rank-2';
-    else if (coin.rank === 3) cardClasses += ' rank-3';
-    
-    card.className = cardClasses;
+    card.className = 'coin-card';
     card.onclick = () => this.showDetails(coin.symbol);
 
     const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
     const changeSymbol = coin.change24h >= 0 ? '+' : '';
     
-    // تحديد فئة الميدالية
-    let rankClass = '';
-    if (coin.rank === 1) rankClass = 'gold';
-    else if (coin.rank === 2) rankClass = 'silver';
-    else if (coin.rank === 3) rankClass = 'bronze';
+    // إضافة الميداليات فقط
+    let rankDisplay = coin.rank;
+    if (coin.rank === 1) rankDisplay = `${coin.rank} 🥇`;
+    else if (coin.rank === 2) rankDisplay = `${coin.rank} 🥈`;
+    else if (coin.rank === 3) rankDisplay = `${coin.rank} 🥉`;
 
     let scoreClass = 'score-badge';
     if (coin.score >= 90) scoreClass += ' perfect';
@@ -545,7 +539,7 @@ createCoinCard(coin) {
     card.innerHTML = `
         <div class="coin-header">
             <div class="coin-info">
-                <div class="rank ${rankClass}">${coin.rank}</div>
+                <div class="rank">${rankDisplay}</div>
                 <div class="coin-logo">${coin.symbol.charAt(0)}</div>
                 <div class="coin-details">
                     <h3>${coin.symbol}</h3>
@@ -589,71 +583,6 @@ createCoinCard(coin) {
 
     return card;
 }
-
-formatVolume(volume) {
-    if (volume >= 1000000000) {
-        return (volume / 1000000000).toFixed(2) + 'B';
-    } else if (volume >= 1000000) {
-        return (volume / 1000000).toFixed(2) + 'M';
-    } else if (volume >= 1000) {
-        return (volume / 1000).toFixed(2) + 'K';
-    }
-    return volume.toFixed(2);
-}
-
-
-       createCoinCard(coin) {
-        const card = document.createElement('div');
-        card.className = 'coin-card';
-        card.onclick = () => this.showCoinDetails(coin);
-
-        const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
-        const changeSign = coin.change24h >= 0 ? '+' : '';
-        const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
-
-        card.innerHTML = `
-            <div class="rank-badge">#${coin.rank}</div>
-            <div class="coin-header">
-                <div class="coin-logo">${coin.symbol.charAt(0)}</div>
-                <div class="coin-info">
-                    <h3>${coin.name}</h3>
-                    <div class="coin-price">
-                        $${coin.price.toFixed(4)}
-                        <span class="price-change ${changeClass}">
-                            ${changeSign}${coin.change24h.toFixed(2)}%
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="coin-metrics">
-                <div class="metric-row">
-                    <span class="metric-label">النقاط:</span>
-                    <span class="metric-value">${coin.score}</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">حجم التداول:</span>
-                    <span class="metric-value">${this.formatVolume(coin.volume)}</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">RSI:</span>
-                    <span class="metric-value">${(coin.technicalIndicators.rsi || 0).toFixed(1)}</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">MFI:</span>
-                    <span class="metric-value">${(coin.technicalIndicators.mfi || 0).toFixed(1)}</span>
-                </div>
-            </div>
-            <div class="score-bar">
-                <div class="score-fill" style="width: ${Math.min(coin.score, 100)}%"></div>
-            </div>
-            <div style="margin-top: 5px; font-size: 0.8rem; color: #aaa;">شريط السيولة</div>
-            <div class="liquidity-bar">
-                <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
-            </div>
-        `;
-
-        return card;
-    }
 
     formatVolume(volume) {
         if (volume >= 1000000) {

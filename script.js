@@ -32,53 +32,62 @@ class YaserCrypto {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
     }
 
-    async fetchData() {
-        try {
-            const symbols = this.config.symbols;
-            const results = [];
-            
-            // جلب البيانات بشكل متسلسل مع تأخير أطول
-            for (let i = 0; i < symbols.length; i++) {
-                const symbol = symbols[i];
-                console.log(`جاري جلب بيانات ${symbol}...`);
-                
-                try {
-                    const coin = await this.fetchCoinData(symbol);
-                    if (coin) {
-                        results.push(coin);
-                        console.log(`تم جلب بيانات ${symbol} بنجاح`);
-                    }
-                    
-                    // تأخير بين كل طلب
-                    if (i < symbols.length - 1) {
-                        await this.delay(this.requestDelay);
-                    }
-                } catch (error) {
-                    console.warn(`فشل جلب بيانات ${symbol}:`, error.message);
-                    
-                    // إذا كان الخطأ 429، زيادة التأخير
-                    if (error.message.includes('429')) {
-                        console.log('زيادة التأخير بسبب Rate Limit...');
-                        this.requestDelay = Math.min(this.requestDelay * 2, 3000);
-                        await this.delay(2000);
-                    }
-                    continue;
-                }
-            }
-            
-            this.coins = results;
-            
-            if (this.coins.length === 0) {
-                throw new Error('لم يتم جلب أي بيانات - تحقق من الاتصال بالإنترنت');
-            }
-            
-            console.log(`تم جلب ${this.coins.length} عملة بنجاح`);
-            
-        } catch (error) {
-            console.error('خطأ في جلب البيانات:', error);
-            this.showError(`خطأ في جلب البيانات: ${error.message}`);
+   async fetchData() {
+    try {
+        // جلب قائمة العملات الحقيقية من OKX
+        console.log('جاري جلب قائمة العملات...');
+        const instrumentsResponse = await fetch('https://www.okx.com/api/v5/public/instruments?instType=SPOT');
+        
+        if (!instrumentsResponse.ok) {
+            throw new Error('فشل في جلب قائمة العملات');
         }
+        
+        const instrumentsData = await instrumentsResponse.json();
+        
+        // فلترة العملات المقترنة بـ USDT فقط
+        const usdtPairs = instrumentsData.data
+            .filter(inst => inst.instId.endsWith('-USDT'))
+            .map(inst => inst.instId.replace('-USDT', ''))
+            .slice(0, 50); // أخذ أول 50 عملة
+        
+        console.log(`تم العثور على ${usdtPairs.length} عملة`);
+        
+        const results = [];
+        
+        // جلب بيانات كل عملة
+        for (let i = 0; i < usdtPairs.length; i++) {
+            const symbol = usdtPairs[i];
+            console.log(`جاري جلب بيانات ${symbol}... (${i + 1}/${usdtPairs.length})`);
+            
+            try {
+                const coin = await this.fetchCoinData(symbol);
+                if (coin) {
+                    results.push(coin);
+                }
+                
+                // تأخير بين الطلبات
+                if (i < usdtPairs.length - 1) {
+                    await this.delay(this.requestDelay);
+                }
+            } catch (error) {
+                console.warn(`فشل جلب بيانات ${symbol}:`, error.message);
+                continue;
+            }
+        }
+        
+        this.coins = results;
+        
+        if (this.coins.length === 0) {
+            throw new Error('لم يتم جلب أي بيانات');
+        }
+        
+        console.log(`تم جلب ${this.coins.length} عملة بنجاح`);
+        
+    } catch (error) {
+        console.error('خطأ في جلب البيانات:', error);
+        this.showError(`خطأ في جلب البيانات: ${error.message}`);
     }
+}
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));

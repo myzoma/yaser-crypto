@@ -81,6 +81,51 @@ class YaserCrypto {
         this.showError(`خطأ في جلب البيانات: ${error.message}`);
     }
 }
+async fetchTopGainers() {
+    try {
+        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
+        
+        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+            method: 'GET',
+            headers: {
+                'OK-ACCESS-KEY': this.config.okx.apiKey,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`فشل في جلب البيانات: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        const usdtPairs = data.data
+            .filter(ticker => ticker.instId.endsWith('-USDT'))
+            .map(ticker => {
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const change24h = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
+                
+                return {
+                    symbol: ticker.instId.replace('-USDT', ''),
+                    change24h: change24h,
+                    volume: parseFloat(ticker.vol24h)
+                };
+            })
+            .filter(coin => coin.change24h > 1 && coin.change24h < 15)
+            .filter(coin => coin.volume > 100000)
+            .sort((a, b) => b.change24h - a.change24h)
+            .slice(0, 50);
+
+        console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
+        
+        return usdtPairs.map(coin => coin.symbol);
+
+    } catch (error) {
+        console.error('خطأ:', error);
+        throw error;
+    }
+}
 
 
     delay(ms) {

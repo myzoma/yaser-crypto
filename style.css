@@ -350,4 +350,89 @@ header h1 {
     .technical-indicators {
         grid-template-columns: 1fr;
     }
+    /* إضافة أنماط الميداليات */
+.rank {
+    position: relative;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #fff;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rank.gold::after {
+    content: "🥇";
+    margin-left: 5px;
+    font-size: 1.5em;
+    animation: goldGlow 2s infinite alternate;
+}
+
+.rank.silver::after {
+    content: "🥈";
+    margin-left: 5px;
+    font-size: 1.5em;
+    animation: silverGlow 2s infinite alternate;
+}
+
+.rank.bronze::after {
+    content: "🥉";
+    margin-left: 5px;
+    font-size: 1.5em;
+    animation: bronzeGlow 2s infinite alternate;
+}
+
+/* تأثيرات الإضاءة للميداليات */
+@keyframes goldGlow {
+    0% { 
+        filter: drop-shadow(0 0 5px #ffd700);
+        transform: scale(1);
+    }
+    100% { 
+        filter: drop-shadow(0 0 15px #ffd700);
+        transform: scale(1.1);
+    }
+}
+
+@keyframes silverGlow {
+    0% { 
+        filter: drop-shadow(0 0 5px #c0c0c0);
+        transform: scale(1);
+    }
+    100% { 
+        filter: drop-shadow(0 0 12px #c0c0c0);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes bronzeGlow {
+    0% { 
+        filter: drop-shadow(0 0 5px #cd7f32);
+        transform: scale(1);
+    }
+    100% { 
+        filter: drop-shadow(0 0 10px #cd7f32);
+        transform: scale(1.03);
+    }
+}
+
+/* تحسين بطاقة المركز الأول */
+.coin-card.rank-1 {
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    transform: scale(1.02);
+}
+
+/* تحسين بطاقة المركز الثاني */
+.coin-card.rank-2 {
+    border: 2px solid #c0c0c0;
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.3);
+}
+
+/* تحسين بطاقة المركز الثالث */
+.coin-card.rank-3 {
+    border: 2px solid #cd7f32;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.3);
+}
 }

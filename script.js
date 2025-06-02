@@ -508,78 +508,86 @@ class YaserCrypto {
 
     renderCoins() {
     const grid = document.getElementById('coinsGrid');
+    grid.innerHTML = '';
+    this.coins.forEach(coin => {
+        const card = this.createCoinCard(coin);
+        grid.appendChild(card);
+    });
+}
+
+createCoinCard(coin) {
+    const card = document.createElement('div');
     
-    if (this.coins.length === 0) {
-        grid.innerHTML = '<div class="error">لا توجد بيانات للعرض</div>';
-        return;
-    }
+    // إضافة فئات الترتيب للبطاقة
+    let cardClasses = 'coin-card';
+    if (coin.rank === 1) cardClasses += ' rank-1';
+    else if (coin.rank === 2) cardClasses += ' rank-2';
+    else if (coin.rank === 3) cardClasses += ' rank-3';
     
-    grid.innerHTML = this.coins.map(coin => {
-        const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
-        const changeSymbol = coin.change24h >= 0 ? '+' : '';
-        
-        // تحديد فئة الترتيب للميداليات
-        let rankClass = '';
-        if (coin.rank === 1) rankClass = 'gold';
-        else if (coin.rank === 2) rankClass = 'silver';
-        else if (coin.rank === 3) rankClass = 'bronze';
-        
-        // تحديد فئة البطاقة للحدود الملونة
-        let cardClass = `coin-card rank-${coin.rank}`;
-        
-        let scoreClass = 'score-badge';
-        if (coin.score >= 90) scoreClass += ' perfect';
-        else if (coin.score >= 70) scoreClass += ' high';
-        
-        const liquidityPercent = Math.min((coin.volume / 10000000) * 100, 100);
-        
-        return `
-            <div class="${cardClass}" onclick="window.yaserCrypto.showDetails('${coin.symbol}')">
-                <div class="coin-header">
-                    <div class="coin-info">
-                        <div class="rank ${rankClass}">${coin.rank}</div>
-                        <div class="coin-logo">${coin.symbol.charAt(0)}</div>
-                        <div class="coin-details">
-                            <h3>${coin.symbol}</h3>
-                            <div class="coin-price">$${coin.price.toFixed(6)}</div>
-                        </div>
-                    </div>
-                    <div class="${scoreClass}">${coin.score}</div>
-                </div>
-                
-                <div class="coin-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">التغيير 24س</div>
-                        <div class="stat-value ${changeClass}">
-                            ${changeSymbol}${coin.change24h.toFixed(2)}%
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">الحجم</div>
-                        <div class="stat-value">
-                            ${this.formatVolume(coin.volume)}
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">أعلى 24س</div>
-                        <div class="stat-value positive">
-                            $${coin.high24h.toFixed(6)}
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">أقل 24س</div>
-                        <div class="stat-value negative">
-                            $${coin.low24h.toFixed(6)}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="liquidity-bar">
-                    <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
+    card.className = cardClasses;
+    card.onclick = () => this.showDetails(coin.symbol);
+
+    const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
+    const changeSymbol = coin.change24h >= 0 ? '+' : '';
+    
+    // تحديد فئة الميدالية
+    let rankClass = '';
+    if (coin.rank === 1) rankClass = 'gold';
+    else if (coin.rank === 2) rankClass = 'silver';
+    else if (coin.rank === 3) rankClass = 'bronze';
+
+    let scoreClass = 'score-badge';
+    if (coin.score >= 90) scoreClass += ' perfect';
+    else if (coin.score >= 70) scoreClass += ' high';
+
+    const liquidityPercent = Math.min((coin.volume / 10000000) * 100, 100);
+
+    card.innerHTML = `
+        <div class="coin-header">
+            <div class="coin-info">
+                <div class="rank ${rankClass}">${coin.rank}</div>
+                <div class="coin-logo">${coin.symbol.charAt(0)}</div>
+                <div class="coin-details">
+                    <h3>${coin.symbol}</h3>
+                    <div class="coin-price">$${coin.price.toFixed(6)}</div>
                 </div>
             </div>
-        `;
-    }).join('');
+            <div class="${scoreClass}">${coin.score}</div>
+        </div>
+        
+        <div class="coin-stats">
+            <div class="stat-item">
+                <div class="stat-label">التغيير 24س</div>
+                <div class="stat-value ${changeClass}">
+                    ${changeSymbol}${coin.change24h.toFixed(2)}%
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">الحجم</div>
+                <div class="stat-value">
+                    ${this.formatVolume(coin.volume)}
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">أعلى 24س</div>
+                <div class="stat-value positive">
+                    $${coin.high24h.toFixed(6)}
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">أقل 24س</div>
+                <div class="stat-value negative">
+                    $${coin.low24h.toFixed(6)}
+                </div>
+            </div>
+        </div>
+        
+        <div class="liquidity-bar">
+            <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
+        </div>
+    `;
+
+    return card;
 }
 
 formatVolume(volume) {

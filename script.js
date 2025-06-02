@@ -32,45 +32,38 @@ class YaserCrypto {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
     }
 
-   async fetchData() {
+  async fetchData() {
     try {
-        // جلب قائمة العملات الحقيقية من OKX
-        console.log('جاري جلب قائمة العملات...');
-        const instrumentsResponse = await fetch('https://www.okx.com/api/v5/public/instruments?instType=SPOT');
+        // جلب العملات المرشحة لقائمة أعلى الرابحون
+        console.log('جاري جلب العملات المرشحة...');
+        const candidateSymbols = await this.fetchTopGainers();
         
-        if (!instrumentsResponse.ok) {
-            throw new Error('فشل في جلب قائمة العملات');
+        if (candidateSymbols.length === 0) {
+            throw new Error('لم يتم العثور على عملات مرشحة');
         }
         
-        const instrumentsData = await instrumentsResponse.json();
-        
-        // فلترة العملات المقترنة بـ USDT فقط
-        const usdtPairs = instrumentsData.data
-            .filter(inst => inst.instId.endsWith('-USDT'))
-            .map(inst => inst.instId.replace('-USDT', ''))
-            .slice(0, 50); // أخذ أول 50 عملة
-        
-        console.log(`تم العثور على ${usdtPairs.length} عملة`);
+        console.log(`🎯 سيتم تحليل ${candidateSymbols.length} عملة مرشحة`);
         
         const results = [];
         
-        // جلب بيانات كل عملة
-        for (let i = 0; i < usdtPairs.length; i++) {
-            const symbol = usdtPairs[i];
-            console.log(`جاري جلب بيانات ${symbol}... (${i + 1}/${usdtPairs.length})`);
+        // جلب بيانات تفصيلية لكل عملة مرشحة
+        for (let i = 0; i < candidateSymbols.length; i++) {
+            const symbol = candidateSymbols[i];
+            console.log(`جاري تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
             
             try {
                 const coin = await this.fetchCoinData(symbol);
-                if (coin) {
+                if (coin && !isNaN(coin.change24h)) {
                     results.push(coin);
+                    console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
                 }
                 
                 // تأخير بين الطلبات
-                if (i < usdtPairs.length - 1) {
+                if (i < candidateSymbols.length - 1) {
                     await this.delay(this.requestDelay);
                 }
             } catch (error) {
-                console.warn(`فشل جلب بيانات ${symbol}:`, error.message);
+                console.warn(`❌ فشل تحليل ${symbol}:`, error.message);
                 continue;
             }
         }
@@ -78,16 +71,17 @@ class YaserCrypto {
         this.coins = results;
         
         if (this.coins.length === 0) {
-            throw new Error('لم يتم جلب أي بيانات');
+            throw new Error('لم يتم العثور على عملات تحقق المعايير');
         }
         
-        console.log(`تم جلب ${this.coins.length} عملة بنجاح`);
+        console.log(`🏆 تم العثور على ${this.coins.length} عملة مرشحة`);
         
     } catch (error) {
         console.error('خطأ في جلب البيانات:', error);
         this.showError(`خطأ في جلب البيانات: ${error.message}`);
     }
 }
+
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));

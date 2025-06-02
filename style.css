@@ -413,7 +413,7 @@ header {
 
 .logo-section {
     display: flex;
-    align-items: center;
+    align-items: right;
     gap: 15px;
 }
 

@@ -20,6 +20,7 @@ header {
     border-bottom: 2px solid #00d4aa;
     direction: rtl; /* إضافة هذا */
     text-align: right; /* إضافة هذا */
+    min-height: 120px; /* ارتفاع أكبر */
 }
 
 .header-content {

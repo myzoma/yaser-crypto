@@ -352,40 +352,7 @@ header h1 {
     .technical-indicators {
         grid-template-columns: 1fr;
     }
-    /* إضافة أنماط الميداليات */
-.rank {
-    position: relative;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #fff;
-    min-width: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.rank.gold::after {
-    content: "🥇";
-    margin-left: 5px;
-    font-size: 1.5em;
-    animation: goldGlow 2s infinite alternate;
-}
-
-.rank.silver::after {
-    content: "🥈";
-    margin-left: 5px;
-    font-size: 1.5em;
-    animation: silverGlow 2s infinite alternate;
-}
-
-.rank.bronze::after {
-    content: "🥉";
-    margin-left: 5px;
-    font-size: 1.5em;
-    animation: bronzeGlow 2s infinite alternate;
-}
-
-/* المركز الأول - ذهبي */
+  /* المركز الأول - ذهبي */
 .coin-card:nth-child(1) .rank-badge {
     background: linear-gradient(45deg, #FFD700, #FFA500);
     color: #000;
@@ -409,3 +376,21 @@ header h1 {
     box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
 }
 
+/* المراكز 4-10 - أخضر */
+.coin-card:nth-child(4) .rank-badge,
+.coin-card:nth-child(5) .rank-badge,
+.coin-card:nth-child(6) .rank-badge,
+.coin-card:nth-child(7) .rank-badge,
+.coin-card:nth-child(8) .rank-badge,
+.coin-card:nth-child(9) .rank-badge,
+.coin-card:nth-child(10) .rank-badge {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
+    font-weight: bold;
+}
+
+/* باقي المراكز - رمادي */
+.coin-card:nth-child(n+11) .rank-badge {
+    background: linear-gradient(45deg, #666, #555);
+    color: #fff;
+}

@@ -1,10 +1,68 @@
-// تحديث كلاس YaserCrypto
+// LoadingManager Class
+class LoadingManager {
+    constructor() {
+        this.counter = 0;
+        this.maxCount = 100;
+        this.interval = null;
+    }
+
+    show() {
+        const coinsGrid = document.getElementById('coinsGrid');
+        coinsGrid.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-text">جاري تحميل البيانات...</div>
+                <div class="loading-counter" id="loadingCounter">0%</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        `;
+        
+        this.startCounter();
+    }
+
+    startCounter() {
+        this.counter = 0;
+        const counterElement = document.getElementById('loadingCounter');
+        const progressBar = document.getElementById('progressBar');
+        
+        this.interval = setInterval(() => {
+            this.counter += Math.random() * 15 + 5;
+            
+            if (this.counter >= this.maxCount) {
+                this.counter = this.maxCount;
+                clearInterval(this.interval);
+            }
+            
+            const percentage = Math.floor(this.counter);
+            if (counterElement) {
+                counterElement.textContent = `${percentage}%`;
+            }
+            if (progressBar) {
+                progressBar.style.width = `${percentage}%`;
+            }
+        }, 100);
+    }
+
+    hide() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+    }
+}
+
+// YaserCrypto Class - محدث
 class YaserCrypto {
     constructor() {
         this.coins = [];
         this.config = null;
         this.requestDelay = 500;
-        this.loadingManager = new LoadingManager(); // إضافة هذا
+        this.loadingManager = new LoadingManager(); // إضافة LoadingManager
         this.loadConfig();
     }
 
@@ -13,7 +71,6 @@ class YaserCrypto {
             // إظهار شاشة التحميل
             this.loadingManager.show();
             
-            // تحميل الكونفيج
             const response = await fetch('config.json');
             this.config = await response.json();
             
@@ -23,81 +80,65 @@ class YaserCrypto {
             // إخفاء شاشة التحميل
             this.loadingManager.hide();
             
-            // تحميل البيانات
-            await this.loadData();
-            this.displayCoins();
-            
-            // تحديث تلقائي
-            setInterval(() => {
-                this.loadData();
-                this.displayCoins();
-            }, 30000);
-            
-        } catch (error) {
-            console.error('خطأ في تحميل الإعدادات:', error);
-            this.loadingManager.hide();
-            this.showError();
-        }
-    }
-
-class YaserCrypto {
-    constructor() {
-        this.coins = [];
-        this.config = null;
-        this.requestDelay = 500;
-        this.loadConfig();
-    }
-
-    async loadConfig() {
-        try {
-            const response = await fetch('config.json');
-            this.config = await response.json();
+            // بدء التطبيق
             this.init();
         } catch (error) {
             console.error('خطأ في تحميل الإعدادات:', error);
+            this.loadingManager.hide();
             this.showError('خطأ في تحميل الإعدادات');
         }
     }
 
     async init() {
-        this.showLoading();
         await this.fetchData();
         this.analyzeCoins();
         this.renderCoins();
     }
 
-    showLoading() {
-        document.getElementById('coinsGrid').innerHTML = '<div class="loading">جاري تحميل البيانات...</div>';
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     showError(message) {
-        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+        const coinsGrid = document.getElementById('coinsGrid');
+        coinsGrid.innerHTML = `
+            <div class="loading-container">
+                <div style="color: #ff4757; font-size: 1.5rem;">
+                    <i class="fas fa-exclamation-triangle" style="margin-left: 10px;"></i>
+                    ${message}
+                </div>
+                <div style="color: #aaa; margin-top: 15px;">
+                    يرجى المحاولة مرة أخرى لاحقاً
+                </div>
+            </div>
+        `;
     }
 
+    // باقي الدوال تبقى كما هي...
     async fetchData() {
         try {
             console.log('جاري جلب العملات المرشحة...');
             const candidateSymbols = await this.fetchTopGainers();
-            
+                        
             if (candidateSymbols.length === 0) {
                 throw new Error('لم يتم العثور على عملات مرشحة');
             }
-            
+                        
             console.log(`🎯 سيتم تحليل ${candidateSymbols.length} عملة مرشحة`);
-            
+                        
             const results = [];
-            
+                        
             for (let i = 0; i < candidateSymbols.length; i++) {
                 const symbol = candidateSymbols[i];
                 console.log(`جاري تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
-                
+                                
                 try {
                     const coin = await this.fetchCoinData(symbol);
                     if (coin && !isNaN(coin.change24h)) {
                         results.push(coin);
                         console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
                     }
-                    
+                                        
                     if (i < candidateSymbols.length - 1) {
                         await this.delay(this.requestDelay);
                     }
@@ -106,22 +147,23 @@ class YaserCrypto {
                     continue;
                 }
             }
-            
+                        
             this.coins = results;
-            
+                        
             if (this.coins.length === 0) {
                 throw new Error('لم يتم العثور على عملات تحقق المعايير');
             }
-            
+                        
             console.log(`🏆 تم العثور على ${this.coins.length} عملة مرشحة`);
-            
+                    
         } catch (error) {
             console.error('خطأ في جلب البيانات:', error);
             this.showError(`خطأ في جلب البيانات: ${error.message}`);
         }
     }
 
-    async fetchTopGainers() {
+    // باقي الدوال... (نسخ الدوال الأخرى كما هي)
+   async fetchTopGainers() {
         try {
             console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
             
@@ -165,12 +207,8 @@ class YaserCrypto {
             throw error;
         }
     }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async fetchCoinData(symbol) {
+       
+async fetchCoinData(symbol) {
         try {
             const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
             
@@ -224,7 +262,7 @@ class YaserCrypto {
         }
     }
 
-    calculateTechnicalIndicators(coin) {
+calculateTechnicalIndicators(coin) {
         const currentPrice = coin.price;
         const high24h = coin.high24h;
         const low24h = coin.low24h;

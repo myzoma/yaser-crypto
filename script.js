@@ -516,7 +516,7 @@ class YaserCrypto {
 }
 
 
-      createCoinCard(coin) {
+     createCoinCard(coin) {
     const card = document.createElement('div');
     card.className = 'coin-card';
     card.onclick = () => this.showDetails(coin.symbol);
@@ -524,17 +524,28 @@ class YaserCrypto {
     const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
     const changeSymbol = coin.change24h >= 0 ? '+' : '';
     
-    // إضافة الميداليات فقط
-    let rankDisplay = coin.rank;
-    if (coin.rank === 1) rankDisplay = `${coin.rank} 🥇`;
-    else if (coin.rank === 2) rankDisplay = `${coin.rank} 🥈`;
-    else if (coin.rank === 3) rankDisplay = `${coin.rank} 🥉`;
+    // إضافة الميداليات
+    let rankDisplay = coin.rank.toString();
+    if (coin.rank === 1) rankDisplay = coin.rank + ' 🥇';
+    else if (coin.rank === 2) rankDisplay = coin.rank + ' 🥈';
+    else if (coin.rank === 3) rankDisplay = coin.rank + ' 🥉';
 
     let scoreClass = 'score-badge';
     if (coin.score >= 90) scoreClass += ' perfect';
     else if (coin.score >= 70) scoreClass += ' high';
 
-    const liquidityPercent = Math.min((coin.volume / 10000000) * 100, 100);
+    // حساب السيولة
+    let volume = coin.volume || 0;
+    let volumeDisplay = volume.toLocaleString();
+    if (volume >= 1000000000) {
+        volumeDisplay = (volume / 1000000000).toFixed(2) + 'B';
+    } else if (volume >= 1000000) {
+        volumeDisplay = (volume / 1000000).toFixed(2) + 'M';
+    } else if (volume >= 1000) {
+        volumeDisplay = (volume / 1000).toFixed(2) + 'K';
+    }
+
+    const liquidityPercent = Math.min((volume / 10000000) * 100, 100);
 
     card.innerHTML = `
         <div class="coin-header">
@@ -559,7 +570,7 @@ class YaserCrypto {
             <div class="stat-item">
                 <div class="stat-label">الحجم</div>
                 <div class="stat-value">
-                    ${this.formatVolume(coin.volume)}
+                    ${volumeDisplay}
                 </div>
             </div>
             <div class="stat-item">
@@ -583,6 +594,7 @@ class YaserCrypto {
 
     return card;
 }
+
 
     formatVolume(volume) {
         if (volume >= 1000000) {

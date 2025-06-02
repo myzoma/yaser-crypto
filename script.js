@@ -514,61 +514,72 @@ class YaserCrypto {
         grid.appendChild(card);
     });
 }
-
-
-  createCoinCard(coin) {
-        const card = document.createElement('div');
-        card.className = 'coin-card';
-        card.onclick = () => this.showCoinDetails(coin);
-
-        const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
-        const changeSign = coin.change24h >= 0 ? '+' : '';
-        const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
-
-        card.innerHTML = `
-            <div class="rank-badge">#${coin.rank}${coin.rank === 1 ? ' 🥇' : coin.rank === 2 ? ' 🥈' : coin.rank === 3 ? ' 🥉' : ''}</div>
-            <div class="coin-header">
-                <div class="coin-logo">${coin.symbol.charAt(0)}</div>
-                <div class="coin-info">
-                    <h3>${coin.name}</h3>
-                    <div class="coin-price">
-                        $${coin.price.toFixed(4)}
-                        <span class="price-change ${changeClass}">
-                            ${changeSign}${coin.change24h.toFixed(2)}%
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="coin-metrics">
-                <div class="metric-row">
-                    <span class="metric-label">النقاط:</span>
-                    <span class="metric-value">${coin.score}</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">حجم التداول:</span>
-                    <span class="metric-value">${this.formatVolume(coin.volume)}</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">RSI:</span>
-                    <span class="metric-value">${(coin.technicalIndicators.rsi || 0).toFixed(1)}</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">MFI:</span>
-                    <span class="metric-value">${(coin.technicalIndicators.mfi || 0).toFixed(1)}</span>
-                </div>
-            </div>
-            <div class="score-bar">
-                <div class="score-fill" style="width: ${Math.min(coin.score, 100)}%"></div>
-            </div>
-            <div style="margin-top: 5px; font-size: 0.8rem; color: #aaa;">شريط السيولة</div>
-            <div class="liquidity-bar">
-                <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
-            </div>
-        `;
-
-        return card;
+createCoinCard(coin) {
+    const card = document.createElement('div');
+    card.className = 'coin-card';
+    card.onclick = () => this.showCoinDetails(coin);
+    
+    const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
+    const changeSign = coin.change24h >= 0 ? '+' : '';
+    const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
+    
+    // تحديد لون الخلفية حسب الترتيب
+    let rankBadgeStyle = '';
+    if (coin.rank === 1) {
+        rankBadgeStyle = 'background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);';
+    } else if (coin.rank === 2) {
+        rankBadgeStyle = 'background: linear-gradient(45deg, #C0C0C0, #A8A8A8); color: #000; box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);';
+    } else if (coin.rank === 3) {
+        rankBadgeStyle = 'background: linear-gradient(45deg, #CD7F32, #B8860B); color: #fff; box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);';
+    } else if (coin.rank <= 10) {
+        rankBadgeStyle = 'background: linear-gradient(45deg, #4CAF50, #45a049); color: #fff;';
+    } else {
+        rankBadgeStyle = 'background: linear-gradient(45deg, #666, #555); color: #fff;';
     }
 
+    card.innerHTML = `
+        <div class="rank-badge" style="${rankBadgeStyle}">#${coin.rank}${coin.rank === 1 ? ' 🥇' : coin.rank === 2 ? ' 🥈' : coin.rank === 3 ? ' 🥉' : ''}</div>
+        <div class="coin-header">
+            <div class="coin-logo">${coin.symbol.charAt(0)}</div>
+            <div class="coin-info">
+                <h3>${coin.name}</h3>
+                <div class="coin-price">
+                    $${coin.price.toFixed(4)}
+                    <span class="price-change ${changeClass}">
+                        ${changeSign}${coin.change24h.toFixed(2)}%
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="coin-metrics">
+            <div class="metric-row">
+                <span class="metric-label">النقاط:</span>
+                <span class="metric-value">${coin.score}</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">حجم التداول:</span>
+                <span class="metric-value">${this.formatVolume(coin.volume)}</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">RSI:</span>
+                <span class="metric-value">${(coin.technicalIndicators.rsi || 0).toFixed(1)}</span>
+            </div>
+            <div class="metric-row">
+                <span class="metric-label">MFI:</span>
+                <span class="metric-value">${(coin.technicalIndicators.mfi || 0).toFixed(1)}</span>
+            </div>
+        </div>
+        <div class="score-bar">
+            <div class="score-fill" style="width: ${Math.min(coin.score, 100)}%"></div>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.8rem; color: #aaa;">شريط السيولة</div>
+        <div class="liquidity-bar">
+            <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
+        </div>
+    `;
+    
+    return card;
+}
 
     formatVolume(volume) {
         if (volume >= 1000000) {

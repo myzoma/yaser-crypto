@@ -2,6 +2,7 @@ class YaserCrypto {
     constructor() {
         this.coins = [];
         this.config = null;
+        this.requestDelay = 500; // تأخير أطول لتجنب Rate Limit
         this.loadConfig();
     }
 
@@ -34,49 +35,130 @@ class YaserCrypto {
     async fetchData() {
         try {
             const symbols = this.config.symbols;
-            const promises = symbols.map(symbol => this.fetchCoinData(symbol));
-            const results = await Promise.all(promises);
-            this.coins = results.filter(coin => coin !== null);
+            const results = [];
+            
+            // جلب البيانات بشكل متسلسل مع تأخير أطول
+            for (let i = 0; i < symbols.length; i++) {
+                const symbol = symbols[i];
+                console.log(`جاري جلب بيانات ${symbol}...`);
+                
+                try {
+                    const coin = await this.fetchCoinData(symbol);
+                    if (coin) {
+                        results.push(coin);
+                        console.log(`تم جلب بيانات ${symbol} بنجاح`);
+                    }
+                    
+                    // تأخير بين كل طلب
+                    if (i < symbols.length - 1) {
+                        await this.delay(this.requestDelay);
+                    }
+                } catch (error) {
+                    console.warn(`فشل جلب بيانات ${symbol}:`, error.message);
+                    
+                    // إذا كان الخطأ 429، زيادة التأخير
+                    if (error.message.includes('429')) {
+                        console.log('زيادة التأخير بسبب Rate Limit...');
+                        this.requestDelay = Math.min(this.requestDelay * 2, 3000);
+                        await this.delay(2000);
+                    }
+                    continue;
+                }
+            }
+            
+            this.coins = results;
+            
+            if (this.coins.length === 0) {
+                throw new Error('لم يتم جلب أي بيانات - تحقق من الاتصال بالإنترنت');
+            }
+            
+            console.log(`تم جلب ${this.coins.length} عملة بنجاح`);
+            
         } catch (error) {
             console.error('خطأ في جلب البيانات:', error);
-            this.showError('خطأ في جلب البيانات من المنصة');
+            this.showError(`خطأ في جلب البيانات: ${error.message}`);
         }
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async fetchCoinData(symbol) {
         try {
-            const tickerResponse = await fetch(`${this.config.apiBaseUrl}/api/v5/market/ticker?instId=${symbol}-USDT`, {
-                headers: {
-                    'OK-ACCESS-KEY': this.config.apiKey,
-                    'OK-ACCESS-SIGN': '',
-                    'OK-ACCESS-TIMESTAMP': Date.now().toString(),
-                    'OK-ACCESS-PASSPHRASE': this.config.passphrase
-                }
-            });
+            // استخدام الرابط الصحيح لـ OKX API العام
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+            
+            // محاولة بدون proxy أولاً
+            let tickerResponse;
+            try {
+                tickerResponse = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
+            } catch (corsError) {
+                // إذا فشل بسبب CORS، استخدم proxy
+                console.log(`استخدام proxy لـ ${symbol}...`);
+                tickerResponse = await fetch(proxyUrl + apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+            }
             
             if (!tickerResponse.ok) {
-                throw new Error(`HTTP error! status: ${tickerResponse.status}`);
+                throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
             }
             
             const tickerData = await tickerResponse.json();
             
             if (!tickerData.data || tickerData.data.length === 0) {
-                return null;
+                throw new Error(`لا توجد بيانات لـ ${symbol}`);
             }
 
             const ticker = tickerData.data[0];
             
-            const candlesResponse = await fetch(`${this.config.apiBaseUrl}/api/v5/market/candles?instId=${symbol}-USDT&bar=1H&limit=100`);
-            const candlesData = await candlesResponse.json();
+            // تأخير قصير قبل جلب بيانات الشموع
+            await this.delay(200);
+            
+            // جلب بيانات الشموع
+            const candlesUrl = `https://www.okx.com/api/v5/market/candles?instId=${symbol}-USDT&bar=1H&limit=100`;
+            let candlesResponse;
+            
+            try {
+                candlesResponse = await fetch(candlesUrl);
+            } catch (corsError) {
+                candlesResponse = await fetch(proxyUrl + candlesUrl);
+            }
+            
+            let candlesData = { data: [] };
+            if (candlesResponse.ok) {
+                candlesData = await candlesResponse.json();
+            }
+
+            // التأكد من صحة البيانات
+            const price = parseFloat(ticker.last);
+            const change24h = parseFloat(ticker.sodUtc8);
+            const volume = parseFloat(ticker.vol24h);
+            
+            if (isNaN(price) || price <= 0) {
+                throw new Error(`سعر غير صحيح لـ ${symbol}`);
+            }
 
             const coin = {
                 symbol: symbol,
                 name: symbol,
-                price: parseFloat(ticker.last),
-                change24h: parseFloat(ticker.sodUtc8),
-                volume: parseFloat(ticker.vol24h),
-                high24h: parseFloat(ticker.high24h),
-                low24h: parseFloat(ticker.low24h),
+                price: price,
+                change24h: change24h || 0,
+                volume: volume || 0,
+                high24h: parseFloat(ticker.high24h) || price,
+                low24h: parseFloat(ticker.low24h) || price,
                 candles: candlesData.data || [],
                 technicalIndicators: {},
                 score: 0,
@@ -85,52 +167,84 @@ class YaserCrypto {
                 targets: {}
             };
 
+            // حساب المؤشرات الفنية بالبيانات الحقيقية
             this.calculateTechnicalIndicators(coin);
             
             return coin;
+            
         } catch (error) {
             console.error(`خطأ في جلب بيانات ${symbol}:`, error);
-            return null;
+            throw error;
         }
     }
 
     calculateTechnicalIndicators(coin) {
         const candles = coin.candles;
-        if (!candles || candles.length < 50) return;
+        
+        if (!candles || candles.length < 50) {
+            // استخدام البيانات المتاحة من ticker فقط
+            const currentPrice = coin.price;
+            const high24h = coin.high24h;
+            const low24h = coin.low24h;
+            
+            coin.technicalIndicators = {
+                rsi: this.estimateRSIFromChange(coin.change24h),
+                macd: coin.change24h > 0 ? 0.1 : -0.1,
+                macdSignal: 0,
+                macdHistogram: coin.change24h > 0 ? 0.1 : -0.1,
+                ema20: currentPrice,
+                ema50: currentPrice * (1 - coin.change24h / 100 * 0.5),
+                ma20: currentPrice,
+                ma50: currentPrice * (1 - coin.change24h / 100 * 0.5),
+                parabolicSAR: low24h * 0.99,
+                mfi: this.estimateMFIFromVolume(coin.volume, coin.change24h),
+                fibonacci: this.calculateFibonacci([high24h], [low24h])
+            };
+        } else {
+            // حساب المؤشرات من بيانات الشموع الحقيقية
+            const closes = candles.map(c => parseFloat(c[4])).reverse();
+            const highs = candles.map(c => parseFloat(c[2])).reverse();
+            const lows = candles.map(c => parseFloat(c[3])).reverse();
+            const volumes = candles.map(c => parseFloat(c[5])).reverse();
 
-        const closes = candles.map(c => parseFloat(c[4])).reverse();
-        const highs = candles.map(c => parseFloat(c[2])).reverse();
-        const lows = candles.map(c => parseFloat(c[3])).reverse();
-        const volumes = candles.map(c => parseFloat(c[5])).reverse();
-
-        // حساب RSI
-        coin.technicalIndicators.rsi = this.calculateRSI(closes, 14);
+            coin.technicalIndicators.rsi = this.calculateRSI(closes, 14);
+            
+            const macdData = this.calculateMACD(closes);
+            coin.technicalIndicators.macd = macdData.macd;
+            coin.technicalIndicators.macdSignal = macdData.signal;
+            coin.technicalIndicators.macdHistogram = macdData.histogram;
+            
+            coin.technicalIndicators.ema20 = this.calculateEMA(closes, 20);
+            coin.technicalIndicators.ema50 = this.calculateEMA(closes, 50);
+            coin.technicalIndicators.ma20 = this.calculateSMA(closes, 20);
+            coin.technicalIndicators.ma50 = this.calculateSMA(closes, 50);
+            
+            coin.technicalIndicators.parabolicSAR = this.calculateParabolicSAR(highs, lows, closes);
+            coin.technicalIndicators.mfi = this.calculateMFI(highs, lows, closes, volumes, 14);
+            coin.technicalIndicators.fibonacci = this.calculateFibonacci(highs, lows);
+        }
         
-        // حساب MACD
-        const macdData = this.calculateMACD(closes);
-        coin.technicalIndicators.macd = macdData.macd;
-        coin.technicalIndicators.macdSignal = macdData.signal;
-        coin.technicalIndicators.macdHistogram = macdData.histogram;
-        
-        // حساب المتوسطات المتحركة
-        coin.technicalIndicators.ema20 = this.calculateEMA(closes, 20);
-        coin.technicalIndicators.ema50 = this.calculateEMA(closes, 50);
-        coin.technicalIndicators.ma20 = this.calculateSMA(closes, 20);
-        coin.technicalIndicators.ma50 = this.calculateSMA(closes, 50);
-        
-        // حساب Parabolic SAR
-        coin.technicalIndicators.parabolicSAR = this.calculateParabolicSAR(highs, lows, closes);
-        
-        // حساب MFI
-        coin.technicalIndicators.mfi = this.calculateMFI(highs, lows, closes, volumes, 14);
-        
-        // حساب مستويات فيبوناتشي
-        coin.technicalIndicators.fibonacci = this.calculateFibonacci(highs, lows);
-        
-        // تحديد الأهداف
         this.calculateTargets(coin);
     }
 
+    estimateRSIFromChange(change24h) {
+        // تقدير RSI من التغيير اليومي
+        if (change24h > 5) return 70;
+        if (change24h > 2) return 60;
+        if (change24h > 0) return 55;
+        if (change24h > -2) return 45;
+        if (change24h > -5) return 40;
+        return 30;
+    }
+
+    estimateMFIFromVolume(volume, change24h) {
+        // تقدير MFI من الحجم والتغيير
+        const baseValue = change24h > 0 ? 60 : 40;
+        const volumeBonus = Math.min(volume / 1000000 * 10, 20);
+        return Math.min(Math.max(baseValue + volumeBonus, 0), 100);
+    }
+
+    // باقي الدوال تبقى كما هي...
     calculateRSI(closes, period) {
         if (closes.length < period + 1) return 50;
         
@@ -146,6 +260,8 @@ class YaserCrypto {
         let avgGain = gains / period;
         let avgLoss = losses / period;
         
+        if (avgLoss === 0) return 100;
+        
         for (let i = period + 1; i < closes.length; i++) {
             const change = closes[i] - closes[i - 1];
             if (change > 0) {
@@ -157,10 +273,11 @@ class YaserCrypto {
             }
         }
         
+        if (avgLoss === 0) return 100;
         const rs = avgGain / avgLoss;
         return 100 - (100 / (1 + rs));
     }
-
+    
     calculateMACD(closes) {
         const ema12 = this.calculateEMA(closes, 12);
         const ema26 = this.calculateEMA(closes, 26);

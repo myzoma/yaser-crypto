@@ -12,21 +12,24 @@ body {
     text-align: right;
 }
 
-/* الهيدر الجديد */
-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 20px 0;
-    box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
-    border-bottom: 2px solid #00d4aa;
-}
-
+/* تحديث موضع الهيدر */
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start; /* اليمين في RTL */
     align-items: center;
+}
+
+.title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.site-title span {
+    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
 }
 
 .logo-section {
@@ -34,7 +37,154 @@ header {
     align-items: center;
     gap: 15px;
 }
+.loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    z-index: 9999;
+}
 
+.loading-content {
+    text-align: center;
+    max-width: 400px;
+    padding: 40px;
+    background: rgba(45, 45, 45, 0.9);
+    border-radius: 20px;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.loading-logo {
+    margin-bottom: 30px;
+}
+
+.loading-logo .crypto-icon {
+    font-size: 3rem;
+    color: #00d4aa;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+.loading-title {
+    font-size: 2rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.loading-text {
+    font-size: 1.2rem;
+    color: #00d4aa;
+    margin-bottom: 25px;
+    animation: pulse-text 2s infinite;
+}
+
+.progress-container {
+    width: 100%;
+    height: 10px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0);
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.loading-counter {
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.loading-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: #00d4aa;
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+.dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-text {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* للموبايل */
+@media (max-width: 768px) {
+    .header-content {
+        justify-content: center;
+    }
+    
+    .title-section {
+        text-align: center;
+    }
+    
+    .loading-content {
+        max-width: 300px;
+        padding: 30px 20px;
+    }
+    
+    .loading-logo .crypto-icon {
+        font-size: 2.5rem;
+    }
+    
+    .loading-title {
+        font-size: 1.5rem;
+    }
+    
+    .loading-text {
+        font-size: 1rem;
+    }
 .crypto-icon {
     font-size: 2.5rem;
     color: #00d4aa;

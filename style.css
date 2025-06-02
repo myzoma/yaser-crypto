@@ -15,12 +15,12 @@ body {
 /* الهيدر الجديد */
 header {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 20px 0;
+    padding: 25px 0;
     box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
     border-bottom: 2px solid #00d4aa;
-    direction: rtl; /* إضافة هذا */
-    text-align: right; /* إضافة هذا */
-    min-height: 120px; /* ارتفاع أكبر */
+    direction: rtl;
+    text-align: right;
+    min-height: 110px;
 }
 
 .header-content {
@@ -31,12 +31,32 @@ header {
 }
 
 .logo-section {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 15px;
-    float: right; /* إضافة هذا لضمان الموضع في اليمين */
+}
+.title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.site-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 0;
+    letter-spacing: 2px;
+    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+    animation: glow 3s ease-in-out infinite alternate;
 }
 
+.site-description {
+    color: #c0c0c0;
+    font-size: 0.9rem;
+    font-weight: normal;
+    margin: 0;
+    opacity: 0.8;
+    line-height: 1.4;
+}
 .crypto-icon {
     font-size: 2.5rem;
     color: #00d4aa;
@@ -62,7 +82,20 @@ header {
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
-
+/* للموبايل */
+@media (max-width: 768px) {
+    .site-title {
+        font-size: 1.6rem;
+        letter-spacing: 1px;
+    }
+    
+    .site-description {
+        font-size: 0.8rem;
+    }
+    
+    .crypto-icon {
+        font-size: 1.8rem;
+    }
 @keyframes glow {
     from {
         text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);

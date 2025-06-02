@@ -87,33 +87,63 @@ class YaserCrypto {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async fetchCoinData(symbol) {
-        try {
-            // استخدام الرابط الصحيح لـ OKX API العام
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
-            
-            // محاولة بدون proxy أولاً
-            let tickerResponse;
-            try {
-                tickerResponse = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                    }
-                });
-            } catch (corsError) {
-                // إذا فشل بسبب CORS، استخدم proxy
-                console.log(`استخدام proxy لـ ${symbol}...`);
-                tickerResponse = await fetch(proxyUrl + apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+   async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'OK-ACCESS-KEY': this.config.okx.apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        // حساب النسبة المئوية الصحيحة
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        const change24h = openPrice24h > 0 ? 
+            ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0;
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+
+        // حساب المؤشرات الفنية
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+}
+
             
             if (!tickerResponse.ok) {
                 throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);

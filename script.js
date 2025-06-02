@@ -21,7 +21,7 @@ class YaserCrypto {
     }
 
     showLoading() {
-        document.getElementById('coinsGrid').innerHTML = '<div class="loading">جاري تحميل البيانات...</div>';
+        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
     }
 
     showError(message) {

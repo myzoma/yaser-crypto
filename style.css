@@ -434,14 +434,31 @@ header {
     .logo-section {
         gap: 10px;
     }
-/* إضافة أنماط التحميل */
+/* تحديث أنماط التحميل */
 .loading-container {
+    position: fixed; /* تغيير من flex إلى fixed */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 60vh;
+    background: rgba(26, 26, 46, 0.95); /* خلفية شفافة */
+    z-index: 9999; /* أعلى من كل شيء */
     text-align: center;
+}
+
+/* أو استخدم هذا البديل */
+.loading-container-alt {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px); /* حساب ارتفاع الهيدر */
+    text-align: center;
+    padding: 50px 20px;
 }
 
 .loading-text {
@@ -467,6 +484,7 @@ header {
     border-radius: 10px;
     animation: loading-progress 3s ease-in-out infinite;
     box-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+    transition: width 0.3s ease;
 }
 
 .loading-counter {
@@ -528,4 +546,3 @@ header {
         font-size: 1rem;
     }
 }
-

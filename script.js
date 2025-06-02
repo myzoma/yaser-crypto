@@ -1,70 +1,23 @@
-class LoadingManager {
-    constructor() {
-        this.progressBar = document.getElementById('progressBar');
-        this.loadingCounter = document.getElementById('loadingCounter');
-        this.loadingScreen = document.getElementById('loadingScreen');
-        this.currentProgress = 0;
-    }
-
-    updateProgress(percentage) {
-        this.currentProgress = Math.min(percentage, 100);
-        this.progressBar.style.width = this.currentProgress + '%';
-        this.loadingCounter.textContent = Math.round(this.currentProgress) + '%';
-    }
-
-    hide() {
-        setTimeout(() => {
-            this.loadingScreen.style.opacity = '0';
-            this.loadingScreen.style.transition = 'opacity 0.5s ease';
-            setTimeout(() => {
-                this.loadingScreen.style.display = 'none';
-            }, 500);
-        }, 500);
-    }
-
-    simulateProgress() {
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                this.updateProgress(progress);
-                this.hide();
-            } else {
-                this.updateProgress(progress);
-            }
-        }, 200);
-    }
-}
-
-// تحديث كلاس YaserCrypto
 class YaserCrypto {
     constructor() {
-        this.loadingManager = new LoadingManager();
-        this.config = {
-            updateInterval: 30000,
-            maxCoins: 50,
-            apiRetries: 3
-        };
         this.coins = [];
+        this.config = {
+            apiUrl: "https://www.okx.com/api/v5",
+            requestDelay: 500,
+            maxCoins: 50,
+            minChange: 1,
+            maxChange: 15,
+            minVolume: 100000
+        };
+        this.requestDelay = 500;
         this.init();
     }
 
     async init() {
-        try {
-            this.loadingManager.updateProgress(10);
-            await this.fetchData();
-            this.loadingManager.updateProgress(70);
-            this.renderCoins();
-            this.loadingManager.updateProgress(90);
-            this.startAutoUpdate();
-            this.loadingManager.updateProgress(100);
-        } catch (error) {
-            console.error('خطأ في التهيئة:', error);
-            this.showError('فشل في تحميل البيانات');
-            this.loadingManager.hide();
-        }
+        this.showLoading();
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
     }
 
     showLoading() {
@@ -406,7 +359,7 @@ class YaserCrypto {
                     <div class="coin-price">
                         $${coin.price.toFixed(4)}
                         <span class="price-change ${changeClass}">
-                                                       ${changeSign}${coin.change24h.toFixed(2)}%
+                            ${changeSign}${coin.change24h.toFixed(2)}%
                         </span>
                     </div>
                 </div>
@@ -620,4 +573,3 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
 });
-

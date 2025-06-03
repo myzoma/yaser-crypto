@@ -12,24 +12,54 @@ body {
     text-align: right;
 }
 
+/* Header Styles */
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 15px 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 20px 0;
+    box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+    border-bottom: 2px solid #00d4aa;
 }
 
-header h1 {
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.crypto-icon {
     font-size: 2.5rem;
     color: #00d4aa;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
-    text-align: rtl;
+    text-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
+    animation: pulse 2s infinite;
 }
-/* قسم الروابط - على اليسار */
+
+.site-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, #00d4aa, #00ff88, #40e0d0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+    margin: 0;
+    letter-spacing: 2px;
+    animation: glow 3s ease-in-out infinite alternate;
+}
+
+/* Navigation Styles */
 .navigation {
-    flex: 1;
     display: flex;
-    justify-content: flex-start;
+    align-items: center;
 }
 
 .nav-links {
@@ -59,69 +89,28 @@ header h1 {
 
 .nav-links a:hover,
 .nav-links a.active {
-    background-color: rgba(255,255,255,0.2);
+    background-color: rgba(0, 212, 170, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 212, 170, 0.3);
 }
 
-/* التصميم المتجاوب */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
     }
-    
-    .logo-section {
-        text-align: center;
-    }
-    
-    .navigation {
-        justify-content: center;
-    }
-    
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-    }
-    
-    .site-title {
-        font-size: 1.8rem;
-    }
-    
-    .site-description {
-        font-size: 0.85rem;
-    }
-    
-    .nav-links a {
-        padding: 6px 12px;
-        font-size: 0.9rem;
+    to {
+        text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(64, 224, 208, 0.6);
     }
 }
 
-@media (max-width: 480px) {
-    .nav-links {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .nav-links a {
-        display: block;
-        text-align: center;
-        min-width: 120px;
-    }
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .nav-links {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .site-title {
-        font-size: 2rem;
-    }
+/* Refresh Button */
 .refresh-btn {
     background: linear-gradient(45deg, #00d4aa, #00a085);
     color: white;
@@ -139,19 +128,22 @@ header h1 {
     box-shadow: 0 5px 15px rgba(0, 212, 170, 0.4);
 }
 
+/* Ranking Container */
 .ranking-container {
     padding: 30px;
     max-width: 1400px;
     margin: 0 auto;
 }
 
-.ranking-container h2 {
+.ranking-container h2,
+.ranking-container h4 {
     text-align: center;
     margin-bottom: 30px;
     color: #00d4aa;
     font-size: 1.8rem;
 }
 
+/* Coins Grid */
 .coins-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -185,7 +177,6 @@ header h1 {
     height: 3px;
     background: linear-gradient(90deg, #00d4aa, #00a085);
 }
-
 
 .rank-badge {
     position: absolute;
@@ -295,7 +286,7 @@ header h1 {
     transition: width 0.3s ease;
 }
 
-/* النافذة المنبثقة */
+/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
@@ -427,7 +418,81 @@ header h1 {
     color: #ff4757;
 }
 
+/* Rank Badge Colors */
+.coin-card:nth-child(1) .rank-badge {
+    background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+}
+
+.coin-card:nth-child(2) .rank-badge {
+    background: linear-gradient(45deg, #C0C0C0, #A8A8A8) !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.5) !important;
+}
+
+.coin-card:nth-child(3) .rank-badge {
+    background: linear-gradient(45deg, #CD7F32, #B8860B) !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important;
+}
+
+.coin-card:nth-child(4) .rank-badge,
+.coin-card:nth-child(5) .rank-badge,
+.coin-card:nth-child(6) .rank-badge,
+.coin-card:nth-child(7) .rank-badge,
+.coin-card:nth-child(8) .rank-badge,
+.coin-card:nth-child(9) .rank-badge,
+.coin-card:nth-child(10) .rank-badge {
+    background: linear-gradient(45deg, #4CAF50, #45a049) !important;
+    color: #fff !important;
+    font-weight: bold !important;
+}
+
+.coin-card:nth-child(n+11) .rank-badge {
+    background: linear-gradient(45deg, #666, #555) !important;
+    color: #fff !important;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .logo-section {
+        justify-content: center;
+    }
+    
+    .navigation {
+        justify-content: center;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .crypto-icon {
+        font-size: 2rem;
+    }
+    
+    .site-title {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .nav-links a {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    
     .coins-grid {
         grid-template-columns: 1fr;
         gap: 15px;
@@ -446,119 +511,181 @@ header h1 {
     .technical-indicators {
         grid-template-columns: 1fr;
     }
-/* ألوان خلفية أرقام المراكز - يجب أن تكون في النهاية */
-
-/* المركز الأول - ذهبي */
-.coin-card:nth-child(1) .rank-badge {
-    background: linear-gradient(45deg, #FFD700, #FFA500) !important;
-    color: #000 !important;
-    font-weight: bold !important;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
 }
 
-/* المركز الثاني - فضي */
-.coin-card:nth-child(2) .rank-badge {
-    background: linear-gradient(45deg, #C0C0C0, #A8A8A8) !important;
-    color: #000 !important;
-    font-weight: bold !important;
-    box-shadow: 0 0 10px rgba(192, 192, 192, 0.5) !important;
-}
-
-/* المركز الثالث - برونزي */
-.coin-card:nth-child(3) .rank-badge {
-    background: linear-gradient(45deg, #CD7F32, #B8860B) !important;
-    color: #fff !important;
-    font-weight: bold !important;
-    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important;
-}
-
-/* المراكز 4-10 - أخضر */
-.coin-card:nth-child(4) .rank-badge,
-.coin-card:nth-child(5) .rank-badge,
-.coin-card:nth-child(6) .rank-badge,
-.coin-card:nth-child(7) .rank-badge,
-.coin-card:nth-child(8) .rank-badge,
-.coin-card:nth-child(9) .rank-badge,
-.coin-card:nth-child(10) .rank-badge {
-    background: linear-gradient(45deg, #4CAF50, #45a049) !important;
-    color: #fff !important;
-    font-weight: bold !important;
-}
-
-/* باقي المراكز - رمادي */
-.coin-card:nth-child(n+11) .rank-badge {
-    background: linear-gradient(45deg, #666, #555) !important;
-    color: #fff !important;
-}
-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 20px 0;
-    box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
-    border-bottom: 2px solid #00d4aa;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.logo-section {
-    display: flex;
-    align-items: right;
-    gap: 15px;
-}
-
-.crypto-icon {
-    font-size: 2.5rem;
-    color: #00d4aa;
-    text-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
-    animation: pulse 2s infinite;
-}
-
-.site-title {
-    font-size: 2.2rem;
-    font-weight: bold;
-    background: linear-gradient(45deg, #00d4aa, #00ff88, #40e0d0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
-    margin: 0;
-    letter-spacing: 2px;
-    animation: glow 3s ease-in-out infinite alternate;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
-@keyframes glow {
-    from {
-        text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+@media (max-width: 480px) {
+    .nav-links {
+        flex-direction: column;
+        gap: 8px;
     }
-    to {
-        text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(64, 224, 208, 0.6);
-    }
-}
-
-/* تأثيرات إضافية للموبايل */
-@media (max-width: 768px) {
-    .crypto-icon {
-        font-size: 2rem;
+    
+    .nav-links a {
+        display: block;
+        text-align: center;
+        min-width: 120px;
     }
     
     .site-title {
+        font-size: 1.5rem;
+    }
+    
+    .crypto-icon {
         font-size: 1.8rem;
+    }
+    
+    .ranking-container {
+        padding: 20px 15px;
+    }
+    
+    .ranking-container h2,
+    .ranking-container h4 {
+        font-size: 1.5rem;
+    }
+    
+    .coins-grid {
+        padding: 15px 0;
+    }
+    
+    .coin-card {
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .coin-header {
+        gap: 10px;
+    }
+    
+    .coin-logo {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .coin-info h3 {
+        font-size: 1rem;
+    }
+    
+    .coin-price {
+        font-size: 1rem;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 5% auto;
+        padding: 15px;
+    }
+    
+    .modal-coin-logo {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+    }
+    
+    .targets-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .technical-indicators {
+        gap: 15px;
+    }
+    
+    .indicator-card {
+        padding: 12px;
+    }
+}
+
+/* Additional fixes for better mobile experience */
+@media (max-width: 320px) {
+    .header-content {
+        padding: 0 10px;
+    }
+    
+    .site-title {
+        font-size: 1.3rem;
         letter-spacing: 1px;
     }
     
-    .logo-section {
-        gap: 10px;
+    .nav-links a {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+    
+    .ranking-container {
+        padding: 15px 10px;
+    }
+    
+    .coin-card {
+        padding: 12px;
+    }
+    
+    .rank-badge {
+        font-size: 10px;
+        padding: 3px 8px;
     }
 }
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Loading animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #00d4aa;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+/* Hover effects for better UX */
+.refresh-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.coin-card:active {
+    transform: translateY(-2px);
+}
+
+/* Focus styles for accessibility */
+.nav-links a:focus,
+.refresh-btn:focus,
+.coin-card:focus {
+    outline: 2px solid #00d4aa;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    header {
+        background: none !important;
+        color: #000 !important;
+    }
+    
+    .nav-links {
+        display: none;
+    }
+    
+    .coin-card {
+        background: #fff !important;
+        color: #000 !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+    }
+    
+    .modal {
+        display: none !important;
+    }
+}
+

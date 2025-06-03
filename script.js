@@ -22,86 +22,35 @@ class YaserCrypto {
 
  showLoading() {
     document.getElementById('coinsGrid').innerHTML = `
-        <div class="loading" style="
-            position: relative;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 50vh; 
-            padding: 30px 15px;
-            margin: 20px 0;
-            border-radius: 10px;
-        ">
-            <div style="
-                text-align: center; 
-                color: #00d4aa; 
-                width: 100%; 
-                max-width: 400px;
-                padding: 20px;
-                background: rgba(0, 0, 0, 0.8);
-                border-radius: 15px;
-                border: 2px solid #333;
-            ">
-                <div style="font-size: 1.2rem; margin-bottom: 25px; color: #fff;">جاري تحليل العملات الرقمية</div>
-                <div id="counter" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 25px; color: #00d4aa;">0%</div>
-                <div style="
-                    width: 100%; 
-                    max-width: 350px; 
-                    height: 25px; 
-                    background: #222; 
-                    border-radius: 15px; 
-                    margin: 0 auto 20px; 
-                    overflow: hidden; 
-                    border: 2px solid #444;
-                ">
-                    <div id="bar" style="
-                        height: 100%; 
-                        width: 0%; 
-                        background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0); 
-                        border-radius: 12px; 
-                        transition: width 0.5s ease;
-                    "></div>
-                </div>
-                <div id="status" style="color: #fff; font-size: 1rem; margin-top: 15px;">بدء التحليل...</div>
+        <div class="loading" style="padding: 40px 20px; text-align: center; background: #111; margin: 20px 0; border-radius: 10px;">
+            <div style="color: #fff; font-size: 1.1rem; margin-bottom: 20px;">جاري تحليل العملات الرقمية</div>
+            <div id="counter" style="font-size: 2rem; font-weight: bold; margin-bottom: 20px; color: #00d4aa;">0%</div>
+            <div style="width: 90%; max-width: 300px; height: 20px; background: #333; border-radius: 10px; margin: 0 auto 15px; overflow: hidden;">
+                <div id="bar" style="height: 100%; width: 0%; background: #00d4aa; border-radius: 10px; transition: width 0.3s ease;"></div>
             </div>
+            <div id="status" style="color: #aaa; font-size: 0.9rem;">بدء التحليل...</div>
         </div>
     `;
 
-    // شريط تقدم محسن للجوال
     let prog = 0;
-    const statuses = [
-        'بدء التحليل...',
-        'تحميل البيانات...',
-        'تحليل العملات...',
-        'حساب النقاط...',
-        'ترتيب النتائج...',
-        'اكتمل!'
-    ];
+    const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'اكتمل!'];
     
     const timer = setInterval(() => {
-        prog += Math.random() * 1.5 + 0.5; // أسرع قليلاً للجوال
+        prog += Math.random() * 2 + 1;
         if (prog > 100) prog = 100;
         
-        const counterEl = document.getElementById('counter');
-        const barEl = document.getElementById('bar');
-        const statusEl = document.getElementById('status');
-        
-        if (counterEl && barEl && statusEl) {
-            counterEl.textContent = Math.floor(prog) + '%';
-            barEl.style.width = prog + '%';
+        try {
+            document.getElementById('counter').textContent = Math.floor(prog) + '%';
+            document.getElementById('bar').style.width = prog + '%';
+            document.getElementById('status').textContent = statuses[Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1)];
             
-            const statusIndex = Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1);
-            statusEl.textContent = statuses[statusIndex];
-            
-            if (prog >= 100) {
-                clearInterval(timer);
-                statusEl.textContent = 'اكتمل التحليل!';
-            }
+            if (prog >= 100) clearInterval(timer);
+        } catch(e) {
+            clearInterval(timer);
         }
-    }, 400); // أسرع للجوال
+    }, 300);
 }
+
 
 
     async fetchData() {

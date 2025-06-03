@@ -11,6 +11,25 @@ body {
     direction: rtl;
     text-align: right;
 }
+.site-header {
+    text-align: right;
+    direction: rtl;
+}
+
+.site-branding {
+    float: right;
+    text-align: right;
+}
+
+.site-title {
+    text-align: right;
+    direction: rtl;
+}
+
+.site-description {
+    text-align: right;
+    direction: rtl;
+}
 
 /* الهيدر الجديد */
 header {

@@ -34,6 +34,7 @@ class YaserCrypto {
 
     let prog = 0;
     const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'اكتمل!'];
+     const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'اكتمل..','يجري الان فرز المتسابقين..!'];
     
     const timer = setInterval(() => {
         prog += Math.random() * 2 + 1;

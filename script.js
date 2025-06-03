@@ -72,7 +72,7 @@ setTimeout(() => {
     }, 150);
 }, 100);
 
-    }
+    
 
     showError(message) {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;

@@ -15,7 +15,7 @@ body {
 header {
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
     padding: 20px;
-    text-align: center;
+    text-align: rtl;
     border-bottom: 2px solid #333;
 }
 
@@ -24,6 +24,7 @@ header h1 {
     color: #00d4aa;
     margin-bottom: 10px;
     text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
+    text-align: rtl;
 }
 
 .refresh-btn {

@@ -700,4 +700,72 @@ html {
         display: none !important;
     }
 }
+/* التصميم المتجاوب */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .logo-section {
+        text-align: center;
+    }
+    
+    .site-title {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .site-description {
+        max-width: 100%;
+        font-size: 0.9rem;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+    
+    .nav-links a {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+}
 
+@media (max-width: 480px) {
+    .header-content {
+        padding: 0 15px;
+    }
+    
+    .site-title {
+        font-size: 1.6rem;
+    }
+    
+    .site-description {
+        font-size: 0.85rem;
+    }
+    
+    .nav-links {
+        gap: 8px;
+    }
+    
+    .nav-links a {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .nav-links a {
+        display: block;
+        text-align: center;
+        min-width: 140px;
+    }
+}

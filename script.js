@@ -20,39 +20,72 @@ class YaserCrypto {
         this.renderCoins();
     }
 
-   showLoading() {
-   showLoading() {
+  showLoading() {
     document.getElementById('coinsGrid').innerHTML = `
-        <div class="loading">
-            <div style="text-align: center; color: #00d4aa; padding: 30px;">
-                <div style="font-size: 1.5rem; margin-bottom: 20px;">جاري تحليل البيانات</div>
-                <div id="counter" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: #00d4aa;">0%</div>
-                <div style="width: 400px; height: 25px; background: #333; border-radius: 15px; margin: 0 auto 20px; overflow: hidden; border: 2px solid #555;">
-                    <div id="bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0); border-radius: 12px; transition: width 0.5s ease; box-shadow: 0 0 15px rgba(0, 212, 170, 0.4);"></div>
+        <div class="loading" style="display: flex; justify-content: center; align-items: center; min-height: 400px; padding: 50px 20px;">
+            <div style="text-align: center; color: #00d4aa; width: 100%; max-width: 500px;">
+                <div style="font-size: 1.5rem; margin-bottom: 30px; color: #fff;">جاري تحليل العملات الرقمية</div>
+                <div id="counter" style="font-size: 3rem; font-weight: bold; margin-bottom: 30px; color: #00d4aa; text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);">0%</div>
+                <div style="width: 100%; max-width: 450px; height: 30px; background: #222; border-radius: 20px; margin: 0 auto 25px; overflow: hidden; border: 3px solid #444; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
+                    <div id="bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0); border-radius: 17px; transition: width 0.8s ease; box-shadow: 0 0 25px rgba(0, 212, 170, 0.6);"></div>
                 </div>
-                <div id="status" style="color: #fff; font-size: 1.1rem;">بدء التحليل...</div>
+                <div id="status" style="color: #fff; font-size: 1.2rem; margin-top: 20px; min-height: 30px;">بدء التحليل...</div>
+                <div style="margin-top: 25px;">
+                    <div style="display: inline-block; width: 10px; height: 10px; background: #00d4aa; border-radius: 50%; margin: 0 4px; animation: pulse 1.5s infinite;"></div>
+                    <div style="display: inline-block; width: 10px; height: 10px; background: #00d4aa; border-radius: 50%; margin: 0 4px; animation: pulse 1.5s infinite 0.3s;"></div>
+                    <div style="display: inline-block; width: 10px; height: 10px; background: #00d4aa; border-radius: 50%; margin: 0 4px; animation: pulse 1.5s infinite 0.6s;"></div>
+                </div>
             </div>
         </div>
     `;
 
-    // شريط تقدم بسيط
+    // إضافة CSS للتأثيرات
+    if (!document.getElementById('loadingAnimations')) {
+        const style = document.createElement('style');
+        style.id = 'loadingAnimations';
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { opacity: 0.3; transform: scale(1); }
+                50% { opacity: 1; transform: scale(1.3); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // شريط تقدم أبطأ
     let prog = 0;
-    const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'ترتيب النتائج...', 'اكتمل!'];
+    const statuses = [
+        'بدء التحليل...',
+        'الاتصال بخوادم البيانات...',
+        'تحميل معلومات العملات...',
+        'تحليل الأسعار والمؤشرات...',
+        'حساب نقاط القوة...',
+        'ترتيب النتائج النهائية...',
+        'اكتمل التحليل!'
+    ];
     
     const timer = setInterval(() => {
-        prog += Math.random() * 2 + 0.5; // بين 0.5-2.5%
+        // زيادة أبطأ وأكثر تدرجاً
+        prog += Math.random() * 1.2 + 0.3; // بين 0.3-1.5%
         if (prog > 100) prog = 100;
         
-        document.getElementById('counter').textContent = Math.floor(prog) + '%';
-        document.getElementById('bar').style.width = prog + '%';
+        const counterEl = document.getElementById('counter');
+        const barEl = document.getElementById('bar');
+        const statusEl = document.getElementById('status');
         
-        const statusIndex = Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1);
-        document.getElementById('status').textContent = statuses[statusIndex];
-        
-        if (prog >= 100) {
-            clearInterval(timer);
+        if (counterEl && barEl && statusEl) {
+            counterEl.textContent = Math.floor(prog) + '%';
+            barEl.style.width = prog + '%';
+            
+            const statusIndex = Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1);
+            statusEl.textContent = statuses[statusIndex];
+            
+            if (prog >= 100) {
+                clearInterval(timer);
+                statusEl.textContent = 'اكتمل التحليل!';
+            }
         }
-    }, 300);
+    }, 500); // تحديث كل نصف ثانية (أبطأ)
 }
 
 showError(message) {

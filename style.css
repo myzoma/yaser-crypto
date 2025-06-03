@@ -536,7 +536,7 @@ header {
    .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 50px;
     display: flex;
     justify-content: flex-end; /* لجعل المحتوى في اليمين */
     align-items: center;

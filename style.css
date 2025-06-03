@@ -27,13 +27,11 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
 }
 
+/* قسم اسم الموقع - على اليمين */
 .logo-section {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    text-align: right;
 }
 
 .crypto-icon {
@@ -46,17 +44,24 @@ header {
 .site-title {
     font-size: 2.2rem;
     font-weight: bold;
-    background: linear-gradient(45deg, #00d4aa, #00ff88, #40e0d0);
+    background: linear-gradient(45deg, #3366ff, #ff9900);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
-    margin: 0;
+    margin: 0 0 8px 0;
     letter-spacing: 2px;
-    animation: glow 3s ease-in-out infinite alternate;
+    line-height: 1.2;
+}
+.site-description {
+    color: #fff;
+    font-size: 0.95rem;
+    opacity: 0.9;
+    font-family: 'Tajawal', sans-serif;
+    max-width: 300px;
+    line-height: 1.4;
 }
 
-/* Navigation Styles */
+/* قسم الروابط - في أقصى اليسار */
 .navigation {
     display: flex;
     align-items: center;
@@ -67,7 +72,7 @@ header {
     padding: 0;
     margin: 0;
     display: flex;
-    gap: 15px;
+    gap: 20px;
     align-items: center;
 }
 
@@ -78,20 +83,27 @@ header {
 .nav-links a {
     color: #fff;
     text-decoration: none;
-    padding: 8px 15px;
-    border-radius: 20px;
+    padding: 10px 16px;
+    border-radius: 25px;
     transition: all 0.3s ease;
     font-weight: 500;
     font-family: 'Tajawal', sans-serif;
     font-size: 0.95rem;
     white-space: nowrap;
+    border: 1px solid transparent;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-    background-color: rgba(0, 212, 170, 0.2);
+    background-color: rgba(0, 212, 170, 0.15);
+    border-color: rgba(0, 212, 170, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 212, 170, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+}
+
+.nav-links a.active {
+    background-color: rgba(0, 212, 170, 0.2);
+    border-color: #00d4aa;
 }
 
 /* Animations */

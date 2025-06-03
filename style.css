@@ -555,7 +555,7 @@ header {
     }
     
     .header-content {
-        justify-content: center;
+        justify-content:  rtl;
     }
     
     .progress-container {

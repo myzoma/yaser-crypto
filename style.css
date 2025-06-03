@@ -5,11 +5,12 @@
 }
 
 body {
-    font-family: 'Tajawal', Tajawal, Tajawal;
+    font-family: 'Tajawal', Arial, sans-serif; /* تصحيح font-family */
     background-color: #000;
-    color: #fff;f
+    color: #fff;
     direction: rtl;
     text-align: right;
+    /* إزالة الحرف f الخاطئ */
 }
 .site-header {
     text-align: right;

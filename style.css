@@ -14,6 +14,7 @@ body {
 .site-header {
     text-align: right;
     direction: rtl;
+
 }
 
 .site-branding {
@@ -37,6 +38,10 @@ header {
     padding: 20px 0;
     box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
     border-bottom: 2px solid #00d4aa;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: row-reverse;
 }
 
 .header-content {

@@ -21,8 +21,65 @@ class YaserCrypto {
     }
 
     showLoading() {
-        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
+       document.getElementById('coinsGrid').innerHTML = `
+    <div class="loading-container">
+        <div class="crypto-loading-icon">₿</div>
+        <div class="loading-text">YASER CRYPTO - تحليل متقدم</div>
+        <div class="progress-wrapper">
+            <div class="progress-container">
+                <div class="progress-bar" id="mainProgress">
+                    <div class="progress-glow"></div>
+                </div>
+            </div>
+            <div class="progress-info">
+                <span class="progress-percent" id="percent">0%</span>
+                <span class="progress-speed" id="speed">0 KB/s</span>
+            </div>
+        </div>
+        <div class="status-text" id="statusText">بدء التحليل...</div>
+        <div class="crypto-animation">
+            <span>₿</span><span>Ξ</span><span>₳</span><span>◊</span>
+        </div>
+    </div>
+`;
+
+// تحريك شريط التقدم المتقدم
+let progress = 0;
+const statuses = [
+    'الاتصال بـ CoinGecko API...',
+    'تحميل بيانات 100+ عملة...',
+    'تحليل المؤشرات الفنية...',
+    'حساب نقاط القوة...',
+    'ترتيب العملات...',
+    'تجهيز العرض...',
+    'اكتمل التحليل!'
+];
+
+let statusIndex = 0;
+const progressTimer = setInterval(() => {
+    const increment = Math.random() * 6 + 2;
+    progress += increment;
+    
+    if (progress > 100) progress = 100;
+    
+    document.getElementById('mainProgress').style.width = progress + '%';
+    document.getElementById('percent').textContent = Math.floor(progress) + '%';
+    document.getElementById('speed').textContent = Math.floor(Math.random() * 500 + 100) + ' KB/s';
+    
+    // تغيير الحالة
+    const newStatusIndex = Math.floor((progress / 100) * (statuses.length - 1));
+    if (newStatusIndex !== statusIndex) {
+        statusIndex = newStatusIndex;
+        document.getElementById('statusText').textContent = statuses[statusIndex];
     }
+    
+    if (progress >= 100) {
+        clearInterval(progressTimer);
+        document.getElementById('speed').textContent = 'مكتمل';
+    }
+}, 120);
+
+ 
 
     showError(message) {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;

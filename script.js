@@ -21,48 +21,58 @@ class YaserCrypto {
     }
 
     showLoading() {
-      document.getElementById('coinsGrid').innerHTML = `
-    <div class="loading">
-        <div style="text-align: center; color: #00d4aa; padding: 20px;">
-            <div style="font-size: 1.5rem; margin-bottom: 20px;">جاري تحليل البيانات</div>
-            <div id="counter" style="font-size: 2rem; font-weight: bold; margin-bottom: 15px; color: #00d4aa;">0%</div>
-            <div style="width: 300px; height: 20px; background: #333; border-radius: 10px; margin: 0 auto 15px; overflow: hidden;">
-                <div id="bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0); border-radius: 10px; transition: width 0.3s ease;"></div>
-            </div>
-            <div id="status" style="color: #fff; margin-top: 10px;">بدء التحليل...</div>
+       document.getElementById('coinsGrid').innerHTML = `
+    <div class="loading-container">
+        <div class="loading-text">جاري تحليل البيانات</div>
+        <div class="loading-counter" id="progressCounter">0%</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="loading-status" id="loadingStatus">بدء التحليل...</div>
+        <div class="loading-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
         </div>
     </div>
 `;
 
-// تشغيل العداد
-(function() {
-    let count = 0;
-    const timer = setInterval(() => {
-        count += Math.random() * 5 + 1;
-        if (count > 100) count = 100;
+// تشغيل شريط التقدم بعد إضافة HTML
+setTimeout(() => {
+    let progress = 0;
+    const progressBar = document.getElementById('progressBar');
+    const progressCounter = document.getElementById('progressCounter');
+    const loadingStatus = document.getElementById('loadingStatus');
+
+    const progressInterval = setInterval(() => {
+        const increment = Math.random() * 8 + 2;
+        progress += increment;
         
-        const counterEl = document.getElementById('counter');
-        const barEl = document.getElementById('bar');
-        const statusEl = document.getElementById('status');
+        if (progress > 100) progress = 100;
         
-        if (counterEl && barEl && statusEl) {
-            counterEl.textContent = Math.floor(count) + '%';
-            barEl.style.width = count + '%';
+        if (progressBar && progressCounter && loadingStatus) {
+            progressBar.style.width = progress + '%';
+            progressCounter.textContent = Math.floor(progress) + '%';
             
-            if (count < 30) {
-                statusEl.textContent = 'تحميل البيانات...';
-            } else if (count < 70) {
-                statusEl.textContent = 'تحليل العملات...';
-            } else if (count < 95) {
-                statusEl.textContent = 'ترتيب النتائج...';
-            } else if (count >= 100) {
-                statusEl.textContent = 'اكتمل!';
-                clearInterval(timer);
+            if (progress < 20) {
+                loadingStatus.textContent = 'جاري الاتصال بالخوادم...';
+            } else if (progress < 40) {
+                loadingStatus.textContent = 'تحميل بيانات العملات...';
+            } else if (progress < 60) {
+                loadingStatus.textContent = 'تحليل الأسعار والمؤشرات...';
+            } else if (progress < 80) {
+                loadingStatus.textContent = 'حساب التقييمات...';
+            } else if (progress < 95) {
+                loadingStatus.textContent = 'ترتيب النتائج...';
+            } else if (progress >= 100) {
+                loadingStatus.textContent = 'اكتمل التحليل!';
+                clearInterval(progressInterval);
             }
         }
-    }, 100);
+    }, 150);
+}, 100);
 
- 
+    }
 
     showError(message) {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;

@@ -48,7 +48,7 @@ class YaserCrypto {
         } catch(e) {
             clearInterval(timer);
         }
-    }, 1000);
+    }, 3000);
 }
 
 

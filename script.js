@@ -21,81 +21,38 @@ class YaserCrypto {
     }
 
    showLoading() {
+   showLoading() {
     document.getElementById('coinsGrid').innerHTML = `
         <div class="loading">
-            <div style="text-align: center; color: #00d4aa; padding: 40px; max-width: 500px; margin: 0 auto;">
-                <div style="font-size: 1.8rem; margin-bottom: 25px; font-weight: bold;">YASER CRYPTO</div>
-                <div style="font-size: 1.2rem; margin-bottom: 30px; color: #aaa;">جاري تحليل العملات الرقمية</div>
-                
-                <div id="progressNum" style="font-size: 3rem; font-weight: bold; margin-bottom: 25px; color: #00d4aa; text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);">0%</div>
-                
-                <div style="width: 100%; max-width: 450px; height: 30px; background: #222; border-radius: 20px; margin: 0 auto 25px; overflow: hidden; border: 3px solid #444; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
-                    <div id="progressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00d4aa 0%, #00ff88 50%, #40e0d0 100%); border-radius: 17px; transition: width 0.8s ease; box-shadow: 0 0 25px rgba(0, 212, 170, 0.6);"></div>
+            <div style="text-align: center; color: #00d4aa; padding: 30px;">
+                <div style="font-size: 1.5rem; margin-bottom: 20px;">جاري تحليل البيانات</div>
+                <div id="counter" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: #00d4aa;">0%</div>
+                <div style="width: 400px; height: 25px; background: #333; border-radius: 15px; margin: 0 auto 20px; overflow: hidden; border: 2px solid #555;">
+                    <div id="bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0); border-radius: 12px; transition: width 0.5s ease; box-shadow: 0 0 15px rgba(0, 212, 170, 0.4);"></div>
                 </div>
-                
-                <div id="progressStatus" style="color: #fff; margin-top: 20px; font-size: 1.1rem; min-height: 25px;">جاري البدء...</div>
-                
-                <div style="margin-top: 20px;">
-                    <div style="display: inline-block; width: 8px; height: 8px; background: #00d4aa; border-radius: 50%; margin: 0 3px; animation: pulse 1.5s infinite;"></div>
-                    <div style="display: inline-block; width: 8px; height: 8px; background: #00d4aa; border-radius: 50%; margin: 0 3px; animation: pulse 1.5s infinite 0.2s;"></div>
-                    <div style="display: inline-block; width: 8px; height: 8px; background: #00d4aa; border-radius: 50%; margin: 0 3px; animation: pulse 1.5s infinite 0.4s;"></div>
-                </div>
+                <div id="status" style="color: #fff; font-size: 1.1rem;">بدء التحليل...</div>
             </div>
         </div>
     `;
 
-    // إضافة CSS للتأثيرات إذا لم يكن موجود
-    if (!document.getElementById('progressAnimations')) {
-        const style = document.createElement('style');
-        style.id = 'progressAnimations';
-        style.textContent = `
-            @keyframes pulse {
-                0%, 100% { opacity: 0.3; transform: scale(1); }
-                50% { opacity: 1; transform: scale(1.2); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // بدء شريط التقدم
-    let progress = 0;
-    const messages = [
-        'جاري البدء...',
-        'الاتصال بخوادم البيانات...',
-        'تحميل معلومات العملات...',
-        'تحليل الأسعار والمؤشرات...',
-        'حساب نقاط القوة...',
-        'ترتيب النتائج...',
-        'اكتمل التحليل!'
-    ];
-
-    const progressInterval = setInterval(() => {
-        // زيادة تدريجية وبطيئة
-        const increment = Math.random() * 1.5 + 0.3; // بين 0.3-1.8%
-        progress += increment;
+    // شريط تقدم بسيط
+    let prog = 0;
+    const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'ترتيب النتائج...', 'اكتمل!'];
+    
+    const timer = setInterval(() => {
+        prog += Math.random() * 2 + 0.5; // بين 0.5-2.5%
+        if (prog > 100) prog = 100;
         
-        if (progress > 100) progress = 100;
+        document.getElementById('counter').textContent = Math.floor(prog) + '%';
+        document.getElementById('bar').style.width = prog + '%';
         
-        // تحديث العناصر
-        const progressNum = document.getElementById('progressNum');
-        const progressFill = document.getElementById('progressFill');
-        const progressStatus = document.getElementById('progressStatus');
+        const statusIndex = Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1);
+        document.getElementById('status').textContent = statuses[statusIndex];
         
-        if (progressNum && progressFill && progressStatus) {
-            progressNum.textContent = Math.floor(progress) + '%';
-            progressFill.style.width = progress + '%';
-            
-            // تغيير الرسالة حسب التقدم
-            const messageIndex = Math.min(Math.floor((progress / 100) * messages.length), messages.length - 1);
-            progressStatus.textContent = messages[messageIndex];
-            
-            // إيقاف العداد عند الانتهاء
-            if (progress >= 100) {
-                clearInterval(progressInterval);
-                progressStatus.textContent = 'اكتمل التحليل!';
-            }
+        if (prog >= 100) {
+            clearInterval(timer);
         }
-    }, 400); // تحديث كل 400 مللي ثانية
+    }, 300);
 }
 
 showError(message) {

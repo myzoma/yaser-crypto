@@ -37,27 +37,9 @@ header {
     padding: 20px 0;
     box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
     border-bottom: 2px solid #00d4aa;
-    display: flex;
-    justify-content: flex-end; /* يبقى كما هو */
-    align-items: center; /* تصحيح القيمة */
-    flex-direction: row; /* تغيير إلى row العادي */
-    direction: rtl; /* للنص العربي */
 }
 
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: rtl;
-}
 
-.logo-section {
-    display: flex;
-    align-items: rtl;
-    gap: 15px;
-}
 
 .crypto-icon {
     font-size: 2.5rem;
@@ -67,23 +49,18 @@ header {
 }
 
 .site-title {
-    font-size: 2.2rem;
-    font-weight: bold;
-    background: linear-gradient(45deg, #00d4aa, #00ff88, #40e0d0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
     margin: 0;
-    letter-spacing: 2px;
-    animation: glow 3s ease-in-out infinite alternate;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: right;
 }
 
 .site-description {
+    margin: 5px 0 0 0;
     font-size: 0.9rem;
-    color: #aaa;
-    margin-top: 5px;
-    font-weight: normal;
+    color: #cccccc;
+    text-align: right;
+    line-height: 1.4;
 }
 
 @keyframes pulse {
@@ -539,24 +516,32 @@ header {
         grid-template-columns: 1fr;
     }
     
+  
+    
     .crypto-icon {
-        font-size: 2rem;
-    }
+    font-size: 2.5rem;
+    color: #00d4aa;
+    order: 2; /* لجعل الأيقونة بعد النص */
+}
     
-    .site-title {
-        font-size: 1.8rem;
-        letter-spacing: 1px;
-    }
+
     
-    .logo-section {
-        gap: 10px;
-        flex-direction: column;
-        text-align: center;
-    }
+   .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: right;
+}
     
-    .header-content {
-        justify-content:  rtl;
-    }
+   .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: flex-end; /* لجعل المحتوى في اليمين */
+    align-items: center;
+    direction: rtl; /* للنص العربي */
+}
     
     .progress-container {
         width: 250px;
@@ -610,22 +595,12 @@ header {
         border-radius: 10px;
     }
     
-    .crypto-icon {
-        font-size: 1.8rem;
-    }
-    
-    .site-title {
-        font-size: 1.5rem;
-        letter-spacing: 0.5px;
-    }
     
     .site-description {
         font-size: 0.8rem;
     }
     
-    .header-content {
-        padding: 0 15px;
-    }
+  
     
     header {
         padding: 15px 0;
@@ -734,9 +709,7 @@ header {
         animation: none;
     }
     
-    .site-title {
-        animation: none;
-    }
+  
     
     .coin-card {
         transition: none;

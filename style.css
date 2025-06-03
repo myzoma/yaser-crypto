@@ -7,7 +7,7 @@
 body {
     font-family: 'Tajawal', Tajawal, Tajawal;
     background-color: #000;
-    color: #fff;
+    color: #fff;f
     direction: rtl;
     text-align: right;
 }
@@ -526,22 +526,24 @@ header {
     
 
     
-   .logo-section {
+ .logo-section {
     display: flex;
     align-items: center;
     gap: 15px;
     text-align: right;
+    margin-right: 30px; /* إضافة مسافة من اليمين */
 }
     
-   .header-content {
+  .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 50px;
+    padding: 0 40px; /* زيادة المسافة من 20px إلى 40px */
     display: flex;
-    justify-content: flex-end; /* لجعل المحتوى في اليمين */
+    justify-content: flex-start;
     align-items: center;
-    direction: rtl; /* للنص العربي */
+    direction: rtl;
 }
+
     
     .progress-container {
         width: 250px;

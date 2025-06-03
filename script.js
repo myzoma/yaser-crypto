@@ -21,35 +21,13 @@ class YaserCrypto {
     }
 
  showLoading() {
-    document.getElementById('coinsGrid').innerHTML = `
-        <div class="loading" style="padding: 40px 20px; text-align: center; background: #111; margin: 20px 0; border-radius: 10px;">
-            <div style="color: #fff; font-size: 1.1rem; margin-bottom: 20px;">جاري تحليل العملات الرقمية</div>
-            <div id="counter" style="font-size: 2rem; font-weight: bold; margin-bottom: 20px; color: #00d4aa;">0%</div>
-            <div style="width: 90%; max-width: 300px; height: 20px; background: #333; border-radius: 10px; margin: 0 auto 15px; overflow: hidden;">
-                <div id="bar" style="height: 100%; width: 0%; background: #00d4aa; border-radius: 10px; transition: width 0.3s ease;"></div>
-            </div>
-            <div id="status" style="color: #aaa; font-size: 0.9rem;">بدء التحليل...</div>
-        </div>
-    `;
+        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
+    }
 
-    let prog = 0;
-    const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'يجري الان فرز المتسابقين...', 'اكتمل!'];
-        
-    const timer = setInterval(() => {
-        prog += Math.random() * 2 + 1;
-        if (prog > 100) prog = 100;
-                
-        try {
-            document.getElementById('counter').textContent = Math.floor(prog) + '%';
-            document.getElementById('bar').style.width = prog + '%';
-            document.getElementById('status').textContent = statuses[Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1)];
-                        
-            if (prog >= 100) clearInterval(timer);
-        } catch(e) {
-            clearInterval(timer);
-        }
-    }, 3000);
-}
+    showError(message) {
+        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+    }
+
 
 
 

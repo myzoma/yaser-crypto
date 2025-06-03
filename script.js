@@ -33,24 +33,24 @@ class YaserCrypto {
     `;
 
     let prog = 0;
-   
-     const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'اكتمل..','يجري الان فرز المتسابقين..!'];
-    
+    const statuses = ['بدء التحليل...', 'تحميل البيانات...', 'تحليل العملات...', 'يجري الان فرز المتسابقين...', 'اكتمل!'];
+        
     const timer = setInterval(() => {
         prog += Math.random() * 2 + 1;
         if (prog > 100) prog = 100;
-        
+                
         try {
             document.getElementById('counter').textContent = Math.floor(prog) + '%';
             document.getElementById('bar').style.width = prog + '%';
             document.getElementById('status').textContent = statuses[Math.min(Math.floor((prog / 100) * statuses.length), statuses.length - 1)];
-            
+                        
             if (prog >= 100) clearInterval(timer);
         } catch(e) {
             clearInterval(timer);
         }
     }, 300);
 }
+
 
 
 

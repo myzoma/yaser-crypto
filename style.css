@@ -12,13 +12,12 @@ body {
     text-align: right;
 }
 
-/* إصلاح الهيدر */
+/* الهيدر المُصحح - تعديل بسيط فقط */
 header {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     padding: 20px 0;
     box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
     border-bottom: 2px solid #00d4aa;
-    direction: rtl;
 }
 
 .header-content {
@@ -26,17 +25,14 @@ header {
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    justify-content: flex-start; /* تغيير من flex-end إلى flex-start */
+    justify-content: flex-start; /* هذا التغيير الوحيد */
     align-items: center;
-    direction: rtl;
 }
 
 .logo-section {
     display: flex;
     align-items: center;
     gap: 15px;
-    direction: rtl;
-    text-align: right;
 }
 
 .crypto-icon {
@@ -44,14 +40,6 @@ header {
     color: #00d4aa;
     text-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
     animation: pulse 2s infinite;
-    order: 1; /* ترتيب الأيقونة */
-}
-
-.site-branding {
-    display: flex;
-    flex-direction: column;
-    text-align: right;
-    order: 2; /* ترتيب النصوص */
 }
 
 .site-title {
@@ -65,8 +53,6 @@ header {
     margin: 0;
     letter-spacing: 2px;
     animation: glow 3s ease-in-out infinite alternate;
-    text-align: right;
-    direction: rtl;
 }
 
 .site-description {
@@ -74,8 +60,6 @@ header {
     color: #aaa;
     margin-top: 5px;
     font-weight: normal;
-    text-align: right;
-    direction: rtl;
 }
 
 @keyframes pulse {
@@ -93,7 +77,6 @@ header {
     }
 }
 
-/* باقي الكود يبقى كما هو... */
 .ranking-container {
     padding: 30px;
     max-width: 1400px;
@@ -107,39 +90,273 @@ header {
     font-size: 1.8rem;
 }
 
-/* تحديث الاستعلامات الإعلامية للهيدر */
+.coins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.coin-card {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.coin-card:hover {
+    transform: translateY(-5px);
+    border-color: #00d4aa;
+    box-shadow: 0 10px 30px rgba(0, 212, 170, 0.2);
+}
+
+.coin-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00d4aa, #00a085);
+}
+
+.rank-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.coin-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+
+.coin-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #00d4aa, #00a085);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+}
+
+.coin-info h3 {
+    color: #00d4aa;
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.coin-price {
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.price-change {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.price-change.positive {
+    color: #00ff88;
+}
+
+.price-change.negative {
+    color: #ff4757;
+}
+
+.coin-metrics {
+    margin-top: 15px;
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.metric-label {
+    color: #aaa;
+}
+
+.metric-value {
+    color: #fff;
+    font-weight: bold;
+}
+
+.score-bar {
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4aa, #00a085);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.liquidity-bar {
+    width: 100%;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.liquidity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4834d4, #686de0);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* باقي الكود يبقى كما هو تماماً... */
+
+/* النافذة المنبثقة */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid #333;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: left;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    left: 20px;
+}
+
+.close:hover {
+    color: #00d4aa;
+}
+
+/* ألوان خلفية أرقام المراكز */
+.coin-card:nth-child(1) .rank-badge {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.coin-card:nth-child(2) .rank-badge {
+    background: linear-gradient(45deg, #C0C0C0, #A8A8A8);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+}
+
+.coin-card:nth-child(3) .rank-badge {
+    background: linear-gradient(45deg, #CD7F32, #B8860B);
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+}
+
+.coin-card:nth-child(4) .rank-badge,
+.coin-card:nth-child(5) .rank-badge,
+.coin-card:nth-child(6) .rank-badge,
+.coin-card:nth-child(7) .rank-badge,
+.coin-card:nth-child(8) .rank-badge,
+.coin-card:nth-child(9) .rank-badge,
+.coin-card:nth-child(10) .rank-badge {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
+    font-weight: bold;
+}
+
+.coin-card:nth-child(n+11) .rank-badge {
+    background: linear-gradient(45deg, #666, #555);
+    color: #fff;
+}
+
+/* تصميم متجاوب */
 @media (max-width: 768px) {
-    .header-content {
-        justify-content: center;
-        text-align: center;
+    .coins-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
     
-    .logo-section {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-    }
-    
-    .site-branding {
-        text-align: center;
-    }
-    
-    .site-title {
-        font-size: 1.8rem;
-        letter-spacing: 1px;
-        text-align: center;
-    }
-    
-    .site-description {
-        text-align: center;
+    .coin-card {
+        padding: 15px;
     }
     
     .crypto-icon {
         font-size: 2rem;
     }
+    
+    .site-title {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .logo-section {
+        gap: 10px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-content {
+        justify-content: center;
+    }
 }
 
 @media (max-width: 480px) {
+    .coins-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px 0;
+    }
+    
+    .coin-card {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
     .crypto-icon {
         font-size: 1.8rem;
     }

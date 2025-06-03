@@ -21,56 +21,58 @@ class YaserCrypto {
     }
 
     showLoading() {
-       document.getElementById('coinsGrid').innerHTML = `
-    <div class="loading-container">
-        <div class="loading-text">جاري تحليل البيانات</div>
-        <div class="loading-counter" id="progressCounter">0%</div>
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-        <div class="loading-status" id="loadingStatus">بدء التحليل...</div>
-        <div class="loading-dots">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+      document.getElementById('coinsGrid').innerHTML = `
+    <div class="loading">
+        <div style="text-align: center; color: #00d4aa; padding: 40px;">
+            <div style="font-size: 1.5rem; margin-bottom: 20px;">جاري تحليل البيانات</div>
+            <div id="progressNum" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: #00d4aa;">0%</div>
+            <div style="width: 400px; height: 25px; background: #333; border-radius: 15px; margin: 0 auto 20px; overflow: hidden; border: 2px solid #555;">
+                <div id="progressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00d4aa, #00ff88, #40e0d0); border-radius: 12px; transition: width 0.5s ease; box-shadow: 0 0 20px rgba(0, 212, 170, 0.5);"></div>
+            </div>
+            <div id="progressStatus" style="color: #fff; margin-top: 15px; font-size: 1.1rem;">بدء التحليل...</div>
         </div>
     </div>
 `;
 
-// تشغيل شريط التقدم بعد إضافة HTML
-setTimeout(() => {
-    let progress = 0;
-    const progressBar = document.getElementById('progressBar');
-    const progressCounter = document.getElementById('progressCounter');
-    const loadingStatus = document.getElementById('loadingStatus');
+// عداد بطيء ومتدرج
+let progress = 0;
+const messages = [
+    'بدء التحليل...',
+    'الاتصال بالخوادم...',
+    'تحميل بيانات العملات...',
+    'تحليل الأسعار...',
+    'حساب المؤشرات...',
+    'ترتيب النتائج...',
+    'اكتمل التحليل!'
+];
 
-    const progressInterval = setInterval(() => {
-        const increment = Math.random() * 8 + 2;
-        progress += increment;
+const progressInterval = setInterval(() => {
+    // زيادة بطيئة ومتدرجة
+    const increment = Math.random() * 2 + 0.5; // بين 0.5-2.5%
+    progress += increment;
+    
+    if (progress > 100) progress = 100;
+    
+    // تحديث العناصر
+    const progressNum = document.getElementById('progressNum');
+    const progressFill = document.getElementById('progressFill');
+    const progressStatus = document.getElementById('progressStatus');
+    
+    if (progressNum && progressFill && progressStatus) {
+        progressNum.textContent = Math.floor(progress) + '%';
+        progressFill.style.width = progress + '%';
         
-        if (progress > 100) progress = 100;
+        // تغيير الرسالة حسب التقدم
+        const messageIndex = Math.floor((progress / 100) * (messages.length - 1));
+        progressStatus.textContent = messages[messageIndex];
         
-        if (progressBar && progressCounter && loadingStatus) {
-            progressBar.style.width = progress + '%';
-            progressCounter.textContent = Math.floor(progress) + '%';
-            
-            if (progress < 20) {
-                loadingStatus.textContent = 'جاري الاتصال بالخوادم...';
-            } else if (progress < 40) {
-                loadingStatus.textContent = 'تحميل بيانات العملات...';
-            } else if (progress < 60) {
-                loadingStatus.textContent = 'تحليل الأسعار والمؤشرات...';
-            } else if (progress < 80) {
-                loadingStatus.textContent = 'حساب التقييمات...';
-            } else if (progress < 95) {
-                loadingStatus.textContent = 'ترتيب النتائج...';
-            } else if (progress >= 100) {
-                loadingStatus.textContent = 'اكتمل التحليل!';
-                clearInterval(progressInterval);
-            }
+        // إيقاف العداد عند الانتهاء
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+            progressStatus.textContent = 'اكتمل التحليل!';
         }
-    }, 150);
-}, 100);
+    }
+}, 500); // تحديث كل 300 مللي ثانية (أبطأ)
 
     
 

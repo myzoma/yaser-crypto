@@ -295,7 +295,7 @@ calculateScore(coin) {
     const ema20 = coin.technicalIndicators.ema20;
     const ema50 = coin.technicalIndicators.ema50;
 
-    // فحص الشروط الأساسية فقط
+    // فحص الشروط الأساسية
     if (changePercent >= 3) {
         conditions.rise3Percent = true;
     }
@@ -304,7 +304,8 @@ calculateScore(coin) {
         conditions.rise4Percent = true;
     }
     
-    if (currentPrice > ema20 && currentPrice > ema50) {
+    // تصحيح شرط اختراق المتوسطات - السعر يجب أن يكون >= EMA20 و >= EMA50
+    if (currentPrice >= ema20 && currentPrice >= ema50) {
         conditions.breakoutMA = true;
     }
     
@@ -320,10 +321,10 @@ calculateScore(coin) {
         conditions.mfiBullish = true;
     }
 
-    // حساب عدد الشروط المحققة (الـ6 الأساسية فقط)
+    // حساب عدد الشروط المحققة
     const achievedConditions = Object.keys(conditions).length;
     
-    // إضافة الحالات الخاصة بعد حساب الشروط الأساسية
+    // الحالات الخاصة
     if (changePercent > 7 && achievedConditions >= 4) {
         conditions.strongRise = true;
     }
@@ -332,22 +333,22 @@ calculateScore(coin) {
         conditions.perfectScore = true;
     }
 
-    // حساب النقاط بناءً على الشروط الأساسية الـ6 فقط
+    // حساب النقاط
     let baseScore = 0;
     if (achievedConditions === 6) {
-        baseScore = 100; // جميع الشروط الأساسية
+        baseScore = 100;
     } else if (achievedConditions === 5) {
-        baseScore = 80;  // 5 شروط
+        baseScore = 80;
     } else if (achievedConditions === 4) {
-        baseScore = 60;  // 4 شروط
+        baseScore = 60;
     } else if (achievedConditions === 3) {
-        baseScore = 40;  // 3 شروط
+        baseScore = 40;
     } else if (achievedConditions === 2) {
-        baseScore = 25;  // شرطان
+        baseScore = 25;
     } else if (achievedConditions === 1) {
-        baseScore = 15;  // شرط واحد
+        baseScore = 15;
     } else {
-        baseScore = 5;   // لا توجد شروط
+        baseScore = 5;
     }
 
     coin.baseScore = baseScore;
@@ -357,10 +358,9 @@ calculateScore(coin) {
     
     console.log(`📊 ${coin.symbol}: الشروط=${achievedConditions}/6, التغيير=${changePercent.toFixed(2)}%, النقاط=${baseScore}`);
     
-    // طباعة تفاصيل الشروط للتحقق
     console.log(`   - ارتفاع 3%: ${conditions.rise3Percent ? '✓' : '✗'}`);
     console.log(`   - ارتفاع 4%: ${conditions.rise4Percent ? '✓' : '✗'}`);
-    console.log(`   - اختراق المتوسطات: ${conditions.breakoutMA ? '✓' : '✗'} (السعر:${currentPrice}, EMA20:${ema20}, EMA50:${ema50})`);
+    console.log(`   - اختراق المتوسطات: ${conditions.breakoutMA ? '✓' : '✗'} (السعر:${currentPrice} >= EMA20:${ema20} و >= EMA50:${ema50})`);
     console.log(`   - RSI > 50: ${conditions.rsiBullish ? '✓' : '✗'} (${rsi})`);
     console.log(`   - MACD صاعد: ${conditions.macdBullish ? '✓' : '✗'} (MACD:${macd}, Signal:${macdSignal})`);
     console.log(`   - MFI > 50: ${conditions.mfiBullish ? '✓' : '✗'} (${mfi})`);

@@ -769,3 +769,166 @@ html {
         min-width: 140px;
     }
 }
+/* تنبيه استراتيجية الاستثمار */
+.investment-alert {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 25px;
+    margin: 20px auto;
+    max-width: 1200px;
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.investment-alert::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.alert-icon {
+    font-size: 2rem;
+    margin-right: 10px;
+}
+
+.alert-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.alert-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.investment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.investment-tier {
+    background: rgba(255,255,255,0.15);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.investment-tier:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.tier-gold {
+    border-left: 4px solid #FFD700;
+}
+
+.tier-silver {
+    border-left: 4px solid #C0C0C0;
+}
+
+.tier-bronze {
+    border-left: 4px solid #CD7F32;
+}
+
+.tier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.tier-icon {
+    font-size: 1.5rem;
+}
+
+.tier-range {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.tier-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.percentage {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #FFD700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin: 10px 0;
+}
+
+.tier-content p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.alert-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.warning-text {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+/* استجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .investment-alert {
+        margin: 15px;
+        padding: 20px;
+    }
+    
+    .alert-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .investment-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .percentage {
+        font-size: 2rem;
+    }
+}

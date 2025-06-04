@@ -313,17 +313,16 @@ header {
 
 .modal-content {
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-    margin: 5% auto;
-    padding: 30px;
+    margin: 10% auto;        /* زيادة الهامش من 5% إلى 10% لتقليل المساحة المتاحة */
+    padding: 20px;           /* تقليل المساحة الداخلية من 30px إلى 20px */
     border: 1px solid #333;
     border-radius: 15px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 80vh;
-    overflow-y: auto;
+    width: 70%;              /* تقليل العرض من 90% إلى 70% */
+    max-width: 600px;        /* تقليل أقصى عرض من 800px إلى 600px */
+    max-height: 60vh;        /* تقليل أقصى ارتفاع من 80vh إلى 60vh */
+    overflow-y: auto;        /* الحفاظ على التمرير لحماية المحتوى */
     position: relative;
 }
-
 .close {
     color: #aaa;
     float: left;

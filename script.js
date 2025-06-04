@@ -284,7 +284,7 @@ class YaserCrypto {
         });
     }
 
-  calculateScore(coin) {
+ calculateScore(coin) {
     let score = 0;
     const conditions = {};
     const changePercent = coin.change24h;
@@ -296,7 +296,7 @@ class YaserCrypto {
     const ema20 = coin.technicalIndicators.ema20;
     const ema50 = coin.technicalIndicators.ema50;
 
-    // فحص الشروط وحساب النقاط
+    // فحص الشروط الأساسية وحساب النقاط
     if (changePercent >= 3) {
         score += 8;
         conditions.rise3Percent = true;
@@ -327,25 +327,26 @@ class YaserCrypto {
         conditions.mfiBullish = true;
     }
 
-    // حساب عدد الشروط المحققة
-    const conditionsCount = Object.keys(conditions).length;
+    // حساب عدد الشروط الأساسية المحققة
+    const basicConditionsCount = Object.keys(conditions).length;
 
     // الحالات الخاصة (بونص إضافي فقط)
-    if (changePercent > 7 && conditionsCount >= 4) {
-        score += 20; // بونص إضافي للارتفاع القوي
+    if (changePercent > 7 && basicConditionsCount >= 4) {
+        score += 20;
         conditions.strongRise = true;
     }
     
-    if (changePercent > 9 && conditionsCount >= 5) {
-        score += 10; // بونص إضافي للحالة المثالية
+    // الحالة المثالية: يجب تحقيق جميع الشروط الأساسية الـ6 + ارتفاع أكثر من 9%
+    if (changePercent > 9 && basicConditionsCount === 6) {
+        score += 10;
         conditions.perfectScore = true;
     }
 
-    // التأكد من عدم تجاوز 100
-    score = Math.min(score, 100);
-    
+    // لا نقطع النتيجة - نتركها كما هي لإظهار الفرق الحقيقي
     coin.score = score;
     coin.conditions = conditions;
+    
+    console.log(`📊 ${coin.symbol}: النقاط=${score}, الشروط المحققة=${basicConditionsCount}/6`);
 }
 
     renderCoins() {

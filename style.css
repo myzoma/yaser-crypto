@@ -806,7 +806,7 @@ html {
     display: flex;
     align-items: center;
     gap: 25px;
-    color: #495057;
+    color: #fff;
     font-size: 0.85rem;
     flex-wrap: wrap;
 }

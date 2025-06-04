@@ -6,9 +6,8 @@
 
 body {
     font-family: 'Tajawal', Arial, sans-serif;
-   background: linear-gradient(65deg, #001f2e 20%, #012d42 20%, #023a55 40%, #001f2e 40%);
-    background-attachment: fixed; /* يثبت الخلفية عند التمرير */
-    min-height: 100vh;
+   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+        linear-gradient(65deg, #005A83 20%, #036595 20%, #0571A4 40%, #005A83 40%);
     color: #fff;
     direction: rtl;
     text-align: right;

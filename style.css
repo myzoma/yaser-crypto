@@ -51,7 +51,7 @@ header {
 .site-title {
     font-size: 2.2rem;
     font-weight: bold;
-    background: linear-gradient(45deg, #3366ff, #ff9900);
+    background: linear-gradient(45deg, #3366ff, #04074a);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

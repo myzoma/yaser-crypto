@@ -284,7 +284,116 @@ class YaserCrypto {
             level100: low
         };
     }
+ calculateScore(coin) {
+        let score = 0;
+        const conditions = {};
+        const changePercent = coin.change24h;
+        const rsi = coin.technicalIndicators.rsi;
+        const macd = coin.technicalIndicators.macd;
+        const macdSignal = coin.technicalIndicators.macdSignal;
+        const mfi = coin.technicalIndicators.mfi;
+        const currentPrice = coin.price;
+        const ema20 = coin.technicalIndicators.ema20;
+        const ema50 = coin.technicalIndicators.ema50;
 
+        // فحص الشروط الأساسية
+        if (changePercent >= 3) {
+            conditions.rise3Percent = true;
+        }
+        
+        if (changePercent >= 4) {
+            conditions.rise4Percent = true;
+        }
+        
+        if (currentPrice > ema20 && currentPrice > ema50) {
+            conditions.breakoutMA = true;
+        }
+        
+        if (rsi > 50) {
+            conditions.rsiBullish = true;
+        }
+        
+        if (macd > macdSignal) {
+            conditions.macdBullish = true;
+        }
+        
+        if (mfi > 50) {
+            conditions.mfiBullish = true;
+        }
+
+        // حساب عدد الشروط المحققة
+        const achievedConditions = Object.keys(conditions).length;
+        
+        // الحالات الخاصة
+        if (changePercent > 7 && achievedConditions >= 4) {
+            conditions.strongRise = true;
+        }
+        
+        if (changePercent > 9 && achievedConditions === 6) {
+            conditions.perfectScore = true;
+        }
+
+        // حساب النقاط الأساسية
+        if (achievedConditions === 6) {
+            score = 100;
+        } else if (achievedConditions === 5) {
+            score = 85;
+        } else if (achievedConditions === 4) {
+            score = 70;
+        } else if (achievedConditions === 3) {
+            score = 55;
+        } else if (achievedConditions === 2) {
+            score = 40;
+        } else if (achievedConditions === 1) {
+            score = 25;
+        } else {
+            score = 10;
+        }
+
+        coin.baseScore = score;
+        coin.score = score;
+        coin.conditions = conditions;
+        coin.achievedConditionsCount = achievedConditions;
+        
+        console.log(`📊 ${coin.symbol}: الشروط=${achievedConditions}/6, التغيير=${changePercent.toFixed(2)}%, النقاط الأساسية=${score}`);
+    }
+
+    analyzeCoins() {
+        console.log('🔍 بدء تحليل العملات...');
+        
+        this.coins.forEach(coin => {
+            this.calculateScore(coin);
+        });
+        
+        // ترتيب العملات
+        this.coins.sort((a, b) => {
+            if (a.achievedConditionsCount !== b.achievedConditionsCount) {
+                return b.achievedConditionsCount - a.achievedConditionsCount;
+            }
+            return b.change24h - a.change24h;
+        });
+        
+        // تطبيق نظام الخصم التدريجي
+        for (let i = 0; i < this.coins.length; i++) {
+            const coin = this.coins[i];
+            coin.rank = i + 1;
+            
+            if (i === 0) {
+                coin.finalScore = coin.baseScore;
+            } else {
+                const previousCoin = this.coins[i - 1];
+                const deduction = coin.rank;
+                coin.finalScore = Math.max(previousCoin.finalScore - deduction, 0);
+            }
+            
+            coin.score = coin.finalScore;
+        }
+        
+        console.log('🏆 الترتيب النهائي:');
+        this.coins.slice(0, 10).forEach(coin => {
+            console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
+        });
+    }
     calculateTargets(coin) {
         const fib = coin.technicalIndicators.fibonacci;
         const currentPrice = coin.price;

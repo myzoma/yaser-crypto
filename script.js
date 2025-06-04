@@ -32,52 +32,60 @@ class YaserCrypto {
 
 
 
-    async fetchData() {
-        try {
-            console.log('جاري جلب العملات المرشحة...');
-            const candidateSymbols = await this.fetchTopGainers();
-                        
-            if (candidateSymbols.length === 0) {
-                throw new Error('لم يتم العثور على عملات مرشحة');
-            }
-                        
-            console.log(`🎯 سيتم تحليل ${candidateSymbols.length} عملة مرشحة`);
-                        
-            const results = [];
-                        
-            for (let i = 0; i < candidateSymbols.length; i++) {
-                const symbol = candidateSymbols[i];
-                console.log(`جاري تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
-                                
-                try {
-                    const coin = await this.fetchCoinData(symbol);
-                    if (coin && !isNaN(coin.change24h)) {
-                        results.push(coin);
-                        console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
-                    }
-                                        
-                    if (i < candidateSymbols.length - 1) {
-                        await this.delay(this.requestDelay);
-                    }
-                } catch (error) {
-                    console.warn(`❌ فشل تحليل ${symbol}:`, error.message);
-                    continue;
-                }
-            }
-                        
-            this.coins = results;
-                        
-            if (this.coins.length === 0) {
-                throw new Error('لم يتم العثور على عملات تحقق المعايير');
-            }
-                        
-            console.log(`🏆 تم العثور على ${this.coins.length} عملة مرشحة`);
-                    
-        } catch (error) {
-            console.error('خطأ في جلب البيانات:', error);
-            this.showError(`خطأ في جلب البيانات: ${error.message}`);
+   async fetchData() {
+    try {
+        console.log('🚀 بدء عملية جلب البيانات...');
+        
+        const candidateSymbols = await this.fetchTopGainers();
+        
+        if (!candidateSymbols || candidateSymbols.length === 0) {
+            throw new Error('لم يتم العثور على عملات مرشحة');
         }
+        
+        console.log(`📋 سيتم تحليل ${candidateSymbols.length} عملة`);
+        
+        const results = [];
+        
+        for (let i = 0; i < candidateSymbols.length; i++) {
+            const symbol = candidateSymbols[i];
+            
+            try {
+                console.log(`🔄 تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
+                
+                const coin = await this.fetchCoinData(symbol);
+                
+                if (coin && typeof coin.change24h === 'number' && !isNaN(coin.change24h)) {
+                    results.push(coin);
+                    console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
+                } else {
+                    console.warn(`⚠️ بيانات غير صالحة لـ ${symbol}`);
+                }
+                
+                // تأخير بين الطلبات
+                if (i < candidateSymbols.length - 1) {
+                    await this.delay(this.requestDelay);
+                }
+                
+            } catch (error) {
+                console.warn(`❌ فشل في تحليل ${symbol}:`, error.message);
+                continue; // تجاهل العملة والانتقال للتالية
+            }
+        }
+        
+        if (results.length === 0) {
+            throw new Error('فشل في الحصول على بيانات صالحة لأي عملة');
+        }
+        
+        this.coins = results;
+        console.log(`🎉 تم تحليل ${this.coins.length} عملة بنجاح`);
+        
+    } catch (error) {
+        console.error('💥 خطأ في fetchData:', error);
+        this.showError(`خطأ في جلب البيانات: ${error.message}`);
+        throw error;
     }
+}
+
 
     async fetchTopGainers() {
     try {
@@ -86,7 +94,7 @@ class YaserCrypto {
         const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
+                'Accept': 'application/json'
             }
         });
         
@@ -95,36 +103,71 @@ class YaserCrypto {
         }
         
         const data = await response.json();
+        console.log('📡 استلام البيانات من API:', data.data ? data.data.length : 0, 'عملة');
         
+        if (!data.data || data.data.length === 0) {
+            throw new Error('لا توجد بيانات من API');
+        }
+        
+        // فلترة العملات مع معايير أوسع
         const usdtPairs = data.data
-            .filter(ticker => ticker.instId.endsWith('-USDT'))
+            .filter(ticker => {
+                if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
+                    return false;
+                }
+                
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const volume = parseFloat(ticker.vol24h);
+                
+                // التحقق من صحة البيانات
+                if (!currentPrice || !openPrice || currentPrice <= 0 || openPrice <= 0) {
+                    return false;
+                }
+                
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                
+                // معايير أوسع للحصول على عملات أكثر
+                const validChange = change24h > 0.5 && change24h < 25; // من 0.5% إلى 25%
+                const validVolume = volume > 10000; // حجم أكبر من 10K
+                
+                return validChange && validVolume;
+            })
             .map(ticker => {
-                // استخدام التغيير المباشر من API
-                const change24h = parseFloat(ticker.changePercent) || 0;
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
                 
                 return {
                     symbol: ticker.instId.replace('-USDT', ''),
                     change24h: change24h,
                     volume: parseFloat(ticker.vol24h),
-                    price: parseFloat(ticker.last)
+                    price: currentPrice
                 };
             })
-            .filter(coin => coin.change24h > 1 && coin.change24h < 15)
-            .filter(coin => coin.volume > 100000)
-            .sort((a, b) => b.change24h - a.change24h)
-            .slice(0, 50);
+            .sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً
+            .slice(0, 30); // أخذ أفضل 30 عملة
 
         console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
-        usdtPairs.slice(0, 5).forEach(coin => {
-            console.log(`📈 ${coin.symbol}: ${coin.change24h.toFixed(2)}% - $${coin.price}`);
+        
+        if (usdtPairs.length === 0) {
+            throw new Error('لم يتم العثور على عملات تحقق المعايير');
+        }
+        
+        // عرض أفضل 5 عملات للتحقق
+        console.log('🏆 أفضل 5 عملات مرشحة:');
+        usdtPairs.slice(0, 5).forEach((coin, index) => {
+            console.log(`${index + 1}. ${coin.symbol}: +${coin.change24h.toFixed(2)}% - الحجم: ${coin.volume.toLocaleString()}`);
         });
         
         return usdtPairs.map(coin => coin.symbol);
+        
     } catch (error) {
-        console.error('خطأ:', error);
-        throw error;
+        console.error('❌ خطأ في fetchTopGainers:', error);
+        throw error; // رمي الخطأ بدلاً من استخدام بيانات وهمية
     }
 }
+
 
 
     delay(ms) {

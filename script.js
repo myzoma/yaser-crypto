@@ -272,7 +272,7 @@ class YaserCrypto {
         });
     }
 
-    calculateScore(coin) {
+   calculateScore(coin) {
     let score = 0;
     const conditions = {};
     const changePercent = coin.change24h;
@@ -284,52 +284,64 @@ class YaserCrypto {
     const ema20 = coin.technicalIndicators.ema20;
     const ema50 = coin.technicalIndicators.ema50;
 
-    // تحديد الشروط الخاصة أولاً
-    const totalConditionsCount = [
-        changePercent >= 3,
-        changePercent >= 4, 
-        currentPrice > ema20 && currentPrice > ema50,
-        rsi > 50,
-        macd > macdSignal,
-        mfi > 50
-    ].filter(Boolean).length;
+    // حساب عدد الشروط المحققة
+    let conditionsCount = 0;
+    
+    if (changePercent >= 3) {
+        conditionsCount++;
+        conditions.rise3Percent = true;
+    }
+    if (changePercent >= 4) {
+        conditionsCount++;
+        conditions.rise4Percent = true;
+    }
+    if (currentPrice > ema20 && currentPrice > ema50) {
+        conditionsCount++;
+        conditions.breakoutMA = true;
+    }
+    if (rsi > 50) {
+        conditionsCount++;
+        conditions.rsiBullish = true;
+    }
+    if (macd > macdSignal) {
+        conditionsCount++;
+        conditions.macdBullish = true;
+    }
+    if (mfi > 50) {
+        conditionsCount++;
+        conditions.mfiBullish = true;
+    }
 
-    // حالات خاصة لها الأولوية
-    if (changePercent > 9 && totalConditionsCount >= 5) {
+    // تحديد النتيجة بناءً على الحالات الخاصة أولاً
+    if (changePercent > 9 && conditionsCount >= 5) {
         score = 100;
         conditions.perfectScore = true;
-    } else if (changePercent > 7 && totalConditionsCount >= 4) {
+        // إزالة باقي الشروط لإظهار الحالة المثالية فقط
+        conditions.rise3Percent = false;
+        conditions.rise4Percent = false;
+        conditions.breakoutMA = false;
+        conditions.rsiBullish = false;
+        conditions.macdBullish = false;
+        conditions.mfiBullish = false;
+        conditions.strongRise = false;
+    } else if (changePercent > 7 && conditionsCount >= 4) {
         score = 85;
         conditions.strongRise = true;
+        // إزالة باقي الشروط لإظهار الارتفاع القوي فقط
+        conditions.rise3Percent = false;
+        conditions.rise4Percent = false;
+        conditions.breakoutMA = false;
+        conditions.rsiBullish = false;
+        conditions.macdBullish = false;
+        conditions.mfiBullish = false;
     } else {
         // حساب النقاط العادية
-        if (changePercent >= 3) {
-            score += 8;
-            conditions.rise3Percent = true;
-        }
-        if (changePercent >= 4) {
-            score += 7; // إضافية للوصول لـ 15 مجموع
-            conditions.rise4Percent = true;
-        }
-        if (currentPrice > ema20 && currentPrice > ema50) {
-            score += 18;
-            conditions.breakoutMA = true;
-        }
-        if (rsi > 50) {
-            score += 15;
-            conditions.rsiBullish = true;
-        }
-        if (macd > macdSignal) {
-            score += 22;
-            conditions.macdBullish = true;
-        }
-        if (mfi > 50) {
-            score += 25;
-            conditions.mfiBullish = true;
-        }
-        
-        // التأكد من عدم تجاوز 100
-        score = Math.min(score, 100);
+        if (conditions.rise3Percent) score += 8;
+        if (conditions.rise4Percent) score += 12;
+        if (conditions.breakoutMA) score += 18;
+        if (conditions.rsiBullish) score += 15;
+        if (conditions.macdBullish) score += 22;
+        if (conditions.mfiBullish) score += 25;
     }
 
     coin.score = score;

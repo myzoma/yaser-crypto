@@ -449,7 +449,54 @@ findNearestSupport(price, fib) {
     
     return nearest;
 }
+ renderResults() {
+    const container = document.getElementById('results');
+    if (!container) return;
 
+    container.innerHTML = this.coins.slice(0, 10).map((coin, index) => {
+        const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${coin.rank}`;
+        
+        return `
+            <div class="coin-card ${index < 3 ? 'top-coin' : ''}">
+                <div class="coin-header">
+                    <span class="rank">${rankEmoji}</span>
+                    <span class="symbol">${coin.symbol}</span>
+                    <span class="price">$${coin.price}</span>
+                    <span class="change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
+                    </span>
+                </div>
+                
+                <div class="score-section">
+                    <span class="score">النقاط:${coin.score}</span>
+                    <span class="conditions">${coin.achievedConditionsCount}/6 شروط</span>
+                </div>
+                
+                <div class="targets-section">
+                    <div class="targets-title">🎯 أهداف فيبوناتشي:</div>
+                    <div class="targets-grid">
+                        <span class="entry">دخول: $${coin.targets.entry.toFixed(6)}</span>
+                        <span class="target">T1: $${coin.targets.target1.toFixed(6)}</span>
+                        <span class="target">T2: $${coin.targets.target2.toFixed(6)}</span>
+                        <span class="target">T3: $${coin.targets.target3.toFixed(6)}</span>
+                        <span class="stop-loss">وقف: $${coin.targets.stopLoss.toFixed(6)}</span>
+                    </div>
+                </div>
+                
+                <div class="indicators">
+                    <span>حجم التداول:${(coin.volume / 1000).toFixed(1)}K</span>
+                    <span>RSI:${coin.technicalIndicators.rsi.toFixed(1)}</span>
+                    <span>MFI:${coin.technicalIndicators.mfi.toFixed(1)}</span>
+                </div>
+                
+                <div class="liquidity-bar">
+                    <div class="liquidity-fill" style="width: ${Math.min(coin.volume / 10000, 100)}%"></div>
+                    <span>شريط السيولة</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
     analyzeCoins() {
     console.log('🔍 بدء تحليل العملات...');
@@ -745,53 +792,6 @@ window.onclick = function(event) {
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
-    renderResults() {
-    const container = document.getElementById('results');
-    if (!container) return;
-
-    container.innerHTML = this.coins.slice(0, 10).map((coin, index) => {
-        const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${coin.rank}`;
-        
-        return `
-            <div class="coin-card ${index < 3 ? 'top-coin' : ''}">
-                <div class="coin-header">
-                    <span class="rank">${rankEmoji}</span>
-                    <span class="symbol">${coin.symbol}</span>
-                    <span class="price">$${coin.price}</span>
-                    <span class="change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
-                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
-                    </span>
-                </div>
-                
-                <div class="score-section">
-                    <span class="score">النقاط:${coin.score}</span>
-                    <span class="conditions">${coin.achievedConditionsCount}/6 شروط</span>
-                </div>
-                
-                <div class="targets-section">
-                    <div class="targets-title">🎯 أهداف فيبوناتشي:</div>
-                    <div class="targets-grid">
-                        <span class="entry">دخول: $${coin.targets.entry.toFixed(6)}</span>
-                        <span class="target">T1: $${coin.targets.target1.toFixed(6)}</span>
-                        <span class="target">T2: $${coin.targets.target2.toFixed(6)}</span>
-                        <span class="target">T3: $${coin.targets.target3.toFixed(6)}</span>
-                        <span class="stop-loss">وقف: $${coin.targets.stopLoss.toFixed(6)}</span>
-                    </div>
-                </div>
-                
-                <div class="indicators">
-                    <span>حجم التداول:${(coin.volume / 1000).toFixed(1)}K</span>
-                    <span>RSI:${coin.technicalIndicators.rsi.toFixed(1)}</span>
-                    <span>MFI:${coin.technicalIndicators.mfi.toFixed(1)}</span>
-                </div>
-                
-                <div class="liquidity-bar">
-                    <div class="liquidity-fill" style="width: ${Math.min(coin.volume / 10000, 100)}%"></div>
-                    <span>شريط السيولة</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+   
 
 });

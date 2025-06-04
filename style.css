@@ -769,67 +769,68 @@ html {
         min-width: 140px;
     }
 }
-/* شريط استراتيجية الاستثمار */
+/* شريط استراتيجية الاستثمار - محسن */
 .investment-strategy-bar {
-    background: linear-gradient(135deg, var(--primary-color, #2c3e50) 0%, var(--secondary-color, #34495e) 100%);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    padding: 15px 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 12px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .strategy-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .strategy-header {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    color: white;
+    color: #2c3e50;
+    margin-bottom: 5px;
 }
 
 .strategy-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .strategy-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    color: #2c3e50;
 }
 
 .strategy-tiers {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 15px;
+    gap: 25px;
+    color: #495057;
+    font-size: 0.85rem;
     flex-wrap: wrap;
 }
 
 .tier-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    color: white;
-    font-size: 0.85rem;
+    gap: 8px;
 }
 
 .tier-badge {
-    background: rgba(255,255,255,0.15);
-    padding: 4px 8px;
-    border-radius: 8px;
+    background: #e9ecef;
+    color: #495057;
+    padding: 3px 8px;
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
-    backdrop-filter: blur(5px);
+    border: 1px solid #dee2e6;
 }
 
 .tier-text {
     font-weight: 500;
+    color: #6c757d;
 }
 
 .tier-percent {
@@ -837,23 +838,24 @@ html {
     font-size: 0.9rem;
 }
 
-.tier-gold .tier-percent { color: #FFD700; }
-.tier-silver .tier-percent { color: #C0C0C0; }
-.tier-bronze .tier-percent { color: #CD7F32; }
+.tier-gold .tier-percent { color: #f39c12; }
+.tier-silver .tier-percent { color: #95a5a6; }
+.tier-bronze .tier-percent { color: #d35400; }
 
 .tier-separator {
-    color: rgba(255,255,255,0.3);
+    color: #dee2e6;
     font-weight: 300;
+    font-size: 1.2rem;
 }
 
 .strategy-warning {
-    text-align: center;
+    margin-top: 5px;
     padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px dashed #dee2e6;
 }
 
 .strategy-warning span {
-    color: rgba(255,255,255,0.7);
+    color: #6c757d;
     font-size: 0.7rem;
     font-style: italic;
 }
@@ -861,40 +863,38 @@ html {
 /* استجابة للشاشات الصغيرة */
 @media (max-width: 768px) {
     .investment-strategy-bar {
-        padding: 12px 15px;
-        margin-bottom: 15px;
+        padding: 10px 15px;
+        margin-bottom: 12px;
     }
     
     .strategy-tiers {
-        flex-direction: column;
-        gap: 8px;
+        gap: 15px;
+        font-size: 0.8rem;
     }
     
     .tier-separator {
         display: none;
     }
-    
-    .tier-item {
-        justify-content: space-between;
-        width: 100%;
-        padding: 4px 0;
-    }
 }
 
 @media (max-width: 480px) {
-    .strategy-header {
+    .strategy-tiers {
         flex-direction: column;
-        gap: 4px;
-    }
-    
-    .strategy-title {
-        font-size: 0.9rem;
+        align-items: flex-start;
+        gap: 8px;
     }
     
     .tier-item {
-        font-size: 0.8rem;
+        width: 100%;
+        justify-content: space-between;
+        padding: 4px 0;
+    }
+    
+    .strategy-header {
+        justify-content: flex-start;
     }
 }
+
 /* إضافة هذا للتأكد من العرض الأفقي */
 .investment-strategy-bar {
     width: 100%;

@@ -558,30 +558,31 @@ class YaserCrypto {
         modal.style.display = 'block';
     }
 
-   renderConditions(conditions) {
+  renderConditions(conditions) {
     const conditionLabels = {
         rise3Percent: 'ارتفاع 3% - 8 نقاط',
-        rise4Percent: 'ارتفاع 4% - 12 نقطة', 
+        rise4Percent: 'ارتفاع 4% - 12 نقطة',         
         breakoutMA: 'اختراق المتوسطات - 18 نقطة',
         rsiBullish: 'RSI فوق 50 - 15 نقطة',
         macdBullish: 'MACD تقاطع صاعد - 22 نقطة',
         mfiBullish: 'MFI فوق 50 - 25 نقطة',
-        strongRise: 'ارتفاع قوي +7% - 35 نقطة',
+        strongRise: 'ارتفاع قوي +7% - 85 نقطة',        // تصحيح من 35 إلى 85
         perfectScore: 'جميع الشروط +9% - 100 نقطة'
     };
-        let html = '';
-        for (const [key, label] of Object.entries(conditionLabels)) {
-            const achieved = conditions[key] || false;
-            html += `
-                <div style="padding: 10px; background: ${achieved ? '#1a4d3a' : '#4d1a1a'}; border-radius: 8px; border: 1px solid ${achieved ? '#00ff88' : '#ff4757'};">
-                    <div style="color: ${achieved ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${achieved ? '✓' : '✗'} ${label}
-                    </div>
+
+    let html = '';
+    for (const [key, label] of Object.entries(conditionLabels)) {
+        const achieved = conditions[key] || false;
+        html += `
+            <div style="padding: 10px; background: ${achieved ? '#1a4d3a' : '#4d1a1a'}; border-radius: 8px; border: 1px solid ${achieved ? '#00ff88' : '#ff4757'};">
+                <div style="color: ${achieved ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${achieved ? '✓' : '✗'} ${label}
                 </div>
-            `;
-        }
-        return html;
+            </div>
+        `;
     }
+    return html;
+}
 }
 
 // الدوال العامة

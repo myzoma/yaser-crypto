@@ -273,55 +273,68 @@ class YaserCrypto {
     }
 
     calculateScore(coin) {
-        let score = 0;
-        const conditions = {};
-        const changePercent = coin.change24h;
-        const rsi = coin.technicalIndicators.rsi;
-        const macd = coin.technicalIndicators.macd;
-        const macdSignal = coin.technicalIndicators.macdSignal;
-        const mfi = coin.technicalIndicators.mfi;
-        const currentPrice = coin.price;
-        const ema20 = coin.technicalIndicators.ema20;
-        const ema50 = coin.technicalIndicators.ema50;
+    let score = 0;
+    const conditions = {};
+    const changePercent = coin.change24h;
+    const rsi = coin.technicalIndicators.rsi;
+    const macd = coin.technicalIndicators.macd;
+    const macdSignal = coin.technicalIndicators.macdSignal;
+    const mfi = coin.technicalIndicators.mfi;
+    const currentPrice = coin.price;
+    const ema20 = coin.technicalIndicators.ema20;
+    const ema50 = coin.technicalIndicators.ema50;
 
+    // تحديد الشروط الخاصة أولاً
+    const totalConditionsCount = [
+        changePercent >= 3,
+        changePercent >= 4, 
+        currentPrice > ema20 && currentPrice > ema50,
+        rsi > 50,
+        macd > macdSignal,
+        mfi > 50
+    ].filter(Boolean).length;
+
+    // حالات خاصة لها الأولوية
+    if (changePercent > 9 && totalConditionsCount >= 5) {
+        score = 100;
+        conditions.perfectScore = true;
+    } else if (changePercent > 7 && totalConditionsCount >= 4) {
+        score = 85;
+        conditions.strongRise = true;
+    } else {
+        // حساب النقاط العادية
         if (changePercent >= 3) {
-            score += 10;
+            score += 8;
             conditions.rise3Percent = true;
         }
         if (changePercent >= 4) {
-            score += 15;
+            score += 7; // إضافية للوصول لـ 15 مجموع
             conditions.rise4Percent = true;
         }
         if (currentPrice > ema20 && currentPrice > ema50) {
-            score += 25;
+            score += 18;
             conditions.breakoutMA = true;
         }
         if (rsi > 50) {
-            score += 40;
+            score += 15;
             conditions.rsiBullish = true;
         }
         if (macd > macdSignal) {
-            score += 60;
+            score += 22;
             conditions.macdBullish = true;
         }
         if (mfi > 50) {
-            score += 80;
+            score += 25;
             conditions.mfiBullish = true;
         }
-
-        const totalConditions = Object.keys(conditions).length;
-        if (changePercent > 7 && totalConditions >= 4) {
-            score += 90;
-            conditions.strongRise = true;
-        }
-        if (changePercent > 9 && totalConditions >= 6) {
-            score += 100;
-            conditions.perfectScore = true;
-        }
-
-        coin.score = score;
-        coin.conditions = conditions;
+        
+        // التأكد من عدم تجاوز 100
+        score = Math.min(score, 100);
     }
+
+    coin.score = score;
+    coin.conditions = conditions;
+}
 
     renderCoins() {
         const grid = document.getElementById('coinsGrid');

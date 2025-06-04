@@ -825,7 +825,7 @@ html {
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
-    border: 1px solid #dee2e6;
+    border: 0.5px solid #dee2e6;
 }
 
 .tier-text {

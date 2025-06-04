@@ -533,18 +533,17 @@ class YaserCrypto {
         modal.style.display = 'block';
     }
 
-    renderConditions(conditions) {
-        const conditionLabels = {
-            rise3Percent: 'ارتفاع 3% - 10 نقاط',
-            rise4Percent: 'ارتفاع 4% - 15 نقطة',
-            breakoutMA: 'اختراق المتوسطات - 25 نقطة',
-            rsiBullish: 'RSI فوق 50 - 40 نقطة',
-            macdBullish: 'MACD تقاطع صاعد - 60 نقطة',
-            mfiBullish: 'MFI فوق 50 - 80 نقطة',
-            strongRise: 'ارتفاع قوي +7% - 90 نقطة',
-            perfectScore: 'جميع الشروط +9% - 100 نقطة'
-        };
-
+   renderConditions(conditions) {
+    const conditionLabels = {
+        rise3Percent: 'ارتفاع 3% - 8 نقاط',
+        rise4Percent: 'ارتفاع 4% - 12 نقطة', 
+        breakoutMA: 'اختراق المتوسطات - 18 نقطة',
+        rsiBullish: 'RSI فوق 50 - 15 نقطة',
+        macdBullish: 'MACD تقاطع صاعد - 22 نقطة',
+        mfiBullish: 'MFI فوق 50 - 25 نقطة',
+        strongRise: 'ارتفاع قوي +7% - 35 نقطة',
+        perfectScore: 'جميع الشروط +9% - 100 نقطة'
+    };
         let html = '';
         for (const [key, label] of Object.entries(conditionLabels)) {
             const achieved = conditions[key] || false;

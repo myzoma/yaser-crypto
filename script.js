@@ -272,7 +272,7 @@ class YaserCrypto {
         });
     }
 
-   calculateScore(coin) {
+  calculateScore(coin) {
     let score = 0;
     const conditions = {};
     const changePercent = coin.change24h;
@@ -284,66 +284,54 @@ class YaserCrypto {
     const ema20 = coin.technicalIndicators.ema20;
     const ema50 = coin.technicalIndicators.ema50;
 
-    // حساب عدد الشروط المحققة
-    let conditionsCount = 0;
-    
+    // فحص الشروط وحساب النقاط
     if (changePercent >= 3) {
-        conditionsCount++;
+        score += 8;
         conditions.rise3Percent = true;
     }
+    
     if (changePercent >= 4) {
-        conditionsCount++;
+        score += 12;
         conditions.rise4Percent = true;
     }
+    
     if (currentPrice > ema20 && currentPrice > ema50) {
-        conditionsCount++;
+        score += 18;
         conditions.breakoutMA = true;
     }
+    
     if (rsi > 50) {
-        conditionsCount++;
+        score += 15;
         conditions.rsiBullish = true;
     }
+    
     if (macd > macdSignal) {
-        conditionsCount++;
+        score += 22;
         conditions.macdBullish = true;
     }
+    
     if (mfi > 50) {
-        conditionsCount++;
+        score += 25;
         conditions.mfiBullish = true;
     }
 
-    // تحديد النتيجة بناءً على الحالات الخاصة أولاً
-    if (changePercent > 9 && conditionsCount >= 5) {
-        score = 100;
-        conditions.perfectScore = true;
-        // إزالة باقي الشروط لإظهار الحالة المثالية فقط
-        conditions.rise3Percent = false;
-        conditions.rise4Percent = false;
-        conditions.breakoutMA = false;
-        conditions.rsiBullish = false;
-        conditions.macdBullish = false;
-        conditions.mfiBullish = false;
-        conditions.strongRise = false;
-    } else if (changePercent > 7 && conditionsCount >= 4) {
-        score = 85;
+    // حساب عدد الشروط المحققة
+    const conditionsCount = Object.keys(conditions).length;
+
+    // الحالات الخاصة (بونص إضافي فقط)
+    if (changePercent > 7 && conditionsCount >= 4) {
+        score += 20; // بونص إضافي للارتفاع القوي
         conditions.strongRise = true;
-        // إزالة باقي الشروط لإظهار الارتفاع القوي فقط
-        conditions.rise3Percent = false;
-        conditions.rise4Percent = false;
-        conditions.breakoutMA = false;
-        conditions.rsiBullish = false;
-        conditions.macdBullish = false;
-        conditions.mfiBullish = false;
-    } else {
-        // حساب النقاط العادية
-        if (conditions.rise3Percent) score += 8;
-        if (conditions.rise4Percent) score += 12;
-        if (conditions.breakoutMA) score += 18;
-        if (conditions.rsiBullish) score += 15;
-        if (conditions.macdBullish) score += 22;
-        if (conditions.mfiBullish) score += 25;
+    }
+    
+    if (changePercent > 9 && conditionsCount >= 5) {
+        score += 10; // بونص إضافي للحالة المثالية
+        conditions.perfectScore = true;
     }
 
+    // التأكد من عدم تجاوز 100
+    score = Math.min(score, 100);
+    
     coin.score = score;
     coin.conditions = conditions;
 }
@@ -566,8 +554,8 @@ class YaserCrypto {
         rsiBullish: 'RSI فوق 50 - 15 نقطة',
         macdBullish: 'MACD تقاطع صاعد - 22 نقطة',
         mfiBullish: 'MFI فوق 50 - 25 نقطة',
-        strongRise: 'ارتفاع قوي +7% - 85 نقطة',        // تصحيح من 35 إلى 85
-        perfectScore: 'جميع الشروط +9% - 100 نقطة'
+        strongRise: 'ارتفاع قوي +7% - بونص 20 نقطة',
+        perfectScore: 'جميع الشروط +9% - بونص 10 نقاط'
     };
 
     let html = '';

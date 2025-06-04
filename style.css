@@ -771,7 +771,7 @@ html {
 }
 /* شريط استراتيجية الاستثمار - محسن */
 .investment-strategy-bar {
-    background: #f8f9fa;
+    background: none;
     border: 2px dashed #dee2e6;
     border-radius: 8px;
     margin-bottom: 15px;

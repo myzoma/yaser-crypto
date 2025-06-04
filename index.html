@@ -11,56 +11,6 @@
     <header>
     <!-- الهيدر الموجود -->
 </header>
-
-<!-- إضافة التنبيه الاحترافي هنا ⬇️ -->
-<div class="investment-alert">
-    <div class="alert-header">
-        <span class="alert-icon">💡</span>
-        <h3>استراتيجية توزيع رأس المال</h3>
-        <span class="alert-badge">نصائح احترافية</span>
-    </div>
-    <div class="investment-grid">
-        <div class="investment-tier tier-gold">
-            <div class="tier-header">
-                <span class="tier-icon">🥇</span>
-                <span class="tier-range">90-100 نقطة</span>
-            </div>
-            <div class="tier-content">
-                <h4>استثمار أساسي</h4>
-                <div class="percentage">50%</div>
-                <p>من رأس المال</p>
-            </div>
-        </div>
-        
-        <div class="investment-tier tier-silver">
-            <div class="tier-header">
-                <span class="tier-icon">🥈</span>
-                <span class="tier-range">80-89 نقطة</span>
-            </div>
-            <div class="tier-content">
-                <h4>استثمار ثانوي</h4>
-                <div class="percentage">30%</div>
-                <p>من رأس المال</p>
-            </div>
-        </div>
-        
-        <div class="investment-tier tier-bronze">
-            <div class="tier-header">
-                <span class="tier-icon">🥉</span>
-                <span class="tier-range">75-79 نقطة</span>
-            </div>
-            <div class="tier-content">
-                <h4>استثمار تكميلي</h4>
-                <div class="percentage">20%</div>
-                <p>من رأس المال</p>
-            </div>
-        </div>
-    </div>
-    <div class="alert-footer">
-        <span class="warning-text">⚠️ هذه نصائح تعليمية وليست نصائح استثمارية مالية</span>
-    </div>
-</div>
-
 <body>
     <header>
         <div class="header-content">
@@ -90,7 +40,44 @@
 
     <main>
         <div class="ranking-container">
-            <h4>ترتيب العملات حسب نتيجة السباق</h4>
+             <!-- شريط استراتيجية الاستثمار -->
+    <div class="investment-strategy-bar">
+        <div class="strategy-content">
+            <div class="strategy-header">
+                <span class="strategy-icon">💡</span>
+                <span class="strategy-title">استراتيجية توزيع رأس المال</span>
+            </div>
+            <div class="strategy-tiers">
+                <div class="tier-item tier-gold">
+                    <span class="tier-badge">🥇 90-100</span>
+                    <span class="tier-text">استثمار أساسي</span>
+                    <span class="tier-percent">50%</span>
+                </div>
+                <div class="tier-separator">|</div>
+                <div class="tier-item tier-silver">
+                    <span class="tier-badge">🥈 80-89</span>
+                    <span class="tier-text">استثمار ثانوي</span>
+                    <span class="tier-percent">30%</span>
+                </div>
+                <div class="tier-separator">|</div>
+                <div class="tier-item tier-bronze">
+                    <span class="tier-badge">🥉 75-79</span>
+                    <span class="tier-text">استثمار تكميلي</span>
+                    <span class="tier-percent">20%</span>
+                </div>
+            </div>
+            <div class="strategy-warning">
+                <span>⚠️ نصائح تعليمية وليست نصائح استثمارية</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="ranking-container">
+        <h4>ترتيب العملات حسب نتيجة السباق</h4>
+        <div class="coins-grid" id="coinsGrid">
+            <!-- البطاقات ستظهر هنا -->
+        </div>
+    </div>
             <div class="coins-grid" id="coinsGrid">
                 <!-- البطاقات ستظهر هنا -->
             </div>

@@ -1,4 +1,4 @@
-انا اشك في هذا الكود فيه تعارض واكواد مكررة لنفس الوظيفة ؟؟؟    * {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -6,23 +6,22 @@
 
 body {
     font-family: 'Tajawal', Arial, sans-serif;
-  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-        linear-gradient(65deg, #005A83 0%, #036595 0%, #0571A4 0%, #005A83 30%);
-    color: #fff;
+    background-color: #0a0a0a;
+    background-image: radial-gradient(circle at 10% 20%, #1a1a1a 0%, #000000 90%);
+    color: #e0e0e0;
     direction: rtl;
     text-align: right;
 }
 
 header {
-    background: linear-gradient(65deg, #005A83 20%, #036595 20%, #0571A4 40%, #005A83 40%);
+    background: #121212;
     padding: 20px 0;
-    box-shadow: 0 8px 32px rgba(0, 90, 131, 0.4);
-    border-bottom: 2px solid #00d4aa;
+    box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2);
+    border-bottom: 2px solid #d4af37;
     background-attachment: local;
     background-repeat: no-repeat;
     background-size: 100% 100%;
 }
-
 
 .header-content {
     max-width: 1200px;
@@ -33,22 +32,21 @@ header {
     align-items: center;
 }
 
-/* قسم اسم الموقع - على اليمين */
 .logo-section {
     text-align: right;
 }
 
 .crypto-icon {
     font-size: 2.5rem;
-    color: #00d4aa;
-    text-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
+    color: #d4af37;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
     animation: pulse 2s infinite;
 }
 
 .site-title {
     font-size: 2.2rem;
     font-weight: bold;
-    background: linear-gradient(45deg, #3366ff, #04074a);
+    background: linear-gradient(45deg, #d4af37, #f1c40f);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -56,8 +54,9 @@ header {
     letter-spacing: 2px;
     line-height: 1.2;
 }
+
 .site-description {
-    color: #fff;
+    color: #b0b0b0;
     font-size: 0.75rem;
     opacity: 0.9;
     font-family: 'Tajawal', sans-serif;
@@ -65,7 +64,6 @@ header {
     line-height: 1.4;
 }
 
-/* قسم الروابط - في أقصى اليسار */
 .navigation {
     display: flex;
     align-items: center;
@@ -85,7 +83,7 @@ header {
 }
 
 .nav-links a {
-    color: #fff;
+    color: #e0e0e0;
     text-decoration: none;
     padding: 10px 16px;
     border-radius: 25px;
@@ -99,18 +97,17 @@ header {
 
 .nav-links a:hover,
 .nav-links a.active {
-    background-color: rgba(0, 212, 170, 0.15);
-    border-color: rgba(0, 212, 170, 0.3);
+    background-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
 }
 
 .nav-links a.active {
-    background-color: rgba(0, 212, 170, 0.2);
-    border-color: #00d4aa;
+    background-color: rgba(212, 175, 55, 0.2);
+    border-color: #d4af37;
 }
 
-/* Animations */
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
@@ -119,17 +116,16 @@ header {
 
 @keyframes glow {
     from {
-        text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+        text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
     }
     to {
-        text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 40px rgba(64, 224, 208, 0.6);
+        text-shadow: 0 0 30px rgba(212, 175, 55, 0.8), 0 0 40px rgba(244, 208, 63, 0.6);
     }
 }
 
-/* Refresh Button */
 .refresh-btn {
-    background: linear-gradient(45deg, #00d4aa, #00a085);
-    color: white;
+    background: linear-gradient(45deg, #d4af37, #f1c40f);
+    color: #000;
     padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
@@ -137,14 +133,14 @@ header {
     transition: all 0.3s ease;
     border: none;
     font-size: 14px;
+    font-weight: bold;
 }
 
 .refresh-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 212, 170, 0.4);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
 }
 
-/* Ranking Container */
 .ranking-container {
     padding: 30px;
     max-width: 1400px;
@@ -155,11 +151,10 @@ header {
 .ranking-container h4 {
     text-align: center;
     margin-bottom: 30px;
-    color: #00d4aa;
+    color: #d4af37;
     font-size: 1.8rem;
 }
 
-/* Coins Grid */
 .coins-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -168,8 +163,8 @@ header {
 }
 
 .coin-card {
-    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-    border: 1px solid #333;
+    background: #121212;
+    border: 1px solid #d4af37;
     border-radius: 15px;
     padding: 20px;
     cursor: pointer;
@@ -180,8 +175,7 @@ header {
 
 .coin-card:hover {
     transform: translateY(-5px);
-    border-color: #00d4aa;
-    box-shadow: 0 10px 30px rgba(0, 212, 170, 0.2);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
 }
 
 .coin-card::before {
@@ -191,18 +185,19 @@ header {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #00d4aa, #00a085);
+    background: linear-gradient(90deg, #d4af37, #f1c40f);
 }
 
 .rank-badge {
     position: absolute;
     top: 15px;
     left: 15px;
-    color: white;
+    color: #000 !important;
     padding: 5px 12px;
     border-radius: 20px;
     font-weight: bold;
     font-size: 12px;
+    background: linear-gradient(45deg, #d4af37, #f1c40f);
 }
 
 .coin-header {
@@ -216,17 +211,17 @@ header {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #00d4aa, #00a085);
+    background: linear-gradient(45deg, #d4af37, #f1c40f);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 18px;
-    color: white;
+    color: #000;
 }
 
 .coin-info h3 {
-    color: #00d4aa;
+    color: #d4af37;
     font-size: 1.2rem;
     margin-bottom: 5px;
 }
@@ -281,7 +276,7 @@ header {
 
 .score-fill {
     height: 100%;
-    background: linear-gradient(90deg, #00d4aa, #00a085);
+    background: linear-gradient(90deg, #d4af37, #f1c40f);
     border-radius: 4px;
     transition: width 0.3s ease;
 }
@@ -302,7 +297,6 @@ header {
     transition: width 0.3s ease;
 }
 
-/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
@@ -316,17 +310,19 @@ header {
 }
 
 .modal-content {
-    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-    margin: 10% auto;        /* زيادة الهامش من 5% إلى 10% لتقليل المساحة المتاحة */
-    padding: 20px;           /* تقليل المساحة الداخلية من 30px إلى 20px */
-    border: 1px solid #333;
+    background: #121212;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #d4af37;
     border-radius: 15px;
-    width: 70%;              /* تقليل العرض من 90% إلى 70% */
-    max-width: 600px;        /* تقليل أقصى عرض من 800px إلى 600px */
-    max-height: 60vh;        /* تقليل أقصى ارتفاع من 80vh إلى 60vh */
-    overflow-y: auto;        /* الحفاظ على التمرير لحماية المحتوى */
+    width: 70%;
+    max-width: 600px;
+    max-height: 60vh;
+    overflow-y: auto;
     position: relative;
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
 }
+
 .close {
     color: #aaa;
     float: left;
@@ -339,28 +335,27 @@ header {
 }
 
 .close:hover {
-    color: #00d4aa;
+    color: #d4af37;
 }
 
 .modal-header {
     text-align: center;
-    margin-bottom: 10px;        /* تقليل أكثر إلى 10px */
-    padding-bottom: 8px;        /* تقليل أكثر إلى 8px */
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #333;
 }
-
 
 .modal-coin-logo {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #00d4aa, #00a085);
+    background: linear-gradient(45deg, #d4af37, #f1c40f);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 24px;
-    color: white;
+    color: #000;
     margin: 0 auto 15px;
 }
 
@@ -372,14 +367,14 @@ header {
 }
 
 .indicator-card {
-    background: #2d2d2d;
+    background: #1a1a1a;
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid #444;
+    border: 1px solid #333;
 }
 
 .indicator-title {
-    color: #00d4aa;
+    color: #d4af37;
     font-weight: bold;
     margin-bottom: 10px;
 }
@@ -403,11 +398,11 @@ header {
 }
 
 .target-item {
-    background: #2d2d2d;
+    background: #1a1a1a;
     padding: 15px;
     border-radius: 10px;
     text-align: center;
-    border: 1px solid #444;
+    border: 1px solid #333;
 }
 
 .target-label {
@@ -417,7 +412,7 @@ header {
 }
 
 .target-value {
-    color: #00d4aa;
+    color: #d4af37;
     font-weight: bold;
     font-size: 1.1rem;
 }
@@ -434,46 +429,25 @@ header {
     color: #ff4757;
 }
 
-/* Rank Badge Colors */
 .coin-card:nth-child(1) .rank-badge {
-    background: linear-gradient(45deg, #FFD700, #FFA500) !important;
-    color: #000 !important;
-    font-weight: bold !important;
+    background: linear-gradient(45deg, #FFD700, #D4AF37) !important;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
 }
 
 .coin-card:nth-child(2) .rank-badge {
     background: linear-gradient(45deg, #C0C0C0, #A8A8A8) !important;
-    color: #000 !important;
-    font-weight: bold !important;
     box-shadow: 0 0 10px rgba(192, 192, 192, 0.5) !important;
 }
 
 .coin-card:nth-child(3) .rank-badge {
     background: linear-gradient(45deg, #CD7F32, #B8860B) !important;
-    color: #fff !important;
-    font-weight: bold !important;
     box-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important;
 }
 
-.coin-card:nth-child(4) .rank-badge,
-.coin-card:nth-child(5) .rank-badge,
-.coin-card:nth-child(6) .rank-badge,
-.coin-card:nth-child(7) .rank-badge,
-.coin-card:nth-child(8) .rank-badge,
-.coin-card:nth-child(9) .rank-badge,
-.coin-card:nth-child(10) .rank-badge {
-    background: linear-gradient(45deg, #4CAF50, #45a049) !important;
-    color: #fff !important;
-    font-weight: bold !important;
-}
-
-.coin-card:nth-child(n+11) .rank-badge {
+.coin-card:nth-child(n+4) .rank-badge {
     background: linear-gradient(45deg, #666, #555) !important;
-    color: #fff !important;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -610,7 +584,6 @@ header {
     }
 }
 
-/* Additional fixes for better mobile experience */
 @media (max-width: 320px) {
     .header-content {
         padding: 0 10px;
@@ -641,12 +614,10 @@ header {
     }
 }
 
-/* Smooth scrolling */
 html {
     scroll-behavior: smooth;
 }
 
-/* Loading animation */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -657,32 +628,29 @@ html {
     display: inline-block;
     width: 20px;
     height: 20px;
-    border: 2px solid #00d4aa;
+    border: 2px solid #d4af37;
     border-radius: 50%;
     border-top-color: transparent;
     animation: spin 1s linear infinite;
     margin-right: 10px;
 }
 
-/* Hover effects for better UX */
 .refresh-btn:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
 }
 
 .coin-card:active {
     transform: translateY(-2px);
 }
 
-/* Focus styles for accessibility */
 .nav-links a:focus,
 .refresh-btn:focus,
 .coin-card:focus {
-    outline: 2px solid #00d4aa;
+    outline: 2px solid #d4af37;
     outline-offset: 2px;
 }
 
-/* Print styles */
 @media print {
     header {
         background: none !important;
@@ -704,82 +672,14 @@ html {
         display: none !important;
     }
 }
-/* التصميم المتجاوب */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 20px;
-        text-align: center;
-    }
-    
-    .logo-section {
-        text-align: center;
-    }
-    
-    .site-title {
-        font-size: 1.8rem;
-        letter-spacing: 1px;
-    }
-    
-    .site-description {
-        max-width: 100%;
-        font-size: 0.9rem;
-    }
-    
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-    }
-    
-    .nav-links a {
-        padding: 8px 14px;
-        font-size: 0.9rem;
-    }
-}
 
-@media (max-width: 480px) {
-    .header-content {
-        padding: 0 15px;
-    }
-    
-    .site-title {
-        font-size: 1.6rem;
-    }
-    
-    .site-description {
-        font-size: 0.85rem;
-    }
-    
-    .nav-links {
-        gap: 8px;
-    }
-    
-    .nav-links a {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 320px) {
-    .nav-links {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .nav-links a {
-        display: block;
-        text-align: center;
-        min-width: 140px;
-    }
-}
-/* شريط استراتيجية الاستثمار - محسن */
 .investment-strategy-bar {
-    background: none;
+    background: #121212;
     border-radius: 8px;
     margin-bottom: 15px;
     padding: 12px 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #d4af37;
 }
 
 .strategy-content {
@@ -792,7 +692,7 @@ html {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #00d3a9;
+    color: #d4af37;
     margin-bottom: 5px;
 }
 
@@ -803,7 +703,7 @@ html {
 .strategy-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #00d3a9;
+    color: #d4af37;
 }
 
 .strategy-tiers {
@@ -822,18 +722,17 @@ html {
 }
 
 .tier-badge {
-    background: #e9ecef;
-    color: #495057;
+    background: #d4af37;
+    color: #000;
     padding: 3px 8px;
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
-    border: 0.5px solid #dee2e6;
 }
 
 .tier-text {
     font-weight: 500;
-    color: #6c757d;
+    color: #b0b0b0;
 }
 
 .tier-percent {
@@ -841,12 +740,12 @@ html {
     font-size: 0.9rem;
 }
 
-.tier-gold .tier-percent { color: #f39c12; }
-.tier-silver .tier-percent { color: #95a5a6; }
-.tier-bronze .tier-percent { color: #d35400; }
+.tier-gold .tier-percent { color: #d4af37; }
+.tier-silver .tier-percent { color: #c0c0c0; }
+.tier-bronze .tier-percent { color: #cd7f32; }
 
 .tier-separator {
-    color: #dee2e6;
+    color: #444;
     font-weight: 300;
     font-size: 1.2rem;
 }
@@ -854,20 +753,18 @@ html {
 .strategy-warning {
     margin-top: 5px;
     padding-top: 8px;
-   
+    border-top: 1px solid #333;
 }
 
 .strategy-warning span {
-    color: #00d3a9;
+    color: #d4af37;
     font-size: 0.7rem;
     font-style: italic;
 }
 
-/* استجابة للشاشات الصغيرة */
 @media (max-width: 768px) {
     .investment-strategy-bar {
         padding: 10px 15px;
-        margin-bottom: 12px;
     }
     
     .strategy-tiers {

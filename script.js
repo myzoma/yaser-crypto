@@ -273,81 +273,46 @@ class YaserCrypto {
     }
 
     analyzeCoins() {
-        this.coins.forEach(coin => {
-            this.calculateScore(coin);
-        });
-                
-        this.coins.sort((a, b) => b.score - a.score);
-                
-        this.coins.forEach((coin, index) => {
-            coin.rank = index + 1;
-        });
-    }
-
- calculateScore(coin) {
-    let score = 0;
-    const conditions = {};
-    const changePercent = coin.change24h;
-    const rsi = coin.technicalIndicators.rsi;
-    const macd = coin.technicalIndicators.macd;
-    const macdSignal = coin.technicalIndicators.macdSignal;
-    const mfi = coin.technicalIndicators.mfi;
-    const currentPrice = coin.price;
-    const ema20 = coin.technicalIndicators.ema20;
-    const ema50 = coin.technicalIndicators.ema50;
-
-    // فحص الشروط الأساسية وحساب النقاط
-    if (changePercent >= 3) {
-        score += 8;
-        conditions.rise3Percent = true;
+    this.coins.forEach(coin => {
+        this.calculateScore(coin);
+    });
+    
+    // ترتيب العملات: أولاً حسب عدد الشروط المحققة، ثم حسب نسبة التغيير
+    this.coins.sort((a, b) => {
+        // إذا كان عدد الشروط المحققة مختلف
+        if (a.achievedConditionsCount !== b.achievedConditionsCount) {
+            return b.achievedConditionsCount - a.achievedConditionsCount;
+        }
+        // إذا كان عدد الشروط متساوي، رتب حسب نسبة التغيير
+        return b.change24h - a.change24h;
+    });
+    
+    // تطبيق نظام الخصم التدريجي
+    for (let i = 0; i < this.coins.length; i++) {
+        const coin = this.coins[i];
+        coin.rank = i + 1;
+        
+        if (i === 0) {
+            // المركز الأول يحتفظ بنقاطه الكاملة
+            coin.finalScore = coin.baseScore;
+        } else {
+            // المراكز التالية: خصم نقاط بناءً على المركز السابق
+            const previousCoin = this.coins[i - 1];
+            const deduction = coin.rank; // خصم = رقم المركز (2، 3، 4...)
+            
+            coin.finalScore = Math.max(previousCoin.finalScore - deduction, 0);
+        }
+        
+        coin.score = coin.finalScore; // تحديث النقاط النهائية
     }
     
-    if (changePercent >= 4) {
-        score += 12;
-        conditions.rise4Percent = true;
-    }
-    
-    if (currentPrice > ema20 && currentPrice > ema50) {
-        score += 18;
-        conditions.breakoutMA = true;
-    }
-    
-    if (rsi > 50) {
-        score += 15;
-        conditions.rsiBullish = true;
-    }
-    
-    if (macd > macdSignal) {
-        score += 22;
-        conditions.macdBullish = true;
-    }
-    
-    if (mfi > 50) {
-        score += 25;
-        conditions.mfiBullish = true;
-    }
-
-    // حساب عدد الشروط الأساسية المحققة
-    const basicConditionsCount = Object.keys(conditions).length;
-
-    // الحالات الخاصة (بونص إضافي فقط)
-    if (changePercent > 7 && basicConditionsCount >= 4) {
-        score += 20;
-        conditions.strongRise = true;
-    }
-    
-    // الحالة المثالية: يجب تحقيق جميع الشروط الأساسية الـ6 + ارتفاع أكثر من 9%
-    if (changePercent > 9 && basicConditionsCount === 6) {
-        score += 10;
-        conditions.perfectScore = true;
-    }
-
-    // لا نقطع النتيجة - نتركها كما هي لإظهار الفرق الحقيقي
-    coin.score = score;
-    coin.conditions = conditions;
-    
-    console.log(`📊 ${coin.symbol}: النقاط=${score}, الشروط المحققة=${basicConditionsCount}/6`);
+    console.log('🏆 الترتيب النهائي مع نظام الخصم:');
+    this.coins.slice(0, 10).forEach(coin => {
+        console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score} (أساسية: ${coin.baseScore})`);
+    });
 }
+
+
 
     renderCoins() {
         const grid = document.getElementById('coinsGrid');

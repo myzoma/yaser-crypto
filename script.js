@@ -233,26 +233,41 @@ class YaserCrypto {
 }
 
     calculateTechnicalIndicators(coin) {
-        const currentPrice = coin.price;
-        const high24h = coin.high24h;
-        const low24h = coin.low24h;
-                
-        coin.technicalIndicators = {
-            rsi: this.estimateRSIFromChange(coin.change24h),
-            macd: coin.change24h > 0 ? 0.1 : -0.1,
-            macdSignal: 0,
-            macdHistogram: coin.change24h > 0 ? 0.1 : -0.1,
-            ema20: currentPrice,
-            ema50: currentPrice * (1 - coin.change24h / 100 * 0.5),
-            ma20: currentPrice,
-            ma50: currentPrice * (1 - coin.change24h / 100 * 0.5),
-            parabolicSAR: low24h * 0.99,
-            mfi: this.estimateMFIFromVolume(coin.volume, coin.change24h),
-            fibonacci: this.calculateFibonacci([high24h], [low24h])
-        };
-                
-        this.calculateTargets(coin);
-    }
+    // حساب RSI
+    coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
+    if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
+    if (coin.technicalIndicators.rsi < 0) coin.technicalIndicators.rsi = 0;
+
+    // حساب MACD
+    coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
+    coin.technicalIndicators.macdSignal = 0;
+
+    // حساب MFI
+    coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
+
+    // حساب المتوسطات المتحركة
+    const currentPrice = coin.price;
+    coin.technicalIndicators.ema20 = currentPrice;
+    coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
+
+    // حساب مستويات فيبوناتشي
+    const high24h = currentPrice * 1.05; // افتراض أعلى سعر
+    const low24h = currentPrice * (1 - (coin.change24h / 100) * 1.2); // افتراض أقل سعر
+    
+    const range = high24h - low24h;
+    
+    coin.technicalIndicators.fibonacci = {
+        level0: high24h,
+        level236: high24h - (range * 0.236),
+        level382: high24h - (range * 0.382),
+        level500: high24h - (range * 0.500),
+        level618: high24h - (range * 0.618),
+        level786: high24h - (range * 0.786),
+        level1000: low24h
+    };
+
+    console.log(`📈 ${coin.symbol} فيبوناتشي: 0%=${high24h.toFixed(6)} | 23.6%=${coin.technicalIndicators.fibonacci.level236.toFixed(6)} | 38.2%=${coin.technicalIndicators.fibonacci.level382.toFixed(6)} | 61.8%=${coin.technicalIndicators.fibonacci.level618.toFixed(6)}`);
+}
 
     estimateRSIFromChange(change24h) {
         if (change24h > 5) return 70;
@@ -403,44 +418,48 @@ calculateScore(coin) {
             console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
         });
     }
-    calculateTargets(coin) {
-        const fib = coin.technicalIndicators.fibonacci;
-        const currentPrice = coin.price;
-                
-        coin.targets = {
-            entry: this.findNearestSupport(currentPrice, fib),
-            stopLoss: fib.level786 * 0.98,
-            target1: fib.level618,
-            target2: fib.level382,
-            target3: fib.level236,
-            target4: fib.level0
-        };
-    }
+   calculateTargets(coin) {
+    const fib = coin.technicalIndicators.fibonacci;
+    const currentPrice = coin.price;
+    
+    coin.targets = {
+        entry: this.findNearestSupport(currentPrice, fib),
+        stopLoss: fib.level786 * 0.98,
+        target1: fib.level618,
+        target2: fib.level382,
+        target3: fib.level236,
+        target4: fib.level0
+    };
+    
+    console.log(`🎯 ${coin.symbol} الأهداف: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | T3=${coin.targets.target3.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
+}
 
-    findNearestSupport(price, fib) {
-        const levels = [fib.level618, fib.level500, fib.level382, fib.level236];
-        let nearest = levels[0];
-        let minDiff = Math.abs(price - nearest);
-                
-        for (const level of levels) {
-            const diff = Math.abs(price - level);
-            if (diff < minDiff && level < price) {
-                nearest = level;
-                minDiff = diff;
-            }
+findNearestSupport(price, fib) {
+    const levels = [fib.level618, fib.level500, fib.level382, fib.level236];
+    let nearest = levels[0];
+    let minDiff = Math.abs(price - nearest);
+    
+    for (const level of levels) {
+        const diff = Math.abs(price - level);
+        if (diff < minDiff && level < price) {
+            nearest = level;
+            minDiff = diff;
         }
-                
-        return nearest;
     }
+    
+    return nearest;
+}
+
 
     analyzeCoins() {
     console.log('🔍 بدء تحليل العملات...');
     
     this.coins.forEach(coin => {
         this.calculateScore(coin);
+        this.calculateTargets(coin); // إضافة هذا السطر
     });
     
-    // ترتيب العملات: أولاً حسب عدد الشروط، ثم حسب نسبة التغيير
+    // ترتيب العملات
     this.coins.sort((a, b) => {
         if (a.achievedConditionsCount !== b.achievedConditionsCount) {
             return b.achievedConditionsCount - a.achievedConditionsCount;
@@ -454,21 +473,20 @@ calculateScore(coin) {
         coin.rank = i + 1;
         
         if (i === 0) {
-            // المركز الأول يحتفظ بنقاطه
             coin.finalScore = coin.baseScore;
         } else {
-            // خصم نقاط من المركز السابق
             const previousCoin = this.coins[i - 1];
-            const deduction = coin.rank; // خصم 2 للثاني، 3 للثالث، إلخ
+            const deduction = coin.rank;
             coin.finalScore = Math.max(previousCoin.finalScore - deduction, 1);
         }
         
         coin.score = coin.finalScore;
     }
     
-    console.log('🏆 الترتيب النهائي مع الخصم:');
+    console.log('🏆 الترتيب النهائي مع أهداف فيبوناتشي:');
     this.coins.slice(0, 10).forEach(coin => {
-        console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط النهائية=${coin.score} (أساسية:${coin.baseScore})`);
+        console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
+        console.log(`   🎯 الأهداف: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
     });
 }
 
@@ -727,4 +745,53 @@ window.onclick = function(event) {
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
+    renderResults() {
+    const container = document.getElementById('results');
+    if (!container) return;
+
+    container.innerHTML = this.coins.slice(0, 10).map((coin, index) => {
+        const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${coin.rank}`;
+        
+        return `
+            <div class="coin-card ${index < 3 ? 'top-coin' : ''}">
+                <div class="coin-header">
+                    <span class="rank">${rankEmoji}</span>
+                    <span class="symbol">${coin.symbol}</span>
+                    <span class="price">$${coin.price}</span>
+                    <span class="change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
+                    </span>
+                </div>
+                
+                <div class="score-section">
+                    <span class="score">النقاط:${coin.score}</span>
+                    <span class="conditions">${coin.achievedConditionsCount}/6 شروط</span>
+                </div>
+                
+                <div class="targets-section">
+                    <div class="targets-title">🎯 أهداف فيبوناتشي:</div>
+                    <div class="targets-grid">
+                        <span class="entry">دخول: $${coin.targets.entry.toFixed(6)}</span>
+                        <span class="target">T1: $${coin.targets.target1.toFixed(6)}</span>
+                        <span class="target">T2: $${coin.targets.target2.toFixed(6)}</span>
+                        <span class="target">T3: $${coin.targets.target3.toFixed(6)}</span>
+                        <span class="stop-loss">وقف: $${coin.targets.stopLoss.toFixed(6)}</span>
+                    </div>
+                </div>
+                
+                <div class="indicators">
+                    <span>حجم التداول:${(coin.volume / 1000).toFixed(1)}K</span>
+                    <span>RSI:${coin.technicalIndicators.rsi.toFixed(1)}</span>
+                    <span>MFI:${coin.technicalIndicators.mfi.toFixed(1)}</span>
+                </div>
+                
+                <div class="liquidity-bar">
+                    <div class="liquidity-fill" style="width: ${Math.min(coin.volume / 10000, 100)}%"></div>
+                    <span>شريط السيولة</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 });

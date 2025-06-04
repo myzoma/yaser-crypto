@@ -232,7 +232,7 @@ class YaserCrypto {
     }
 }
 
-    calculateTechnicalIndicators(coin) {
+   calculateTechnicalIndicators(coin) {
     // حساب RSI
     coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
     if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
@@ -250,23 +250,24 @@ class YaserCrypto {
     coin.technicalIndicators.ema20 = currentPrice;
     coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
 
-    // حساب مستويات فيبوناتشي
-    const high24h = currentPrice * 1.05; // افتراض أعلى سعر
-    const low24h = currentPrice * (1 - (coin.change24h / 100) * 1.2); // افتراض أقل سعر
+    // تصحيح حساب مستويات فيبوناتشي للاتجاه الصاعد
+    const low24h = currentPrice * (1 - (coin.change24h / 100)); // أقل سعر (قبل الارتفاع)
+    const high24h = currentPrice; // أعلى سعر (السعر الحالي)
     
     const range = high24h - low24h;
     
+    // مستويات فيبوناتشي للاتجاه الصاعد (الأهداف أعلى من السعر الحالي)
     coin.technicalIndicators.fibonacci = {
-        level0: high24h,
-        level236: high24h - (range * 0.236),
-        level382: high24h - (range * 0.382),
-        level500: high24h - (range * 0.500),
-        level618: high24h - (range * 0.618),
-        level786: high24h - (range * 0.786),
-        level1000: low24h
+        level0: high24h, // 0% = السعر الحالي
+        level236: high24h + (range * 0.236), // هدف 1
+        level382: high24h + (range * 0.382), // هدف 2  
+        level500: high24h + (range * 0.500), // هدف 3
+        level618: high24h + (range * 0.618), // هدف 4
+        level786: low24h + (range * 0.214), // دعم قوي
+        level1000: low24h // 100% = أقل سعر
     };
 
-    console.log(`📈 ${coin.symbol} فيبوناتشي: 0%=${high24h.toFixed(6)} | 23.6%=${coin.technicalIndicators.fibonacci.level236.toFixed(6)} | 38.2%=${coin.technicalIndicators.fibonacci.level382.toFixed(6)} | 61.8%=${coin.technicalIndicators.fibonacci.level618.toFixed(6)}`);
+    console.log(`📈 ${coin.symbol} فيبوناتشي: الحالي=${high24h.toFixed(6)} | T1=${coin.technicalIndicators.fibonacci.level236.toFixed(6)} | T2=${coin.technicalIndicators.fibonacci.level382.toFixed(6)} | T3=${coin.technicalIndicators.fibonacci.level500.toFixed(6)}`);
 }
 
     estimateRSIFromChange(change24h) {
@@ -423,16 +424,17 @@ calculateScore(coin) {
     const currentPrice = coin.price;
     
     coin.targets = {
-        entry: this.findNearestSupport(currentPrice, fib),
-        stopLoss: fib.level786 * 0.98,
-        target1: fib.level618,
-        target2: fib.level382,
-        target3: fib.level236,
-        target4: fib.level0
+        entry: currentPrice, // الدخول بالسعر الحالي
+        stopLoss: fib.level786, // وقف خسارة عند دعم قوي
+        target1: fib.level236, // هدف 1 (أعلى من السعر)
+        target2: fib.level382, // هدف 2
+        target3: fib.level500, // هدف 3
+        target4: fib.level618  // هدف 4
     };
     
-    console.log(`🎯 ${coin.symbol} الأهداف: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | T3=${coin.targets.target3.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
+    console.log(`🎯 ${coin.symbol} الأهداف المصححة: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | T3=${coin.targets.target3.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
 }
+
 
 findNearestSupport(price, fib) {
     const levels = [fib.level618, fib.level500, fib.level382, fib.level236];

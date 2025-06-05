@@ -836,3 +836,18 @@ html {
     border-color: #ff4444;
     color: #ff4444;
 }
+.printing {
+    transform: scale(1) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+}
+
+.printing .share-buttons {
+    display: none !important;
+}
+
+/* تحسين مظهر البطاقة عند التصوير */
+@media print {
+    .share-buttons {
+        display: none !important;
+    }
+}

@@ -207,7 +207,9 @@ console.log('📊 جميع بيانات ticker:', ticker);
         
         // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
         const high24h = parseFloat(ticker.high24h);
+const high24h = parseFloat(ticker.high24h);
 const change24h = parseFloat(ticker.changePercent) || (high24h > 0 ? ((currentPrice - high24h) / high24h) * 100 : 0);
+
 
         
         console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);

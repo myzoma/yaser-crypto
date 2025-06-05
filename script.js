@@ -89,11 +89,9 @@ class YaserCrypto {
 
     async fetchTopGainers() {
     try {
-        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');ب
+        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
         
         const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
-
-
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -112,34 +110,8 @@ class YaserCrypto {
         }
         
         // فلترة العملات مع معايير أوسع
-       const usdtPairs = data.data
-.filter(ticker => {
-    // فلترة أساسية فقط
-    if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
-        return false;
-    }
-    const currentPrice = parseFloat(ticker.last);
-    const openPrice = parseFloat(ticker.open24h);
-    const volume = parseFloat(ticker.vol24h);
-    
-    return currentPrice > 0 && openPrice > 0 && volume > 1000; // شروط أساسية فقط
-})
-.map(ticker => {
-    const currentPrice = parseFloat(ticker.last);
-    const openPrice = parseFloat(ticker.open24h);
-    const change24h = ((currentPrice - openPrice) / openPrice) * 100;
-    
-    return {
-        symbol: ticker.instId.replace('-USDT', ''),
-        change24h: change24h,
-        volume: parseFloat(ticker.vol24h),
-        price: currentPrice
-    };
-})
-.sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً
-.filter(coin => coin.change24h > 0.5 && coin.change24h < 50) // فلترة نهائية
-.slice(0, 30);
-
+        const usdtPairs = data.data
+            .filter(ticker => {
                 if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
                     return false;
                 }
@@ -153,12 +125,10 @@ class YaserCrypto {
                     return false;
                 }
                 
-                const highPrice = parseFloat(ticker.high24h);
-const change24h = ((currentPrice - highPrice) / highPrice) * 100;
-
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
                 
                 // معايير أوسع للحصول على عملات أكثر
-                const validChange = change24h > -50 && change24h < 25; // من 0.5% إلى 25%
+                const validChange = change24h > 0.5 && change24h < 25; // من 0.5% إلى 25%
                 const validVolume = volume > 10000; // حجم أكبر من 10K
                 
                 return validChange && validVolume;
@@ -227,18 +197,13 @@ const change24h = ((currentPrice - highPrice) / highPrice) * 100;
         }
         
         const ticker = tickerData.data[0];
-        console.log('🔍 جميع حقول ticker المتاحة:', Object.keys(ticker));
-console.log('📊 جميع بيانات ticker:', ticker);
-
+        
         const currentPrice = parseFloat(ticker.last);
         const openPrice24h = parseFloat(ticker.open24h);
         
         // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
-       
-const high24h = parseFloat(ticker.high24h);
-const change24h = parseFloat(ticker.changePercent) || (high24h > 0 ? ((currentPrice - high24h) / high24h) * 100 : 0);
-
-
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
         
         console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
         
@@ -832,4 +797,6 @@ document.addEventListener('DOMContentLoaded', function() {
    
 
 });
+
+
 

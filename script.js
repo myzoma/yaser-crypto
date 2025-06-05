@@ -795,8 +795,6 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
    
-
-});
 // إضافة دالة لمسح الـ cache وإعادة التحميل
 async forceRefresh() {
     console.log('🔄 إعادة تحميل كاملة للبيانات...');
@@ -829,6 +827,8 @@ clearBrowserCache() {
         });
     }
 }
+
+});
 
 
 

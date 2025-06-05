@@ -741,38 +741,36 @@ class YaserCrypto {
                 <span>$${targets.stopLoss.toFixed(6)}</span>
             </div>
         </div>
-       <div class="conditions-met">
+      <div class="conditions-met">
     <h3>الشروط المحققة</h3>
     <div class="conditions-grid">
         <div class="condition ${coin.change24h >= 3 ? 'met' : 'not-met'}">
-            ارتفاع 3%+: ${coin.change24h >= 3 ? '✅' : '❌'} (${coin.change24h.toFixed(2)}%)
+            ارتفاع 3%+: ${coin.change24h >= 3 ? '✅' : '❌'}
         </div>
         <div class="condition ${coin.change24h >= 4 ? 'met' : 'not-met'}">
-            ارتفاع 4%+: ${coin.change24h >= 4 ? '✅' : '❌'} (${coin.change24h.toFixed(2)}%)
+            ارتفاع 4%+: ${coin.change24h >= 4 ? '✅' : '❌'}
         </div>
         <div class="condition ${coin.change24h >= 7 ? 'met' : 'not-met'}">
-            ارتفاع قوي 7%+: ${coin.change24h >= 7 ? '✅' : '❌'} (${coin.change24h.toFixed(2)}%)
+            ارتفاع قوي 7%+: ${coin.change24h >= 7 ? '✅' : '❌'}
         </div>
         <div class="condition ${coin.price > (coin.technicalIndicators.ema20 || coin.price) ? 'met' : 'not-met'}">
             اختراق المتوسطات: ${coin.price > (coin.technicalIndicators.ema20 || coin.price) ? '✅' : '❌'}
         </div>
         <div class="condition ${(coin.technicalIndicators.rsi || 50) > 50 && (coin.technicalIndicators.rsi || 50) < 70 ? 'met' : 'not-met'}">
-            RSI إيجابي: ${(coin.technicalIndicators.rsi || 50) > 50 && (coin.technicalIndicators.rsi || 50) < 70 ? '✅' : '❌'} (${(coin.technicalIndicators.rsi || 50).toFixed(1)})
+            RSI إيجابي: ${(coin.technicalIndicators.rsi || 50) > 50 && (coin.technicalIndicators.rsi || 50) < 70 ? '✅' : '❌'}
         </div>
         <div class="condition ${(coin.technicalIndicators.macd || 0) > (coin.technicalIndicators.macdSignal || 0) ? 'met' : 'not-met'}">
             MACD إيجابي: ${(coin.technicalIndicators.macd || 0) > (coin.technicalIndicators.macdSignal || 0) ? '✅' : '❌'}
         </div>
         <div class="condition ${(coin.technicalIndicators.mfi || 50) > 50 && (coin.technicalIndicators.mfi || 50) < 80 ? 'met' : 'not-met'}">
-            MFI إيجابي: ${(coin.technicalIndicators.mfi || 50) > 50 && (coin.technicalIndicators.mfi || 50) < 80 ? '✅' : '❌'} (${(coin.technicalIndicators.mfi || 50).toFixed(1)})
-        </div>
-        <div class="condition ${coin.volume >= 100000 ? 'met' : 'not-met'}">
-            حجم تداول كافي: ${coin.volume >= 100000 ? '✅' : '❌'} (${(coin.volume/1000000).toFixed(2)}M)
+            MFI إيجابي: ${(coin.technicalIndicators.mfi || 50) > 50 && (coin.technicalIndicators.mfi || 50) < 80 ? '✅' : '❌'}
         </div>
         <div class="condition ${coin.score >= 80 ? 'met' : 'not-met'}">
-            نقاط مثالية: ${coin.score >= 80 ? '✅' : '❌'} (${coin.score}/100)
+            نقاط مثالية: ${coin.score >= 80 ? '✅' : '❌'}
         </div>
     </div>
 </div>
+
     `;
     
     modal.style.display = 'block';

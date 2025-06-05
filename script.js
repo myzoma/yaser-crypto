@@ -125,10 +125,12 @@ class YaserCrypto {
                     return false;
                 }
                 
-                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                const highPrice = parseFloat(ticker.high24h);
+const change24h = ((currentPrice - highPrice) / highPrice) * 100;
+
                 
                 // معايير أوسع للحصول على عملات أكثر
-                const validChange = change24h > 0.5 && change24h < 25; // من 0.5% إلى 25%
+                const validChange = change24h > -50 && change24h < 25; // من 0.5% إلى 25%
                 const validVolume = volume > 10000; // حجم أكبر من 10K
                 
                 return validChange && validVolume;

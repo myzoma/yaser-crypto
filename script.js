@@ -539,8 +539,6 @@ findNearestSupport(price, fib) {
     });
 }
 
-
-
     renderCoins() {
         const grid = document.getElementById('coinsGrid');
         grid.innerHTML = '';
@@ -795,5 +793,4 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
    
-
 });

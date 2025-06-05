@@ -191,9 +191,7 @@ class YaserCrypto {
         }
         
         const tickerData = await tickerResponse.json();
-        console.log('🔍 جميع حقول ticker المتاحة:', Object.keys(ticker));
-console.log('📊 جميع بيانات ticker:', ticker);
-
+        
         if (!tickerData.data || tickerData.data.length === 0) {
             throw new Error(`لا توجد بيانات لـ ${symbol}`);
         }
@@ -799,6 +797,4 @@ document.addEventListener('DOMContentLoaded', function() {
    
 
 });
-
-
 

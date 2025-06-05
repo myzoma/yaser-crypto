@@ -879,12 +879,8 @@ window.onclick = function(event) {
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
-   }
-// في نهاية الملف، أضف:
-let yaserCrypto;
-document.addEventListener('DOMContentLoaded', function() {
-    yaserCrypto = new YaserCrypto();
-    window.yaserCrypto = yaserCrypto; // جعل المتغير متاح عالمياً
+   
+
 });
 
 

@@ -89,9 +89,10 @@ class YaserCrypto {
 
     async fetchTopGainers() {
     try {
-        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
+        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');ب
         
-        const response = await fetch('https://www.okx.com/priapi/v5/market/tickers-gainers?instType=SPOT&limit=50', {
+        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+
 
             method: 'GET',
             headers: {
@@ -111,8 +112,34 @@ class YaserCrypto {
         }
         
         // فلترة العملات مع معايير أوسع
-        const usdtPairs = data.data
-            .filter(ticker => {
+       const usdtPairs = data.data
+.filter(ticker => {
+    // فلترة أساسية فقط
+    if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
+        return false;
+    }
+    const currentPrice = parseFloat(ticker.last);
+    const openPrice = parseFloat(ticker.open24h);
+    const volume = parseFloat(ticker.vol24h);
+    
+    return currentPrice > 0 && openPrice > 0 && volume > 1000; // شروط أساسية فقط
+})
+.map(ticker => {
+    const currentPrice = parseFloat(ticker.last);
+    const openPrice = parseFloat(ticker.open24h);
+    const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+    
+    return {
+        symbol: ticker.instId.replace('-USDT', ''),
+        change24h: change24h,
+        volume: parseFloat(ticker.vol24h),
+        price: currentPrice
+    };
+})
+.sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً
+.filter(coin => coin.change24h > 0.5 && coin.change24h < 50) // فلترة نهائية
+.slice(0, 30);
+
                 if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
                     return false;
                 }

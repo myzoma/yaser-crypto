@@ -567,8 +567,175 @@ findNearestSupport(price, fib) {
     downloadBtn.addEventListener('click', () => this.downloadCard(coin.symbol));
     
     card.appendChild(shareButtons);
+   const shareContainer = document.createElement('div');
+    shareContainer.className = 'share-buttons';
+    
+    // زر تويتر
+    const twitterBtn = document.createElement('button');
+    twitterBtn.className = 'share-btn twitter';
+    twitterBtn.innerHTML = `
+        <i class="fab fa-twitter"></i>
+        تويتر
+    `;
+    
+    // زر التحميل
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'share-btn download';
+    downloadBtn.innerHTML = `
+        <i class="fas fa-download"></i>
+        تحميل
+    `;
+    
+    // إضافة الأحداث
+    twitterBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.shareCardToTwitter(coin.symbol);
+    });
+    
+    downloadBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.downloadCard(coin.symbol);
+    });
+    
+    // إضافة الأزرار للحاوية
+    shareContainer.appendChild(twitterBtn);
+    shareContainer.appendChild(downloadBtn);
+    
+    // إضافة الحاوية للبطاقة
+    card.appendChild(shareContainer);
     
     return card;
+}
+    // أضف هذه الدوال داخل كلاس YaserCrypto
+
+async shareCardToTwitter(symbol) {
+    try {
+        console.log(`مشاركة بطاقة ${symbol} في تويتر...`);
+        
+        const cardElement = document.getElementById(`card-${symbol}`);
+        if (!cardElement) {
+            console.error('لم يتم العثور على البطاقة');
+            return;
+        }
+
+        // إخفاء أزرار المشاركة مؤقتاً
+        const shareButtons = cardElement.querySelector('.share-buttons');
+        const originalDisplay = shareButtons ? shareButtons.style.display : '';
+        if (shareButtons) shareButtons.style.display = 'none';
+        
+        // التقاط صورة للبطاقة
+        const canvas = await html2canvas(cardElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false
+        });
+
+        // إظهار الأزرار مرة أخرى
+        if (shareButtons) shareButtons.style.display = originalDisplay || 'flex';
+
+        // تحويل إلى صورة وتحميل
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${symbol}-analysis.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // إنشاء نص التغريدة
+            const coin = this.coins.find(c => c.symbol === symbol);
+            const tweetText = this.generateTweetText(coin);
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+            
+            // فتح تويتر بعد تأخير قصير
+            setTimeout(() => {
+                window.open(twitterUrl, '_blank', 'width=550,height=420');
+                URL.revokeObjectURL(url);
+            }, 1000);
+
+        }, 'image/png', 0.95);
+
+    } catch (error) {
+        console.error('خطأ في المشاركة:', error);
+        // مشاركة نصية كبديل
+        this.shareTextOnly(symbol);
+    }
+}
+
+async downloadCard(symbol) {
+    try {
+        console.log(`تحميل بطاقة ${symbol}...`);
+        
+        const cardElement = document.getElementById(`card-${symbol}`);
+        if (!cardElement) {
+            alert('لم يتم العثور على البطاقة');
+            return;
+        }
+
+        const shareButtons = cardElement.querySelector('.share-buttons');
+        const originalDisplay = shareButtons ? shareButtons.style.display : '';
+        if (shareButtons) shareButtons.style.display = 'none';
+        
+        const canvas = await html2canvas(cardElement, {
+            backgroundColor: '#ffffff',
+            scale: 3, // جودة أعلى للتحميل
+            useCORS: true,
+            allowTaint: true,
+            logging: false
+        });
+
+        if (shareButtons) shareButtons.style.display = originalDisplay || 'flex';
+
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${symbol}-crypto-analysis-${new Date().toISOString().split('T')[0]}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log(`تم تحميل صورة ${symbol} بنجاح`);
+        }, 'image/png', 1.0);
+
+    } catch (error) {
+        console.error('خطأ في التحميل:', error);
+        alert('حدث خطأ في تحميل الصورة');
+    }
+}
+
+generateTweetText(coin) {
+    const profitT1 = ((coin.targets.target1 - coin.targets.entry) / coin.targets.entry * 100);
+    const profitT2 = ((coin.targets.target2 - coin.targets.entry) / coin.targets.entry * 100);
+    
+    return `🚀 تحليل ${coin.symbol}/USDT
+
+📊 النقاط: ${coin.score}/100
+📈 التغيير 24س: +${coin.change24h.toFixed(2)}%
+
+🎯 الأهداف:
+• دخول: $${coin.targets.entry.toFixed(6)}
+• هدف 1: $${coin.targets.target1.toFixed(6)} (+${profitT1.toFixed(1)}%)
+• هدف 2: $${coin.targets.target2.toFixed(6)} (+${profitT2.toFixed(1)}%)
+
+⚠️ وقف خسارة: $${coin.targets.stopLoss.toFixed(6)}
+
+#${coin.symbol} #crypto #تحليل_فني #استثمار
+
+YASER CRYPTO`;
+}
+
+shareTextOnly(symbol) {
+    const coin = this.coins.find(c => c.symbol === symbol);
+    if (!coin) return;
+    
+    const text = this.generateTweetText(coin);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(twitterUrl, '_blank');
 }
 
 // واحتفظ بدالة renderCoins الأصلية

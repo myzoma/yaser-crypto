@@ -229,15 +229,17 @@ stopAutoRefresh() {
         }
         
         const ticker = tickerData.data[0];
-        console.log(`🔍 اختبار بيانات ${symbol}:`);
+        const openPrice24h = parseFloat(ticker.open24h);
+        // ضع هذا الكود في دالة fetchCoinData() بعد السطر const ticker = tickerData.data[0];
+
+console.log(`🔍 اختبار بيانات ${symbol}:`);
 console.log('📊 البيانات الخام من API:');
 console.log('- ticker.last (السعر الحالي):', ticker.last);
 console.log('- ticker.open24h (سعر الافتتاح):', ticker.open24h);
 console.log('- ticker.changePercent (النسبة من API):', ticker.changePercent);
 console.log('- نوع البيانات changePercent:', typeof ticker.changePercent);
 
-const currentPrice = parseFloat(ticker.last);
-const openPrice24h = parseFloat(ticker.open24h);
+// استخدم المتغيرات الموجودة أصلاً
 const manualCalculation = openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0;
 
 console.log('🧮 الحسابات:');
@@ -245,9 +247,7 @@ console.log('- الحساب اليدوي:', manualCalculation.toFixed(4), '%');
 console.log('- النسبة من API:', parseFloat(ticker.changePercent));
 console.log('- النسبة المستخدمة نهائياً:', change24h);
 console.log('-------------------');
-        const currentPrice = parseFloat(ticker.last);
-        const openPrice24h = parseFloat(ticker.open24h);
-        
+
         // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
         const change24h = parseFloat(ticker.changePercent) || 
             (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);

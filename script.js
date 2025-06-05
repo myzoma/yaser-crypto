@@ -631,151 +631,131 @@ class YaserCrypto {
         return volume.toFixed(0);
     }
 
-   showCoinDetails(coin) {
-    const modal = document.getElementById('coinModal');
-    const modalBody = document.getElementById('modalBody');
-    console.log('بيانات العملة:', coin.technicalIndicators);
+  showCoinDetails(coin) {
+        const modal = document.getElementById('coinModal');
+        const modalBody = document.getElementById('modalBody');
+        const fib = coin.technicalIndicators.fibonacci;
+        const targets = coin.targets;
 
-    // ✅ فحص وجود البيانات مع قيم افتراضية
-    const fib = coin.technicalIndicators.fibonacci || {
-        level0: coin.high24h || coin.price,
-        level236: (coin.high24h || coin.price) * 0.764,
-        level382: (coin.high24h || coin.price) * 0.618,
-        level500: (coin.high24h || coin.price) * 0.5,
-        level618: (coin.high24h || coin.price) * 0.382,
-        level786: (coin.high24h || coin.price) * 0.214
-    };
-    
-    const targets = coin.targets || {
-        entry: coin.price,
-        target1: coin.price * 1.05,
-        target2: coin.price * 1.10,
-        target3: coin.price * 1.15,
-        target4: coin.price * 1.20,
-        stopLoss: coin.price * 0.95
-    };
-    
-    // تحديد رمز الحالة
-    const statusIcon = coin.status === 'warning' ? ' ⚠️' : '';
-    const statusText = coin.status === 'warning' ? ' (تحذير: انخفاض من أعلى نقطة)' : '';
-    
-    modalBody.innerHTML = `
-        <div class="modal-header">
-            <div class="modal-coin-logo">${coin.symbol.charAt(0)}</div>
-            <h2>${coin.name}${statusIcon}</h2>
-            <p>المركز: #${coin.rank} | النقاط: ${coin.score}${statusText}</p>
-            <p>السعر الحالي: $${coin.price.toFixed(4)}</p>
-        </div>
-        <div class="technical-indicators">
-            <div class="indicator-card">
-                <div class="indicator-title">RSI (14)</div>
-                <div class="indicator-value">${(coin.technicalIndicators.rsi || 50).toFixed(2)}</div>
-                <div style="color: ${(coin.technicalIndicators.rsi || 50) > 70 ? '#ff4444' : (coin.technicalIndicators.rsi || 50) < 30 ? '#44ff44' : '#ffaa00'}">${(coin.technicalIndicators.rsi || 50) > 70 ? 'مشبع شراء' : (coin.technicalIndicators.rsi || 50) < 30 ? 'مشبع بيع' : 'متوسط'}</div>
+        modalBody.innerHTML = `
+            <div class="modal-header">
+                <div class="modal-coin-logo">${coin.symbol.charAt(0)}</div>
+                <h2>${coin.name}</h2>
+                <p>المركز: #${coin.rank} | النقاط: ${coin.score}</p>
+                <p>السعر الحالي: $${coin.price.toFixed(4)}</p>
             </div>
-            <div class="indicator-card">
-                <div class="indicator-title">MACD</div>
-                <div class="indicator-value">${(coin.technicalIndicators.macd || 0).toFixed(4)}</div>
-                <div style="color: ${(coin.technicalIndicators.macd || 0) > (coin.technicalIndicators.macdSignal || 0) ? '#44ff44' : '#ff4444'}">${(coin.technicalIndicators.macd || 0) > (coin.technicalIndicators.macdSignal || 0) ? 'إشارة شراء' : 'إشارة بيع'}</div>
+            <div class="technical-indicators">
+                <div class="indicator-card">
+                    <div class="indicator-title">RSI (14)</div>
+                    <div class="indicator-value">${(coin.technicalIndicators.rsi || 0).toFixed(2)}</div>
+                    <div style="color: ${coin.technicalIndicators.rsi > 50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                        ${coin.technicalIndicators.rsi > 50 ? 'صاعد' : 'هابط'}
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-title">MACD</div>
+                    <div class="indicator-value">${(coin.technicalIndicators.macd || 0).toFixed(4)}</div>
+                    <div style="color: ${coin.technicalIndicators.macd > coin.technicalIndicators.macdSignal ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                        ${coin.technicalIndicators.macd > coin.technicalIndicators.macdSignal ? 'تقاطع صاعد' : 'تقاطع هابط'}
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-title">EMA 20</div>
+                    <div class="indicator-value">$${(coin.technicalIndicators.ema20 || 0).toFixed(4)}</div>
+                    <div style="color: ${coin.price > coin.technicalIndicators.ema20 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                        ${coin.price > coin.technicalIndicators.ema20 ? 'فوق المتوسط' : 'تحت المتوسط'}
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-title">EMA 50</div>
+                    <div class="indicator-value">$${(coin.technicalIndicators.ema50 || 0).toFixed(4)}</div>
+                    <div style="color: ${coin.price > coin.technicalIndicators.ema50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                        ${coin.price > coin.technicalIndicators.ema50 ? 'فوق المتوسط' : 'تحت المتوسط'}
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-title">Parabolic SAR</div>
+                    <div class="indicator-value">$${(coin.technicalIndicators.parabolicSAR || 0).toFixed(4)}</div>
+                    <div style="color: ${coin.price > coin.technicalIndicators.parabolicSAR ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                        ${coin.price > coin.technicalIndicators.parabolicSAR ? 'اتجاه صاعد' : 'اتجاه هابط'}
+                    </div>
+                </div>
+                <div class="indicator-card">
+                    <div class="indicator-title">MFI (14)</div>
+                    <div class="indicator-value">${(coin.technicalIndicators.mfi || 0).toFixed(2)}</div>
+                    <div style="color: ${coin.technicalIndicators.mfi > 50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                        ${coin.technicalIndicators.mfi > 50 ? 'سيولة قوية' : 'سيولة ضعيفة'}
+                    </div>
+                </div>
             </div>
-            <div class="indicator-card">
-                <div class="indicator-title">MFI (14)</div>
-                <div class="indicator-value">${(coin.technicalIndicators.mfi || 50).toFixed(2)}</div>
-                <div style="color: ${(coin.technicalIndicators.mfi || 50) > 80 ? '#ff4444' : (coin.technicalIndicators.mfi || 50) < 20 ? '#44ff44' : '#ffaa00'}">${(coin.technicalIndicators.mfi || 50) > 80 ? 'مشبع شراء' : (coin.technicalIndicators.mfi || 50) < 20 ? 'مشبع بيع' : 'متوسط'}</div>
+            <div class="targets-section">
+                <h3 style="color: #00d4aa; margin-bottom: 15px;">الأهداف والمستويات</h3>
+                <div class="targets-grid">
+                    <div class="target-item">
+                        <div class="target-label">نقطة الدخول</div>
+                        <div class="target-value">$${targets.entry.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">وقف الخسارة</div>
+                        <div class="target-value">$${targets.stopLoss.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">الهدف الأول</div>
+                        <div class="target-value">$${targets.target1.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">الهدف الثاني</div>
+                        <div class="target-value">$${targets.target2.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">الهدف الثالث</div>
+                        <div class="target-value">$${targets.target3.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">الهدف الرابع</div>
+                        <div class="target-value">$${targets.target4.toFixed(4)}</div>
+                    </div>
+                </div>
             </div>
-            <div class="indicator-card">
-                <div class="indicator-title">EMA 20</div>
-                <div class="indicator-value">$${(coin.technicalIndicators.ema20 || coin.price).toFixed(4)}</div>
-                <div style="color: ${coin.price > (coin.technicalIndicators.ema20 || coin.price) ? '#44ff44' : '#ff4444'}">${coin.price > (coin.technicalIndicators.ema20 || coin.price) ? 'فوق المتوسط' : 'تحت المتوسط'}</div>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+                <h3 style="color: #00d4aa; margin-bottom: 15px;">مستويات فيبوناتشي</h3>
+                <div class="targets-grid">
+                    <div class="target-item">
+                        <div class="target-label">0% (القمة)</div>
+                        <div class="target-value">$${fib.level0.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">23.6%</div>
+                        <div class="target-value">$${fib.level236.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">38.2%</div>
+                        <div class="target-value">$${fib.level382.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">50%</div>
+                        <div class="target-value">$${fib.level500.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">61.8%</div>
+                        <div class="target-value">$${fib.level618.toFixed(4)}</div>
+                    </div>
+                    <div class="target-item">
+                        <div class="target-label">78.6%</div>
+                        <div class="target-value">$${fib.level786.toFixed(4)}</div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="fibonacci-levels">
-            <h3>مستويات فيبوناتشي</h3>
-            <div class="fib-level">
-                <span>0% (أعلى نقطة):</span>
-                <span>$${fib.level0.toFixed(4)}</span>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+                <h3 style="color: #00d4aa; margin-bottom: 15px;">الشروط المحققة</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                    ${this.renderConditions(coin.conditions)}
+                </div>
             </div>
-            <div class="fib-level">
-                <span>23.6%:</span>
-                <span>$${fib.level236.toFixed(4)}</span>
-            </div>
-            <div class="fib-level">
-                <span>38.2%:</span>
-                <span>$${fib.level382.toFixed(4)}</span>
-            </div>
-            <div class="fib-level">
-                <span>50%:</span>
-                <span>$${fib.level500.toFixed(4)}</span>
-            </div>
-            <div class="fib-level">
-                <span>61.8%:</span>
-                <span>$${fib.level618.toFixed(4)}</span>
-            </div>
-            <div class="fib-level">
-                <span>78.6% (دعم قوي):</span>
-                <span>$${fib.level786.toFixed(4)}</span>
-            </div>
-        </div>
-        <div class="trading-targets">
-            <h3>أهداف التداول</h3>
-            <div class="target-row entry">
-                <span>نقطة الدخول:</span>
-                <span>$${targets.entry.toFixed(6)}</span>
-            </div>
-            <div class="target-row target">
-                <span>الهدف الأول:</span>
-                <span>$${targets.target1.toFixed(6)}</span>
-            </div>
-            <div class="target-row target">
-                <span>الهدف الثاني:</span>
-                <span>$${targets.target2.toFixed(6)}</span>
-            </div>
-            <div class="target-row target">
-                <span>الهدف الثالث:</span>
-                <span>$${targets.target3.toFixed(6)}</span>
-            </div>
-            <div class="target-row target">
-                <span>الهدف الرابع:</span>
-                <span>$${targets.target4.toFixed(6)}</span>
-            </div>
-            <div class="target-row stop-loss">
-                <span>وقف الخسارة:</span>
-                <span>$${targets.stopLoss.toFixed(6)}</span>
-            </div>
-        </div>
-      <div class="conditions-met">
-    <h3>الشروط المحققة</h3>
-    <div class="conditions-grid">
-        <div class="condition ${coin.change24h >= 3 ? 'met' : 'not-met'}">
-            ارتفاع 3%+: ${coin.change24h >= 3 ? '✅' : '❌'}
-        </div>
-        <div class="condition ${coin.change24h >= 4 ? 'met' : 'not-met'}">
-            ارتفاع 4%+: ${coin.change24h >= 4 ? '✅' : '❌'}
-        </div>
-        <div class="condition ${coin.change24h >= 7 ? 'met' : 'not-met'}">
-            ارتفاع قوي 7%+: ${coin.change24h >= 7 ? '✅' : '❌'}
-        </div>
-        <div class="condition ${coin.price > (coin.technicalIndicators.ema20 || coin.price) ? 'met' : 'not-met'}">
-            اختراق المتوسطات: ${coin.price > (coin.technicalIndicators.ema20 || coin.price) ? '✅' : '❌'}
-        </div>
-        <div class="condition ${(coin.technicalIndicators.rsi || 50) > 50 && (coin.technicalIndicators.rsi || 50) < 70 ? 'met' : 'not-met'}">
-            RSI إيجابي: ${(coin.technicalIndicators.rsi || 50) > 50 && (coin.technicalIndicators.rsi || 50) < 70 ? '✅' : '❌'}
-        </div>
-        <div class="condition ${(coin.technicalIndicators.macd || 0) > (coin.technicalIndicators.macdSignal || 0) ? 'met' : 'not-met'}">
-            MACD إيجابي: ${(coin.technicalIndicators.macd || 0) > (coin.technicalIndicators.macdSignal || 0) ? '✅' : '❌'}
-        </div>
-        <div class="condition ${(coin.technicalIndicators.mfi || 50) > 50 && (coin.technicalIndicators.mfi || 50) < 80 ? 'met' : 'not-met'}">
-            MFI إيجابي: ${(coin.technicalIndicators.mfi || 50) > 50 && (coin.technicalIndicators.mfi || 50) < 80 ? '✅' : '❌'}
-        </div>
-        <div class="condition ${coin.score >= 80 ? 'met' : 'not-met'}">
-            نقاط مثالية: ${coin.score >= 80 ? '✅' : '❌'}
-        </div>
-    </div>
-</div>
-
-    `;
-    
-    modal.style.display = 'block';
-}
+        `;
+                
+        modal.style.display = 'block';
+    }
 
 
     async delay(ms) {

@@ -66,6 +66,7 @@ class YaserCrypto {
             const data = await response.json();
             console.log('البيانات الخام:', data.data.slice(0, 5)); // أول 5 عملات
 console.log('عدد العملات الكلي:', data.data.length);
+console.log('حقول العملة الأولى:', Object.keys(data.data[0]));
 
             if (!data.data || !Array.isArray(data.data)) {
                 throw new Error('Invalid data format received');

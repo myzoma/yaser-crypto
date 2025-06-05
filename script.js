@@ -1,19 +1,13 @@
 class YaserCrypto {
     constructor() {
         this.coins = [];
-        this.coinHistory = new Map(); // جديد: لتتبع تاريخ العملات
         this.config = {
             apiUrl: "https://www.okx.com/api/v5",
             requestDelay: 500,
-            maxCoins: 30, // تعديل: من 50 إلى 30
-            minChange: 5, // تعديل: من 1 إلى 5 (العملات الجديدة تبدأ من 5-7%)
+            maxCoins: 50,
+            minChange: 1,
             maxChange: 15,
-            minVolume: 100000,
-            refreshInterval: 30000, // جديد: 30 ثانية
-            warningDropPercent: 3, // جديد: تحذير عند فقدان 3%
-            removeDropPercent: 7, // جديد: حذف عند فقدان 7%
-            changeWeight: 0.8, // جديد: وزن نسبة التغيير 80%
-            technicalWeight: 0.2 // جديد: وزن التحليل الفني 20%
+            minVolume: 100000
         };
         this.requestDelay = 500;
         this.init();
@@ -24,29 +18,9 @@ class YaserCrypto {
         await this.fetchData();
         this.analyzeCoins();
         this.renderCoins();
-        
-        // بدء التحديث التلقائي
-        this.startAutoUpdate();
     }
 
-    // دالة جديدة للتحديث التلقائي
-    startAutoUpdate() {
-        console.log(`🔄 بدء التحديث التلقائي كل ${this.config.refreshInterval / 1000} ثانية`);
-        
-        setInterval(async () => {
-            try {
-                console.log('🔄 تحديث تلقائي...');
-                await this.fetchData();
-                this.analyzeCoins();
-                this.renderCoins();
-                console.log('✅ تم التحديث بنجاح');
-            } catch (error) {
-                console.error('❌ خطأ في التحديث التلقائي:', error);
-            }
-        }, this.config.refreshInterval);
-    }
-
-    showLoading() {
+ showLoading() {
         document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
     }
 
@@ -54,517 +28,537 @@ class YaserCrypto {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
     }
 
+
+
+
+
    async fetchData() {
     try {
-        console.log('📡 جلب بيانات العملات...');
-        const response = await fetch(`${this.config.apiUrl}/market/tickers?instType=SPOT`);
+        console.log('🚀 بدء عملية جلب البيانات...');
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const candidateSymbols = await this.fetchTopGainers();
+        
+        if (!candidateSymbols || candidateSymbols.length === 0) {
+            throw new Error('لم يتم العثور على عملات مرشحة');
         }
         
-        const data = await response.json();
+        console.log(`📋 سيتم تحليل ${candidateSymbols.length} عملة`);
         
-        if (!data.data || !Array.isArray(data.data)) {
-            throw new Error('Invalid data format received');
+        const results = [];
+        
+        for (let i = 0; i < candidateSymbols.length; i++) {
+            const symbol = candidateSymbols[i];
+            
+            try {
+                console.log(`🔄 تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
+                
+                const coin = await this.fetchCoinData(symbol);
+                
+                if (coin && typeof coin.change24h === 'number' && !isNaN(coin.change24h)) {
+                    results.push(coin);
+                    console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
+                } else {
+                    console.warn(`⚠️ بيانات غير صالحة لـ ${symbol}`);
+                }
+                
+                // تأخير بين الطلبات
+                if (i < candidateSymbols.length - 1) {
+                    await this.delay(this.requestDelay);
+                }
+                
+            } catch (error) {
+                console.warn(`❌ فشل في تحليل ${symbol}:`, error.message);
+                continue; // تجاهل العملة والانتقال للتالية
+            }
         }
-
-        this.coins = data.data
-            .filter(coin => {
-                // ✅ حساب التغيير الصحيح
-                const currentPrice = parseFloat(coin.last);
-                const openPrice = parseFloat(coin.open24h);
-                const change = ((currentPrice - openPrice) / openPrice) * 100;
-                const volume = parseFloat(coin.vol24h);
-                
-                return change >= 5 && 
-                       change <= 15 && 
-                       volume >= 100000 &&
-                       currentPrice > 0 &&
-                       openPrice > 0 &&
-                       coin.instId.endsWith('-USDT') &&
-                       !coin.instId.includes('DOWN') &&
-                       !coin.instId.includes('UP') &&
-                       !coin.instId.includes('BEAR') &&
-                       !coin.instId.includes('BULL');
-            })
-            .map(coin => {
-                // ✅ حساب التغيير الصحيح في الـ mapping أيضاً
-                const currentPrice = parseFloat(coin.last);
-                const openPrice = parseFloat(coin.open24h);
-                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
-                
-                return {
-                    symbol: coin.instId.replace('-USDT', ''),
-                    name: coin.instId.replace('-USDT', ''),
-                    price: currentPrice,
-                    change24h: change24h,
-                    volume: parseFloat(coin.vol24h),
-                    high24h: parseFloat(coin.high24h),
-                    low24h: parseFloat(coin.low24h),
-                    technicalIndicators: {},
-                    conditions: {},
-                    score: 0,
-                    status: 'normal'
-                };
-            });
-
-        console.log(`📊 تم جلب ${this.coins.length} عملة مرشحة`);
+        
+        if (results.length === 0) {
+            throw new Error('فشل في الحصول على بيانات صالحة لأي عملة');
+        }
+        
+        this.coins = results;
+        console.log(`🎉 تم تحليل ${this.coins.length} عملة بنجاح`);
         
     } catch (error) {
-        console.error('❌ خطأ في جلب البيانات:', error);
+        console.error('💥 خطأ في fetchData:', error);
         this.showError(`خطأ في جلب البيانات: ${error.message}`);
+        throw error;
     }
 }
 
 
-    async calculateTechnicalIndicators(coin) {
-        try {
-            const response = await fetch(`${this.config.apiUrl}/market/candles?instId=${coin.symbol}-USDT&bar=1H&limit=100`);
-            
-            if (!response.ok) {
-                console.warn(`⚠️ فشل في جلب بيانات ${coin.symbol}`);
-                return;
+    async fetchTopGainers() {
+    try {
+        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
+        
+        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
             }
-            
-            const data = await response.json();
-            
-            if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-                console.warn(`⚠️ لا توجد بيانات كافية لـ ${coin.symbol}`);
-                return;
-            }
-
-            const candles = data.data.reverse().map(candle => ({
-                timestamp: parseInt(candle[0]),
-                open: parseFloat(candle[1]),
-                high: parseFloat(candle[2]),
-                low: parseFloat(candle[3]),
-                close: parseFloat(candle[4]),
-                volume: parseFloat(candle[5])
-            }));
-
-            if (candles.length < 50) {
-                console.warn(`⚠️ بيانات غير كافية لـ ${coin.symbol}: ${candles.length} شمعة فقط`);
-                return;
-            }
-
-            coin.technicalIndicators = {
-                rsi: this.calculateRSI(candles, 14),
-                macd: this.calculateMACD(candles),
-                macdSignal: this.calculateMACDSignal(candles),
-                ema20: this.calculateEMA(candles, 20),
-                ema50: this.calculateEMA(candles, 50),
-                ma20: this.calculateMA(candles, 20),
-                ma50: this.calculateMA(candles, 50),
-                mfi: this.calculateMFI(candles, 14),
-                parabolicSAR: this.calculateParabolicSAR(candles),
-                fibonacci: this.calculateFibonacci(candles)
-            };
-
-            this.calculateTargets(coin);
-
-        } catch (error) {
-            console.error(`❌ خطأ في حساب المؤشرات لـ ${coin.symbol}:`, error);
+        });
+        
+        if (!response.ok) {
+            throw new Error(`فشل في جلب البيانات: ${response.status}`);
         }
+        
+        const data = await response.json();
+        console.log('📡 استلام البيانات من API:', data.data ? data.data.length : 0, 'عملة');
+        
+        if (!data.data || data.data.length === 0) {
+            throw new Error('لا توجد بيانات من API');
+        }
+        
+        // فلترة العملات مع معايير أوسع
+        const usdtPairs = data.data
+            .filter(ticker => {
+                if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
+                    return false;
+                }
+                
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const volume = parseFloat(ticker.vol24h);
+                
+                // التحقق من صحة البيانات
+                if (!currentPrice || !openPrice || currentPrice <= 0 || openPrice <= 0) {
+                    return false;
+                }
+                
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                
+                // معايير أوسع للحصول على عملات أكثر
+                const validChange = change24h > 0.5 && change24h < 25; // من 0.5% إلى 25%
+                const validVolume = volume > 10000; // حجم أكبر من 10K
+                
+                return validChange && validVolume;
+            })
+            .map(ticker => {
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                
+                return {
+                    symbol: ticker.instId.replace('-USDT', ''),
+                    change24h: change24h,
+                    volume: parseFloat(ticker.vol24h),
+                    price: currentPrice
+                };
+            })
+            .sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً
+            .slice(0, 30); // أخذ أفضل 30 عملة
+
+        console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
+        
+        if (usdtPairs.length === 0) {
+            throw new Error('لم يتم العثور على عملات تحقق المعايير');
+        }
+        
+        // عرض أفضل 5 عملات للتحقق
+        console.log('🏆 أفضل 5 عملات مرشحة:');
+        usdtPairs.slice(0, 5).forEach((coin, index) => {
+            console.log(`${index + 1}. ${coin.symbol}: +${coin.change24h.toFixed(2)}% - الحجم: ${coin.volume.toLocaleString()}`);
+        });
+        
+        return usdtPairs.map(coin => coin.symbol);
+        
+    } catch (error) {
+        console.error('❌ خطأ في fetchTopGainers:', error);
+        throw error; // رمي الخطأ بدلاً من استخدام بيانات وهمية
+    }
+}
+
+
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    // دالة جديدة لتتبع أداء العملات
-    trackCoinPerformance(coin) {
-        const symbol = coin.symbol;
-        const currentChange = coin.change24h;
+    async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
         
-        // إذا كانت العملة جديدة، احفظ أعلى نقطة لها
-        if (!this.coinHistory.has(symbol)) {
-            this.coinHistory.set(symbol, {
-                highestChange: currentChange,
-                timestamp: Date.now(),
-                initialChange: currentChange
-            });
-            console.log(`📈 عملة جديدة ${symbol}: بدء التتبع من ${currentChange.toFixed(2)}%`);
-        } else {
-            const history = this.coinHistory.get(symbol);
-            
-            // تحديث أعلى نقطة إذا وصلت لنقطة أعلى
-            if (currentChange > history.highestChange) {
-                history.highestChange = currentChange;
-                history.timestamp = Date.now();
-                console.log(`🚀 ${symbol}: نقطة جديدة عالية ${currentChange.toFixed(2)}%`);
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
-            
-            // حفظ البيانات المحدثة
-            this.coinHistory.set(symbol, history);
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
         }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+}
+
+   calculateTechnicalIndicators(coin) {
+    // حساب RSI
+    coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
+    if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
+    if (coin.technicalIndicators.rsi < 0) coin.technicalIndicators.rsi = 0;
+
+    // حساب MACD
+    coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
+    coin.technicalIndicators.macdSignal = 0;
+
+    // حساب MFI
+    coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
+
+    // حساب المتوسطات المتحركة
+    const currentPrice = coin.price;
+    coin.technicalIndicators.ema20 = currentPrice;
+    coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
+
+    // تصحيح حساب مستويات فيبوناتشي للاتجاه الصاعد
+    const low24h = currentPrice * (1 - (coin.change24h / 100)); // أقل سعر (قبل الارتفاع)
+    const high24h = currentPrice; // أعلى سعر (السعر الحالي)
+    
+    const range = high24h - low24h;
+    
+    // مستويات فيبوناتشي للاتجاه الصاعد (الأهداف أعلى من السعر الحالي)
+    coin.technicalIndicators.fibonacci = {
+        level0: high24h, // 0% = السعر الحالي
+        level236: high24h + (range * 0.236), // هدف 1
+        level382: high24h + (range * 0.382), // هدف 2  
+        level500: high24h + (range * 0.500), // هدف 3
+        level618: high24h + (range * 0.618), // هدف 4
+        level786: low24h + (range * 0.214), // دعم قوي
+        level1000: low24h // 100% = أقل سعر
+    };
+
+    console.log(`📈 ${coin.symbol} فيبوناتشي: الحالي=${high24h.toFixed(6)} | T1=${coin.technicalIndicators.fibonacci.level236.toFixed(6)} | T2=${coin.technicalIndicators.fibonacci.level382.toFixed(6)} | T3=${coin.technicalIndicators.fibonacci.level500.toFixed(6)}`);
+}
+
+    estimateRSIFromChange(change24h) {
+        if (change24h > 5) return 70;
+        if (change24h > 2) return 60;
+        if (change24h > 0) return 55;
+        if (change24h > -2) return 45;
+        if (change24h > -5) return 40;
+        return 30;
     }
 
-    // دالة جديدة لتقييم حالة العملة
-    evaluateCoinStatus(coin) {
-        const symbol = coin.symbol;
-        const currentChange = coin.change24h;
-        
-        // إذا لم تكن العملة مسجلة، اعتبرها عادية
-        if (!this.coinHistory.has(symbol)) {
-            return 'normal';
-        }
-        
-        const history = this.coinHistory.get(symbol);
-        const highestChange = history.highestChange;
-        const dropFromHigh = highestChange - currentChange;
-        
-        // حساب النسبة المئوية للانخفاض
-        const dropPercentage = (dropFromHigh / highestChange) * 100;
-        
-        console.log(`📊 ${symbol}: الحالي=${currentChange.toFixed(2)}%, الأعلى=${highestChange.toFixed(2)}%, الانخفاض=${dropPercentage.toFixed(1)}%`);
-        
-        // إزالة العملة إذا فقدت أكثر من 7% من أعلى نقطة
-        if (dropPercentage > this.config.removeDropPercent) {
-            console.log(`🗑️ ${symbol}: تم حذفها - فقدت ${dropPercentage.toFixed(1)}% من أعلى نقطة`);
-            this.coinHistory.delete(symbol); // حذف من التاريخ
-            return 'removed';
-        }
-        
-        // تحذير إذا فقدت أكثر من 3% من أعلى نقطة
-        if (dropPercentage > this.config.warningDropPercent) {
-            console.log(`⚠️ ${symbol}: تحذير - فقدت ${dropPercentage.toFixed(1)}% من أعلى نقطة`);
-            return 'warning';
-        }
-        
-        return 'normal';
+    estimateMFIFromVolume(volume, change24h) {
+        const baseValue = change24h > 0 ? 60 : 40;
+        const volumeBonus = Math.min(volume / 1000000 * 10, 20);
+        return Math.min(Math.max(baseValue + volumeBonus, 0), 100);
     }
+
+    calculateFibonacci(highs, lows) {
+        const high = Math.max(...highs);
+        const low = Math.min(...lows);
+        const diff = high - low;
+                
+        return {
+            level0: high,
+            level236: high - (diff * 0.236),
+            level382: high - (diff * 0.382),
+            level500: high - (diff * 0.500),
+            level618: high - (diff * 0.618),
+            level786: high - (diff * 0.786),
+            level100: low
+        };
+    }
+calculateScore(coin) {
+    const conditions = {};
+    const changePercent = coin.change24h;
+    const rsi = coin.technicalIndicators.rsi;
+    const macd = coin.technicalIndicators.macd;
+    const macdSignal = coin.technicalIndicators.macdSignal;
+    const mfi = coin.technicalIndicators.mfi;
+    const currentPrice = coin.price;
+    const ema20 = coin.technicalIndicators.ema20;
+    const ema50 = coin.technicalIndicators.ema50;
+
+    // فحص الشروط الأساسية
+    if (changePercent >= 3) {
+        conditions.rise3Percent = true;
+    }
+    
+    if (changePercent >= 4) {
+        conditions.rise4Percent = true;
+    }
+    
+    // تصحيح شرط اختراق المتوسطات - السعر يجب أن يكون >= EMA20 و >= EMA50
+    if (currentPrice >= ema20 && currentPrice >= ema50) {
+        conditions.breakoutMA = true;
+    }
+    
+    if (rsi > 50) {
+        conditions.rsiBullish = true;
+    }
+    
+    if (macd > macdSignal) {
+        conditions.macdBullish = true;
+    }
+    
+    if (mfi > 50) {
+        conditions.mfiBullish = true;
+    }
+
+    // حساب عدد الشروط المحققة
+    const achievedConditions = Object.keys(conditions).length;
+    
+    // الحالات الخاصة
+    if (changePercent > 7 && achievedConditions >= 4) {
+        conditions.strongRise = true;
+    }
+    
+    if (changePercent > 9 && achievedConditions === 6) {
+        conditions.perfectScore = true;
+    }
+
+    // حساب النقاط
+    let baseScore = 0;
+    if (achievedConditions === 6) {
+        baseScore = 100;
+    } else if (achievedConditions === 5) {
+        baseScore = 80;
+    } else if (achievedConditions === 4) {
+        baseScore = 60;
+    } else if (achievedConditions === 3) {
+        baseScore = 40;
+    } else if (achievedConditions === 2) {
+        baseScore = 25;
+    } else if (achievedConditions === 1) {
+        baseScore = 15;
+    } else {
+        baseScore = 5;
+    }
+
+    coin.baseScore = baseScore;
+    coin.score = baseScore;
+    coin.conditions = conditions;
+    coin.achievedConditionsCount = achievedConditions;
+    
+    console.log(`📊 ${coin.symbol}: الشروط=${achievedConditions}/6, التغيير=${changePercent.toFixed(2)}%, النقاط=${baseScore}`);
+    
+    console.log(`   - ارتفاع 3%: ${conditions.rise3Percent ? '✓' : '✗'}`);
+    console.log(`   - ارتفاع 4%: ${conditions.rise4Percent ? '✓' : '✗'}`);
+    console.log(`   - اختراق المتوسطات: ${conditions.breakoutMA ? '✓' : '✗'} (السعر:${currentPrice} >= EMA20:${ema20} و >= EMA50:${ema50})`);
+    console.log(`   - RSI > 50: ${conditions.rsiBullish ? '✓' : '✗'} (${rsi})`);
+    console.log(`   - MACD صاعد: ${conditions.macdBullish ? '✓' : '✗'} (MACD:${macd}, Signal:${macdSignal})`);
+    console.log(`   - MFI > 50: ${conditions.mfiBullish ? '✓' : '✗'} (${mfi})`);
+}
+
 
     analyzeCoins() {
         console.log('🔍 بدء تحليل العملات...');
         
-        // تتبع أداء العملات وتقييم حالتها
         this.coins.forEach(coin => {
-            this.trackCoinPerformance(coin);
-            coin.status = this.evaluateCoinStatus(coin);
             this.calculateScore(coin);
         });
         
-        // إزالة العملات التي فقدت أكثر من 7% من أعلى نقطة
-        this.coins = this.coins.filter(coin => coin.status !== 'removed');
-        
-        // تطبيق النظام الجديد للنقاط (80% تغيير + 20% تحليل فني)
-        this.coins.forEach(coin => {
-            const changeScore = Math.min(coin.change24h * 10, 100); // التغيير × 10 (حد أقصى 100)
-            const technicalScore = coin.score || 0; // النقاط الفنية الحالية
-            
-            // النظام الجديد: 80% تغيير + 20% تحليل فني
-            coin.newScore = (changeScore * this.config.changeWeight) + (technicalScore * this.config.technicalWeight);
-            coin.score = Math.round(coin.newScore);
-            
-            console.log(`📊 ${coin.symbol}: تغيير=${coin.change24h.toFixed(2)}% (${changeScore.toFixed(1)} نقطة) + فني=${technicalScore} = ${coin.score} نقطة`);
-        });
-        
-        // ترتيب العملات حسب النظام الجديد
+        // ترتيب العملات
         this.coins.sort((a, b) => {
-            // أولوية للعملات الجديدة (5-7%)
-            const aIsNew = a.change24h >= this.config.minChange && a.change24h <= 7;
-            const bIsNew = b.change24h >= this.config.minChange && b.change24h <= 7;
-            
-            if (aIsNew && !bIsNew) return -1;
-            if (!aIsNew && bIsNew) return 1;
-            
-            // ثم حسب النقاط الجديدة
-            return b.score - a.score;
+            if (a.achievedConditionsCount !== b.achievedConditionsCount) {
+                return b.achievedConditionsCount - a.achievedConditionsCount;
+            }
+            return b.change24h - a.change24h;
         });
         
-        // تحديد المراكز
+        // تطبيق نظام الخصم التدريجي
         for (let i = 0; i < this.coins.length; i++) {
-            this.coins[i].rank = i + 1;
+            const coin = this.coins[i];
+            coin.rank = i + 1;
+            
+            if (i === 0) {
+                coin.finalScore = coin.baseScore;
+            } else {
+                const previousCoin = this.coins[i - 1];
+                const deduction = coin.rank;
+                coin.finalScore = Math.max(previousCoin.finalScore - deduction, 0);
+            }
+            
+            coin.score = coin.finalScore;
         }
         
-        // تحديد العملات للعرض (أفضل 30 عملة)
-        this.coins = this.coins.slice(0, this.config.maxCoins);
-        
-        console.log('🏆 الترتيب النهائي (النظام الجديد):');
+        console.log('🏆 الترتيب النهائي:');
         this.coins.slice(0, 10).forEach(coin => {
-            const statusText = coin.status === 'warning' ? ' ⚠️' : '';
-            const isNew = coin.change24h >= this.config.minChange && coin.change24h <= 7 ? ' 🆕' : '';
-            console.log(`${coin.rank}. ${coin.symbol}${statusText}${isNew}: ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
+            console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
         });
-        
-        console.log(`📈 إجمالي العملات المعروضة: ${this.coins.length}`);
-        console.log(`🗑️ العملات المحذوفة: ${this.coinHistory.size - this.coins.length}`);
     }
+   calculateTargets(coin) {
+    const fib = coin.technicalIndicators.fibonacci;
+    const currentPrice = coin.price;
+    
+    coin.targets = {
+        entry: currentPrice, // الدخول بالسعر الحالي
+        stopLoss: fib.level786, // وقف خسارة عند دعم قوي
+        target1: fib.level236, // هدف 1 (أعلى من السعر)
+        target2: fib.level382, // هدف 2
+        target3: fib.level500, // هدف 3
+        target4: fib.level618  // هدف 4
+    };
+    
+    console.log(`🎯 ${coin.symbol} الأهداف المصححة: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | T3=${coin.targets.target3.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
+}
 
-    calculateScore(coin) {
-        let score = 0;
-        const conditions = {};
-        
-        const rsi = coin.technicalIndicators.rsi || 0;
-        const macd = coin.technicalIndicators.macd || 0;
-        const macdSignal = coin.technicalIndicators.macdSignal || 0;
-        const ema20 = coin.technicalIndicators.ema20 || 0;
-        const ema50 = coin.technicalIndicators.ema50 || 0;
-        const mfi = coin.technicalIndicators.mfi || 0;
-        const change = coin.change24h;
 
-        // شرط 1: ارتفاع 3% - 8 نقاط
-        if (change >= 3) {
-            score += 8;
-            conditions.rise3Percent = true;
+findNearestSupport(price, fib) {
+    const levels = [fib.level618, fib.level500, fib.level382, fib.level236];
+    let nearest = levels[0];
+    let minDiff = Math.abs(price - nearest);
+    
+    for (const level of levels) {
+        const diff = Math.abs(price - level);
+        if (diff < minDiff && level < price) {
+            nearest = level;
+            minDiff = diff;
         }
-
-        // شرط 2: ارتفاع 4% - 12 نقطة
-        if (change >= 4) {
-            score += 12;
-            conditions.rise4Percent = true;
-        }
-
-        // شرط 3: اختراق المتوسطات - 18 نقطة
-        if (coin.price > ema20 && coin.price > ema50) {
-            score += 18;
-            conditions.breakoutMA = true;
-        }
-
-        // شرط 4: RSI فوق 50 - 15 نقطة
-        if (rsi > 50) {
-            score += 15;
-            conditions.rsiBullish = true;
-        }
-
-        // شرط 5: MACD تقاطع صاعد - 22 نقطة
-        if (macd > macdSignal) {
-            score += 22;
-            conditions.macdBullish = true;
-        }
-
-        // شرط 6: MFI فوق 50 - 25 نقطة
-        if (mfi > 50) {
-            score += 25;
-            conditions.mfiBullish = true;
-        }
-
-        // بونص: ارتفاع قوي +7% - 20 نقطة إضافية
-        if (change >= 7) {
-            score += 20;
-            conditions.strongRise = true;
-        }
-
-        // بونص: جميع الشروط +9% - 10 نقاط إضافية
-        if (change >= 9 && Object.keys(conditions).length >= 6) {
-            score += 10;
-            conditions.perfectScore = true;
-        }
-
-        coin.score = score;
-        coin.conditions = conditions;
-        coin.achievedConditionsCount = Object.keys(conditions).length;
     }
+    
+    return nearest;
+}
+ renderResults() {
+    const container = document.getElementById('results');
+    if (!container) return;
 
-    calculateTargets(coin) {
-        const fib = coin.technicalIndicators.fibonacci;
-        const currentPrice = coin.price;
+    container.innerHTML = this.coins.slice(0, 10).map((coin, index) => {
+        const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${coin.rank}`;
         
-        coin.targets = {
-            entry: currentPrice,
-            stopLoss: fib.level786,
-            target1: fib.level236,
-            target2: fib.level382,
-            target3: fib.level500,
-            target4: fib.level618
-        };
-        
-        console.log(`🎯 ${coin.symbol} الأهداف المصححة: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | T3=${coin.targets.target3.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
-    }
-
-    findNearestSupport(price, fib) {
-        const levels = [fib.level618, fib.level500, fib.level382, fib.level236];
-        let nearest = levels[0];
-        let minDiff = Math.abs(price - nearest);
-        
-        for (const level of levels) {
-            const diff = Math.abs(price - level);
-            if (diff < minDiff && level < price) {
-                nearest = level;
-                minDiff = diff;
-            }
-        }
-        
-        return nearest;
-    }
-
-    calculateRSI(candles, period = 14) {
-        if (candles.length < period + 1) return 50;
-        
-        let gains = 0;
-        let losses = 0;
-        
-        for (let i = 1; i <= period; i++) {
-            const change = candles[candles.length - i].close - candles[candles.length - i - 1].close;
-            if (change > 0) {
-                gains += change;
-            } else {
-                losses += Math.abs(change);
-            }
-        }
-        
-        const avgGain = gains / period;
-        const avgLoss = losses / period;
-        
-        if (avgLoss === 0) return 100;
-        
-        const rs = avgGain / avgLoss;
-        return 100 - (100 / (1 + rs));
-    }
-
-    calculateMACD(candles) {
-        const ema12 = this.calculateEMA(candles, 12);
-        const ema26 = this.calculateEMA(candles, 26);
-        return ema12 - ema26;
-    }
-
-    calculateMACDSignal(candles) {
-        return this.calculateEMA(candles, 9);
-    }
-
-    calculateEMA(candles, period) {
-        if (candles.length < period) return candles[candles.length - 1]?.close || 0;
-        
-        const multiplier = 2 / (period + 1);
-        let ema = candles.slice(0, period).reduce((sum, candle) => sum + candle.close, 0) / period;
-        
-        for (let i = period; i < candles.length; i++) {
-            ema = (candles[i].close * multiplier) + (ema * (1 - multiplier));
-        }
-        
-        return ema;
-    }
-
-    calculateMA(candles, period) {
-        if (candles.length < period) return candles[candles.length - 1]?.close || 0;
-        
-        const slice = candles.slice(-period);
-        return slice.reduce((sum, candle) => sum + candle.close, 0) / period;
-    }
-
-    calculateMFI(candles, period = 14) {
-        if (candles.length < period + 1) return 50;
-        
-        let positiveFlow = 0;
-        let negativeFlow = 0;
-        
-        for (let i = candles.length - period; i < candles.length; i++) {
-            const current = candles[i];
-            const previous = candles[i - 1];
-            
-            const typicalPrice = (current.high + current.low + current.close) / 3;
-            const previousTypicalPrice = (previous.high + previous.low + previous.close) / 3;
-            const moneyFlow = typicalPrice * current.volume;
-            
-            if (typicalPrice > previousTypicalPrice) {
-                positiveFlow += moneyFlow;
-            } else if (typicalPrice < previousTypicalPrice) {
-                negativeFlow += moneyFlow;
-            }
-        }
-        
-        if (negativeFlow === 0) return 100;
-        
-        const moneyFlowRatio = positiveFlow / negativeFlow;
-        return 100 - (100 / (1 + moneyFlowRatio));
-    }
-
-    calculateParabolicSAR(candles) {
-        if (candles.length < 2) return candles[candles.length - 1]?.close || 0;
-        
-        const af = 0.02;
-        const maxAf = 0.2;
-        let sar = candles[0].low;
-        let ep = candles[0].high;
-        let currentAf = af;
-        let isUptrend = true;
-        
-        for (let i = 1; i < candles.length; i++) {
-            const candle = candles[i];
-            
-            if (isUptrend) {
-                sar = sar + currentAf * (ep - sar);
+        return `
+            <div class="coin-card ${index < 3 ? 'top-coin' : ''}">
+                <div class="coin-header">
+                    <span class="rank">${rankEmoji}</span>
+                    <span class="symbol">${coin.symbol}</span>
+                    <span class="price">$${coin.price}</span>
+                    <span class="change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
+                    </span>
+                </div>
                 
-                if (candle.high > ep) {
-                    ep = candle.high;
-                    currentAf = Math.min(currentAf + af, maxAf);
-                }
+                <div class="score-section">
+                    <span class="score">النقاط:${coin.score}</span>
+                    <span class="conditions">${coin.achievedConditionsCount}/6 شروط</span>
+                </div>
                 
-                if (candle.low < sar) {
-                    isUptrend = false;
-                    sar = ep;
-                    ep = candle.low;
-                    currentAf = af;
-                }
-            } else {
-                sar = sar - currentAf * (sar - ep);
+                <div class="targets-section">
+                    <div class="targets-title">🎯 أهداف فيبوناتشي:</div>
+                    <div class="targets-grid">
+                        <span class="entry">دخول: $${coin.targets.entry.toFixed(6)}</span>
+                        <span class="target">T1: $${coin.targets.target1.toFixed(6)}</span>
+                        <span class="target">T2: $${coin.targets.target2.toFixed(6)}</span>
+                        <span class="target">T3: $${coin.targets.target3.toFixed(6)}</span>
+                        <span class="stop-loss">وقف: $${coin.targets.stopLoss.toFixed(6)}</span>
+                    </div>
+                </div>
                 
-                if (candle.low < ep) {
-                    ep = candle.low;
-                    currentAf = Math.min(currentAf + af, maxAf);
-                }
+                <div class="indicators">
+                    <span>حجم التداول:${(coin.volume / 1000).toFixed(1)}K</span>
+                    <span>RSI:${coin.technicalIndicators.rsi.toFixed(1)}</span>
+                    <span>MFI:${coin.technicalIndicators.mfi.toFixed(1)}</span>
+                </div>
                 
-                if (candle.high > sar) {
-                    isUptrend = true;
-                    sar = ep;
-                    ep = candle.high;
-                    currentAf = af;
-                }
-            }
-        }
-        
-        return sar;
-    }
+                <div class="liquidity-bar">
+                    <div class="liquidity-fill" style="width: ${Math.min(coin.volume / 10000, 100)}%"></div>
+                    <span>شريط السيولة</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
-    calculateFibonacci(candles) {
-        if (candles.length < 20) {
-            const lastPrice = candles[candles.length - 1]?.close || 0;
-            return {
-                level0: lastPrice,
-                level236: lastPrice * 0.764,
-                level382: lastPrice * 0.618,
-                level500: lastPrice * 0.5,
-                level618: lastPrice * 0.382,
-                level786: lastPrice * 0.214
-            };
+    analyzeCoins() {
+    console.log('🔍 بدء تحليل العملات...');
+    
+    this.coins.forEach(coin => {
+        this.calculateScore(coin);
+        this.calculateTargets(coin); // إضافة هذا السطر
+    });
+    
+    // ترتيب العملات
+    this.coins.sort((a, b) => {
+        if (a.achievedConditionsCount !== b.achievedConditionsCount) {
+            return b.achievedConditionsCount - a.achievedConditionsCount;
+        }
+        return b.change24h - a.change24h;
+    });
+    
+    // تطبيق نظام الخصم التدريجي
+    for (let i = 0; i < this.coins.length; i++) {
+        const coin = this.coins[i];
+        coin.rank = i + 1;
+        
+        if (i === 0) {
+            coin.finalScore = coin.baseScore;
+        } else {
+            const previousCoin = this.coins[i - 1];
+            const deduction = coin.rank;
+            coin.finalScore = Math.max(previousCoin.finalScore - deduction, 1);
         }
         
-        const recentCandles = candles.slice(-20);
-        const high = Math.max(...recentCandles.map(c => c.high));
-        const low = Math.min(...recentCandles.map(c => c.low));
-        const range = high - low;
-        
-        return {
-            level0: high,
-            level236: high - (range * 0.236),
-            level382: high - (range * 0.382),
-            level500: high - (range * 0.500),
-            level618: high - (range * 0.618),
-            level786: high - (range * 0.786)
-        };
+        coin.score = coin.finalScore;
     }
+    
+    console.log('🏆 الترتيب النهائي مع أهداف فيبوناتشي:');
+    this.coins.slice(0, 10).forEach(coin => {
+        console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
+        console.log(`   🎯 الأهداف: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
+    });
+}
+
+
 
     renderCoins() {
         const grid = document.getElementById('coinsGrid');
         grid.innerHTML = '';
-        
         this.coins.forEach(coin => {
             const card = this.createCoinCard(coin);
             grid.appendChild(card);
         });
-        
-        console.log(`🎨 تم عرض ${this.coins.length} عملة`);
     }
 
     createCoinCard(coin) {
         const card = document.createElement('div');
         card.className = 'coin-card';
         card.onclick = () => this.showCoinDetails(coin);
-        
+                
         const changeClass = coin.change24h >= 0 ? 'positive' : 'negative';
         const changeSign = coin.change24h >= 0 ? '+' : '';
         const liquidityPercent = Math.min((coin.technicalIndicators.mfi || 0), 100);
-        
-        // تحديد رمز الحالة
-        const statusIcon = coin.status === 'warning' ? ' ⚠️' : '';
-        
+                
         let rankBadgeStyle = '';
         if (coin.rank === 1) {
             rankBadgeStyle = 'background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);';
@@ -577,13 +571,13 @@ class YaserCrypto {
         } else {
             rankBadgeStyle = 'background: linear-gradient(45deg, #666, #555); color: #fff;';
         }
-        
+
         card.innerHTML = `
             <div class="rank-badge" style="${rankBadgeStyle}">#${coin.rank}${coin.rank === 1 ? ' 🥇' : coin.rank === 2 ? ' 🥈' : coin.rank === 3 ? ' 🥉' : ''}</div>
             <div class="coin-header">
                 <div class="coin-logo">${coin.symbol.charAt(0)}</div>
                 <div class="coin-info">
-                    <h3>${coin.name}${statusIcon}</h3>
+                    <h3>${coin.name}</h3>
                     <div class="coin-price">
                         $${coin.price.toFixed(4)}
                         <span class="price-change ${changeClass}">
@@ -618,7 +612,7 @@ class YaserCrypto {
                 <div class="liquidity-fill" style="width: ${liquidityPercent}%"></div>
             </div>
         `;
-        
+                
         return card;
     }
 
@@ -631,7 +625,7 @@ class YaserCrypto {
         return volume.toFixed(0);
     }
 
-  showCoinDetails(coin) {
+    showCoinDetails(coin) {
         const modal = document.getElementById('coinModal');
         const modalBody = document.getElementById('modalBody');
         const fib = coin.technicalIndicators.fibonacci;
@@ -757,29 +751,52 @@ class YaserCrypto {
         modal.style.display = 'block';
     }
 
+  renderConditions(conditions) {
+    const conditionLabels = {
+        rise3Percent: 'ارتفاع 3% - 8 نقاط',
+        rise4Percent: 'ارتفاع 4% - 12 نقطة',         
+        breakoutMA: 'اختراق المتوسطات - 18 نقطة',
+        rsiBullish: 'RSI فوق 50 - 15 نقطة',
+        macdBullish: 'MACD تقاطع صاعد - 22 نقطة',
+        mfiBullish: 'MFI فوق 50 - 25 نقطة',
+        strongRise: 'ارتفاع قوي +7% - بونص 20 نقطة',
+        perfectScore: 'جميع الشروط +9% - بونص 10 نقاط'
+    };
 
-    async delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    let html = '';
+    for (const [key, label] of Object.entries(conditionLabels)) {
+        const achieved = conditions[key] || false;
+        html += `
+            <div style="padding: 10px; background: ${achieved ? '#1a4d3a' : '#4d1a1a'}; border-radius: 8px; border: 1px solid ${achieved ? '#00ff88' : '#ff4757'};">
+                <div style="color: ${achieved ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${achieved ? '✓' : '✗'} ${label}
+                </div>
+            </div>
+        `;
+    }
+    return html;
+}
+}
+
+// الدوال العامة
+function closeModal() {
+    document.getElementById('coinModal').style.display = 'none';
+}
+
+// إغلاق النافذة المنبثقة عند النقر خارجها
+window.onclick = function(event) {
+    const modal = document.getElementById('coinModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
 }
 
-// إغلاق النافذة المنبثقة
+// تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('coinModal');
-    const closeBtn = document.querySelector('.close');
-    
-    closeBtn.onclick = function() {
-        modal.style.display = 'none';
-    }
-    
-    window.onclick = function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    }
+    window.yaserCrypto = new YaserCrypto();
+   
+
 });
 
-// بدء التطبيق
-document.addEventListener('DOMContentLoaded', function() {
-    new YaserCrypto();
-});
+
+

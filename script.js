@@ -7,9 +7,11 @@ class YaserCrypto {
             maxCoins: 50,
             minChange: 1,
             maxChange: 15,
-            minVolume: 100000
+            minVolume: 100000,
+            refreshInterval: 15000 // كل 15 ثانية
         };
         this.requestDelay = 500;
+        this.refreshTimer = null;
         this.init();
     }
 
@@ -18,21 +20,53 @@ class YaserCrypto {
         await this.fetchData();
         this.analyzeCoins();
         this.renderCoins();
+        this.startAutoRefresh();
     }
 
- showLoading() {
-        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
+    // إضافة دالة التحديث التلقائي
+    startAutoRefresh() {
+        if (this.refreshTimer) {
+            clearInterval(this.refreshTimer);
+        }
+        
+        this.refreshTimer = setInterval(async () => {
+            console.log('🔄 تحديث تلقائي للبيانات...');
+            try {
+                await this.fetchData();
+                this.analyzeCoins();
+                this.renderCoins();
+                console.log('✅ تم التحديث بنجاح');
+            } catch (error) {
+                console.error('❌ خطأ في التحديث:', error);
+            }
+        }, this.config.refreshInterval);
     }
 
-    showError(message) {
-        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+    // إضافة دالة إيقاف التحديث
+    stopAutoRefresh() {
+        if (this.refreshTimer) {
+            clearInterval(this.refreshTimer);
+            this.refreshTimer = null;
+            console.log('⏹️ تم إيقاف التحديث التلقائي');
+        }
     }
 
+    // إضافة دالة التحديث اليدوي
+    async manualRefresh() {
+        console.log('🔄 تحديث يدوي...');
+        this.showLoading();
+        try {
+            await this.fetchData();
+            this.analyzeCoins();
+            this.renderCoins();
+            console.log('✅ تم التحديث اليدوي بنجاح');
+        } catch (error) {
+            console.error('❌ خطأ في التحديث اليدوي:', error);
+            this.showError(`خطأ: ${error.message}`);
+        }
+    }
 
-
-
-
-   async fetchData() {
+  async fetchData() {
     try {
         console.log('🚀 بدء عملية جلب البيانات...');
         
@@ -86,15 +120,19 @@ class YaserCrypto {
     }
 }
 
-
-    async fetchTopGainers() {
+async fetchTopGainers() {
     try {
         console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
         
-        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+        // إضافة timestamp لتجنب الـ cache
+        const timestamp = Date.now();
+        const response = await fetch(`https://www.okx.com/api/v5/market/tickers?instType=SPOT&_t=${timestamp}`, {
             method: 'GET',
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
         });
         
@@ -127,8 +165,8 @@ class YaserCrypto {
                 
                 const change24h = ((currentPrice - openPrice) / openPrice) * 100;
                 
-                // معايير أوسع للحصول على عملات أكثر
-                const validChange = change24h > 0.5 && change24h < 25; // من 0.5% إلى 25%
+                // معايير أوسع للحصول على عملات أكثر - تشمل العملات الهابطة أيضاً
+                const validChange = Math.abs(change24h) > 0.5 && Math.abs(change24h) < 25; // من 0.5% إلى 25% (صعود أو هبوط)
                 const validVolume = volume > 10000; // حجم أكبر من 10K
                 
                 return validChange && validVolume;
@@ -145,44 +183,49 @@ class YaserCrypto {
                     price: currentPrice
                 };
             })
-            .sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً
-            .slice(0, 30); // أخذ أفضل 30 عملة
-
+            .sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً (الهابطة ستكون في النهاية)
+            .slice(0, 50); // زيادة العدد إلى 50 عملة لتشمل المتغيرة
+        
         console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
         
         if (usdtPairs.length === 0) {
             throw new Error('لم يتم العثور على عملات تحقق المعايير');
         }
         
-        // عرض أفضل 5 عملات للتحقق
+        // عرض أفضل 5 عملات وأسوأ 5 عملات للتحقق
         console.log('🏆 أفضل 5 عملات مرشحة:');
         usdtPairs.slice(0, 5).forEach((coin, index) => {
-            console.log(`${index + 1}. ${coin.symbol}: +${coin.change24h.toFixed(2)}% - الحجم: ${coin.volume.toLocaleString()}`);
+            console.log(`${index + 1}. ${coin.symbol}: ${coin.change24h > 0 ? '+' : ''}${coin.change24h.toFixed(2)}% - الحجم: ${coin.volume.toLocaleString()}`);
+        });
+        
+        console.log('📉 أسوأ 5 عملات:');
+        usdtPairs.slice(-5).forEach((coin, index) => {
+            console.log(`${index + 1}. ${coin.symbol}: ${coin.change24h > 0 ? '+' : ''}${coin.change24h.toFixed(2)}% - الحجم: ${coin.volume.toLocaleString()}`);
         });
         
         return usdtPairs.map(coin => coin.symbol);
         
     } catch (error) {
         console.error('❌ خطأ في fetchTopGainers:', error);
-        throw error; // رمي الخطأ بدلاً من استخدام بيانات وهمية
+        throw error;
     }
 }
 
-
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async fetchCoinData(symbol) {
+// إضافة دالة fetchCoinData المحدثة
+async fetchCoinData(symbol) {
     try {
-        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        // إضافة timestamp لتجنب الـ cache
+        const timestamp = Date.now();
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT&_t=${timestamp}`;
         
         const tickerResponse = await fetch(apiUrl, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
         });
         
@@ -202,10 +245,9 @@ class YaserCrypto {
         const openPrice24h = parseFloat(ticker.open24h);
         
         // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
-        const change24h = parseFloat(ticker.changePercent) || 
-            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        const change24h = parseFloat(ticker.changePercent) || (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
         
-        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%`);
         
         const coin = {
             symbol: symbol,
@@ -219,7 +261,8 @@ class YaserCrypto {
             score: 0,
             rank: 0,
             conditions: {},
-            targets: {}
+            targets: {},
+            lastUpdate: new Date().toLocaleTimeString() // إضافة وقت آخر تحديث
         };
         
         this.calculateTechnicalIndicators(coin);
@@ -232,7 +275,49 @@ class YaserCrypto {
     }
 }
 
-   calculateTechnicalIndicators(coin) {
+// إضافة دوال التحديث التلقائي
+startAutoRefresh() {
+    if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+    }
+    
+    console.log('🔄 بدء التحديث التلقائي كل 15 ثانية...');
+    
+    this.refreshTimer = setInterval(async () => {
+        console.log('🔄 تحديث تلقائي للبيانات...');
+        try {
+            await this.fetchData();
+            this.analyzeCoins();
+            this.renderCoins();
+            console.log('✅ تم التحديث التلقائي بنجاح في', new Date().toLocaleTimeString());
+        } catch (error) {
+            console.error('❌ خطأ في التحديث التلقائي:', error);
+        }
+    }, 15000); // كل 15 ثانية
+}
+
+stopAutoRefresh() {
+    if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+        this.refreshTimer = null;
+        console.log('⏹️ تم إيقاف التحديث التلقائي');
+    }
+}
+
+async manualRefresh() {
+    console.log('🔄 تحديث يدوي...');
+    this.showLoading();
+    try {
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
+        console.log('✅ تم التحديث اليدوي بنجاح في', new Date().toLocaleTimeString());
+    } catch (error) {
+        console.error('❌ خطأ في التحديث اليدوي:', error);
+        this.showError(`خطأ: ${error.message}`);
+    }
+}
+ calculateTechnicalIndicators(coin) {
     // حساب RSI
     coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
     if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
@@ -795,8 +880,11 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
    
-
-
+// في نهاية الملف، أضف:
+let yaserCrypto;
+document.addEventListener('DOMContentLoaded', function() {
+    yaserCrypto = new YaserCrypto();
+    window.yaserCrypto = yaserCrypto; // جعل المتغير متاح عالمياً
 });
 
 

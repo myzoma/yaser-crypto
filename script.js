@@ -795,38 +795,7 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
    
-// إضافة دالة لمسح الـ cache وإعادة التحميل
-async forceRefresh() {
-    console.log('🔄 إعادة تحميل كاملة للبيانات...');
-    
-    // مسح البيانات الحالية
-    this.coins = [];
-    
-    // إظهار رسالة التحميل
-    this.showLoading();
-    
-    try {
-        // إعادة تشغيل العملية كاملة
-        await this.fetchData();
-        this.analyzeCoins();
-        this.renderCoins();
-        console.log('✅ تم التحديث الكامل بنجاح');
-    } catch (error) {
-        console.error('❌ خطأ في التحديث الكامل:', error);
-        this.showError(`خطأ في التحديث: ${error.message}`);
-    }
-}
 
-// دالة لمسح cache المتصفح
-clearBrowserCache() {
-    if ('caches' in window) {
-        caches.keys().then(function(names) {
-            names.forEach(function(name) {
-                caches.delete(name);
-            });
-        });
-    }
-}
 
 });
 

@@ -634,7 +634,8 @@ class YaserCrypto {
    showCoinDetails(coin) {
     const modal = document.getElementById('coinModal');
     const modalBody = document.getElementById('modalBody');
-    
+    console.log('بيانات العملة:', coin.technicalIndicators);
+
     // ✅ فحص وجود البيانات مع قيم افتراضية
     const fib = coin.technicalIndicators.fibonacci || {
         level0: coin.high24h || coin.price,

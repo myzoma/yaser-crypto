@@ -1,4 +1,238 @@
- calculateTechnicalIndicators(coin) {
+class YaserCrypto {
+    constructor() {
+        this.coins = [];
+        this.config = {
+            apiUrl: "https://www.okx.com/api/v5",
+            requestDelay: 500,
+            maxCoins: 50,
+            minChange: 1,
+            maxChange: 15,
+            minVolume: 100000
+        };
+        this.requestDelay = 500;
+        this.init();
+    }
+
+    async init() {
+        this.showLoading();
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
+    }
+
+ showLoading() {
+        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
+    }
+
+    showError(message) {
+        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+    }
+
+
+
+
+
+   async fetchData() {
+    try {
+        console.log('🚀 بدء عملية جلب البيانات...');
+        
+        const candidateSymbols = await this.fetchTopGainers();
+        
+        if (!candidateSymbols || candidateSymbols.length === 0) {
+            throw new Error('لم يتم العثور على عملات مرشحة');
+        }
+        
+        console.log(`📋 سيتم تحليل ${candidateSymbols.length} عملة`);
+        
+        const results = [];
+        
+        for (let i = 0; i < candidateSymbols.length; i++) {
+            const symbol = candidateSymbols[i];
+            
+            try {
+                console.log(`🔄 تحليل ${symbol}... (${i + 1}/${candidateSymbols.length})`);
+                
+                const coin = await this.fetchCoinData(symbol);
+                
+                if (coin && typeof coin.change24h === 'number' && !isNaN(coin.change24h)) {
+                    results.push(coin);
+                    console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
+                } else {
+                    console.warn(`⚠️ بيانات غير صالحة لـ ${symbol}`);
+                }
+                
+                // تأخير بين الطلبات
+                if (i < candidateSymbols.length - 1) {
+                    await this.delay(this.requestDelay);
+                }
+                
+            } catch (error) {
+                console.warn(`❌ فشل في تحليل ${symbol}:`, error.message);
+                continue; // تجاهل العملة والانتقال للتالية
+            }
+        }
+        
+        if (results.length === 0) {
+            throw new Error('فشل في الحصول على بيانات صالحة لأي عملة');
+        }
+        
+        this.coins = results;
+        console.log(`🎉 تم تحليل ${this.coins.length} عملة بنجاح`);
+        
+    } catch (error) {
+        console.error('💥 خطأ في fetchData:', error);
+        this.showError(`خطأ في جلب البيانات: ${error.message}`);
+        throw error;
+    }
+}
+
+
+    async fetchTopGainers() {
+    try {
+        console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
+        
+        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`فشل في جلب البيانات: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📡 استلام البيانات من API:', data.data ? data.data.length : 0, 'عملة');
+        
+        if (!data.data || data.data.length === 0) {
+            throw new Error('لا توجد بيانات من API');
+        }
+        
+        // فلترة العملات مع معايير أوسع
+        const usdtPairs = data.data
+            .filter(ticker => {
+                if (!ticker.instId || !ticker.instId.endsWith('-USDT')) {
+                    return false;
+                }
+                
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const volume = parseFloat(ticker.vol24h);
+                
+                // التحقق من صحة البيانات
+                if (!currentPrice || !openPrice || currentPrice <= 0 || openPrice <= 0) {
+                    return false;
+                }
+                
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                
+                // معايير أوسع للحصول على عملات أكثر
+                const validChange = change24h > 0.5 && change24h < 25; // من 0.5% إلى 25%
+                const validVolume = volume > 10000; // حجم أكبر من 10K
+                
+                return validChange && validVolume;
+            })
+            .map(ticker => {
+                const currentPrice = parseFloat(ticker.last);
+                const openPrice = parseFloat(ticker.open24h);
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                
+                return {
+                    symbol: ticker.instId.replace('-USDT', ''),
+                    change24h: change24h,
+                    volume: parseFloat(ticker.vol24h),
+                    price: currentPrice
+                };
+            })
+            .sort((a, b) => b.change24h - a.change24h) // ترتيب حسب الأعلى ارتفاعاً
+            .slice(0, 30); // أخذ أفضل 30 عملة
+
+        console.log(`🎯 تم العثور على ${usdtPairs.length} عملة مرشحة`);
+        
+        if (usdtPairs.length === 0) {
+            throw new Error('لم يتم العثور على عملات تحقق المعايير');
+        }
+        
+        // عرض أفضل 5 عملات للتحقق
+        console.log('🏆 أفضل 5 عملات مرشحة:');
+        usdtPairs.slice(0, 5).forEach((coin, index) => {
+            console.log(`${index + 1}. ${coin.symbol}: +${coin.change24h.toFixed(2)}% - الحجم: ${coin.volume.toLocaleString()}`);
+        });
+        
+        return usdtPairs.map(coin => coin.symbol);
+        
+    } catch (error) {
+        console.error('❌ خطأ في fetchTopGainers:', error);
+        throw error; // رمي الخطأ بدلاً من استخدام بيانات وهمية
+    }
+}
+
+
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+}
+
+   calculateTechnicalIndicators(coin) {
     // حساب RSI
     coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
     if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;

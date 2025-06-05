@@ -851,3 +851,42 @@ html {
         display: none !important;
     }
 }
+.share-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.share-btn {
+    background: linear-gradient(135deg, #1da1f2, #0d8bd9);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+.share-btn.download {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.share-btn.download:hover {
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.share-btn i {
+    font-size: 14px;
+}

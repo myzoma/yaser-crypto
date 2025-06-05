@@ -10,6 +10,7 @@ class YaserCrypto {
             minVolume: 100000
         };
         this.requestDelay = 500;
+        this.refreshTimer = null;
         this.init();
     }
 
@@ -18,7 +19,21 @@ class YaserCrypto {
         await this.fetchData();
         this.analyzeCoins();
         this.renderCoins();
+        this.startAutoRefresh();
+
     }
+startAutoRefresh() {
+    if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+    }
+    
+    this.refreshTimer = setInterval(() => {
+        console.log('🔄 تحديث تلقائي للبيانات...');
+        this.refresh();
+    }, this.config.refreshInterval || 60000);
+    
+    console.log(`⏰ تم تفعيل التحديث التلقائي كل ${(this.config.refreshInterval || 60000) / 1000} ثانية`);
+}
 
  showLoading() {
         document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
@@ -29,6 +44,23 @@ class YaserCrypto {
     }
 
 
+async refresh() {
+    try {
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
+        console.log('✅ تم تحديث البيانات بنجاح');
+    } catch (error) {
+        console.error('❌ خطأ في التحديث التلقائي:', error);
+    }
+}
+stopAutoRefresh() {
+    if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+        this.refreshTimer = null;
+        console.log('⏹️ تم إيقاف التحديث التلقائي');
+    }
+}
 
 
 

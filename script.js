@@ -54,60 +54,69 @@ class YaserCrypto {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
     }
 
-    async fetchData() {
-        try {
-            console.log('📡 جلب بيانات العملات...');
-            const response = await fetch(`${this.config.apiUrl}/market/tickers?instType=SPOT`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('البيانات الخام:', data.data.slice(0, 5)); // أول 5 عملات
-console.log('عدد العملات الكلي:', data.data.length);
-console.log('حقول العملة الأولى:', Object.keys(data.data[0]));
+   async fetchData() {
+    try {
+        console.log('📡 جلب بيانات العملات...');
+        const response = await fetch(`${this.config.apiUrl}/market/tickers?instType=SPOT`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.data || !Array.isArray(data.data)) {
+            throw new Error('Invalid data format received');
+        }
 
-            if (!data.data || !Array.isArray(data.data)) {
-                throw new Error('Invalid data format received');
-            }
-
-            this.coins = data.data
-                .filter(coin => {
-                    const change = parseFloat(coin.last24hPx);
-                    const volume = parseFloat(coin.vol24h);
-                    return change >= this.config.minChange && 
-                           change <= this.config.maxChange && 
-                           volume >= this.config.minVolume &&
-                           coin.instId.endsWith('-USDT');
-                })
-                .map(coin => ({
+        this.coins = data.data
+            .filter(coin => {
+                // ✅ حساب التغيير الصحيح
+                const currentPrice = parseFloat(coin.last);
+                const openPrice = parseFloat(coin.open24h);
+                const change = ((currentPrice - openPrice) / openPrice) * 100;
+                const volume = parseFloat(coin.vol24h);
+                
+                return change >= 5 && 
+                       change <= 15 && 
+                       volume >= 100000 &&
+                       currentPrice > 0 &&
+                       openPrice > 0 &&
+                       coin.instId.endsWith('-USDT') &&
+                       !coin.instId.includes('DOWN') &&
+                       !coin.instId.includes('UP') &&
+                       !coin.instId.includes('BEAR') &&
+                       !coin.instId.includes('BULL');
+            })
+            .map(coin => {
+                // ✅ حساب التغيير الصحيح في الـ mapping أيضاً
+                const currentPrice = parseFloat(coin.last);
+                const openPrice = parseFloat(coin.open24h);
+                const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                
+                return {
                     symbol: coin.instId.replace('-USDT', ''),
                     name: coin.instId.replace('-USDT', ''),
-                    price: parseFloat(coin.last),
-                    change24h: parseFloat(coin.last24hPx),
+                    price: currentPrice,
+                    change24h: change24h,
                     volume: parseFloat(coin.vol24h),
                     high24h: parseFloat(coin.high24h),
                     low24h: parseFloat(coin.low24h),
                     technicalIndicators: {},
                     conditions: {},
                     score: 0,
-                    status: 'normal' // جديد: حالة العملة
-                }));
+                    status: 'normal'
+                };
+            });
 
-            console.log(`📊 تم جلب ${this.coins.length} عملة مرشحة`);
-            
-            // حساب المؤشرات الفنية
-            for (const coin of this.coins) {
-                await this.calculateTechnicalIndicators(coin);
-                await this.delay(this.requestDelay);
-            }
-            
-        } catch (error) {
-            console.error('❌ خطأ في جلب البيانات:', error);
-            this.showError(`خطأ في جلب البيانات: ${error.message}`);
-        }
+        console.log(`📊 تم جلب ${this.coins.length} عملة مرشحة`);
+        
+    } catch (error) {
+        console.error('❌ خطأ في جلب البيانات:', error);
+        this.showError(`خطأ في جلب البيانات: ${error.message}`);
     }
+}
+
 
     async calculateTechnicalIndicators(coin) {
         try {

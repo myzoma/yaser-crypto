@@ -91,7 +91,8 @@ class YaserCrypto {
     try {
         console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
         
-        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+        const response = await fetch('https://www.okx.com/priapi/v5/market/tickers-gainers?instType=SPOT&limit=50', {
+
             method: 'GET',
             headers: {
                 'Accept': 'application/json'

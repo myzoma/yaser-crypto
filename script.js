@@ -27,11 +27,7 @@ class YaserCrypto {
     showError(message) {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
     }
-
-
-
-
-
+    
    async fetchData() {
     try {
         console.log('🚀 بدء عملية جلب البيانات...');

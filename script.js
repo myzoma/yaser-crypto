@@ -535,14 +535,155 @@ findNearestSupport(price, fib) {
     });
 }
 
-    renderCoins() {
-        const grid = document.getElementById('coinsGrid');
-        grid.innerHTML = '';
-        this.coins.forEach(coin => {
-            const card = this.createCoinCard(coin);
-            grid.appendChild(card);
+   createCoinCard(coin) {
+    this.calculateTargets(coin);
+    
+    const card = document.createElement('div');
+    card.className = 'coin-card';
+    card.setAttribute('data-symbol', coin.symbol);
+    card.id = `card-${coin.symbol}`;
+    
+    // باقي الكود الموجود في createCoinCard...
+    
+    // أضف هذا في نهاية دالة createCoinCard قبل return card
+    const shareButtons = document.createElement('div');
+    shareButtons.className = 'share-buttons';
+    shareButtons.innerHTML = `
+        <button class="share-btn twitter" data-symbol="${coin.symbol}">
+            <i class="fab fa-twitter"></i>
+            تويتر
+        </button>
+        <button class="share-btn download" data-symbol="${coin.symbol}">
+            <i class="fas fa-download"></i>
+            تحميل
+        </button>
+    `;
+    
+    // إضافة الأحداث للأزرار
+    const twitterBtn = shareButtons.querySelector('.twitter');
+    const downloadBtn = shareButtons.querySelector('.download');
+    
+    twitterBtn.addEventListener('click', () => this.shareCardToTwitter(coin.symbol));
+    downloadBtn.addEventListener('click', () => this.downloadCard(coin.symbol));
+    
+    card.appendChild(shareButtons);
+    
+    return card;
+}
+
+// واحتفظ بدالة renderCoins الأصلية
+renderCoins() {
+    const grid = document.getElementById('coinsGrid');
+    grid.innerHTML = '';
+    this.coins.forEach(coin => {
+        const card = this.createCoinCard(coin);
+        grid.appendChild(card);
+    });
+}
+async shareCardToTwitter(symbol) {
+    try {
+        const cardElement = document.getElementById(`card-${symbol}`);
+        if (!cardElement) {
+            console.error('Card element not found');
+            return;
+        }
+
+        // إخفاء أزرار المشاركة مؤقتاً
+        const shareButtons = cardElement.querySelector('.share-buttons');
+        if (shareButtons) shareButtons.style.display = 'none';
+        
+        const canvas = await html2canvas(cardElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
         });
+
+        // إظهار الأزرار مرة أخرى
+        if (shareButtons) shareButtons.style.display = 'flex';
+
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${symbol}-analysis.png`;
+            a.click();
+
+            const coin = this.coins.find(c => c.symbol === symbol);
+            const tweetText = this.generateTweetText(coin);
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+            
+            setTimeout(() => {
+                window.open(twitterUrl, '_blank', 'width=550,height=420');
+                URL.revokeObjectURL(url);
+            }, 500);
+
+        }, 'image/png', 0.95);
+
+    } catch (error) {
+        console.error('Error sharing to Twitter:', error);
+        this.shareTextOnly(symbol);
     }
+}
+
+async downloadCard(symbol) {
+    try {
+        const cardElement = document.getElementById(`card-${symbol}`);
+        if (!cardElement) return;
+
+        const shareButtons = cardElement.querySelector('.share-buttons');
+        if (shareButtons) shareButtons.style.display = 'none';
+        
+        const canvas = await html2canvas(cardElement, {
+            backgroundColor: '#ffffff',
+            scale: 3,
+            useCORS: true,
+            allowTaint: true
+        });
+
+        if (shareButtons) shareButtons.style.display = 'flex';
+
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${symbol}-crypto-analysis-${new Date().toISOString().split('T')[0]}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }, 'image/png', 1.0);
+
+    } catch (error) {
+        console.error('Error downloading card:', error);
+        alert('حدث خطأ في تحميل الصورة');
+    }
+}
+
+generateTweetText(coin) {
+    const profitT1 = ((coin.targets.target1 - coin.targets.entry) / coin.targets.entry * 100);
+    const profitT2 = ((coin.targets.target2 - coin.targets.entry) / coin.targets.entry * 100);
+    
+    return `🚀 تحليل ${coin.symbol}/USDT
+
+📊 النقاط: ${coin.score}/100
+📈 التغيير 24س: +${coin.change24h.toFixed(2)}%
+
+🎯 الأهداف:
+• دخول: $${coin.targets.entry.toFixed(6)}
+• هدف 1: $${coin.targets.target1.toFixed(6)} (+${profitT1.toFixed(1)}%)
+• هدف 2: $${coin.targets.target2.toFixed(6)} (+${profitT2.toFixed(1)}%)
+
+⚠️ وقف خسارة: $${coin.targets.stopLoss.toFixed(6)}
+
+#${coin.symbol} #crypto #تحليل_فني #استثمار`;
+}
+
+shareTextOnly(symbol) {
+    const coin = this.coins.find(c => c.symbol === symbol);
+    const text = this.generateTweetText(coin);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(twitterUrl, '_blank');
+}
+
 
     createCoinCard(coin) {
         const card = document.createElement('div');

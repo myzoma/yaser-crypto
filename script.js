@@ -206,7 +206,7 @@ stopAutoRefresh() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async fetchCoinData(symbol) {
+   async fetchCoinData(symbol) {
     try {
         const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
         
@@ -229,8 +229,290 @@ stopAutoRefresh() {
         }
         
         const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
         const openPrice24h = parseFloat(ticker.open24h);
-      
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
+        // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
+        const change24h = parseFloat(ticker.changePercent) || 
+            (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+        
+        console.log(`📊 ${symbol}: السعر=${currentPrice}, التغيير=${change24h.toFixed(2)}%`);
+        
+        const coin = {
+            symbol: symbol,
+            name: symbol,
+            price: currentPrice,
+            change24h: change24h,
+            volume: parseFloat(ticker.vol24h) || 0,
+            high24h: parseFloat(ticker.high24h) || currentPrice,
+            low24h: parseFloat(ticker.low24h) || currentPrice,
+            technicalIndicators: {},
+            score: 0,
+            rank: 0,
+            conditions: {},
+            targets: {}
+        };
+        
+        this.calculateTechnicalIndicators(coin);
+        
+        return coin;
+        
+    } catch (error) {
+        console.error(`خطأ في جلب بيانات ${symbol}:`, error);
+        throw error;
+    }
+async fetchCoinData(symbol) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+        
+        const tickerResponse = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!tickerResponse.ok) {
+            throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+        }
+        
+        const tickerData = await tickerResponse.json();
+        
+        if (!tickerData.data || tickerData.data.length === 0) {
+            throw new Error(`لا توجد بيانات لـ ${symbol}`);
+        }
+        
+        const ticker = tickerData.data[0];
+        
+        const currentPrice = parseFloat(ticker.last);
+        const openPrice24h = parseFloat(ticker.open24h);
+        
         // استخدام التغيير المباشر من API بدلاً من الحساب اليدوي
         const change24h = parseFloat(ticker.changePercent) || 
             (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
@@ -261,7 +543,6 @@ stopAutoRefresh() {
         throw error;
     }
 }
-
    calculateTechnicalIndicators(coin) {
     // حساب RSI
     coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);

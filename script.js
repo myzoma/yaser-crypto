@@ -197,7 +197,9 @@ class YaserCrypto {
         }
         
         const ticker = tickerData.data[0];
-        
+        console.log('🔍 جميع حقول ticker المتاحة:', Object.keys(ticker));
+console.log('📊 جميع بيانات ticker:', ticker);
+
         const currentPrice = parseFloat(ticker.last);
         const openPrice24h = parseFloat(ticker.open24h);
         

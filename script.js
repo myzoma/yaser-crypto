@@ -86,6 +86,8 @@ async init() {
     
    async fetchData() {
     try {
+        console.log('🔥 اختبار: هل وصل التعديل هنا؟');
+        console.log('🚀 بدء عملية جلب البيانات...');
         console.log('🚀 بدء عملية جلب البيانات...');
         
         const candidateSymbols = await this.fetchTopGainers();

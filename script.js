@@ -1,5 +1,35 @@
 class YaserCrypto {
     constructor() {
+        async loadTechnicalIndicators() {
+    return new Promise((resolve, reject) => {
+        // التحقق إذا كانت المكتبة محملة مسبقاً
+        if (typeof TI !== 'undefined') {
+            console.log('✅ مكتبة التحليل الفني متوفرة مسبقاً');
+            resolve();
+            return;
+        }
+
+        // إنشاء script tag وتحميل المكتبة
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/technicalindicators@3.1.0/dist/browser.js';
+        script.onload = () => {
+            if (typeof TI !== 'undefined') {
+                console.log('✅ تم تحميل مكتبة التحليل الفني بنجاح');
+                resolve();
+            } else {
+                console.error('❌ فشل في تحميل مكتبة التحليل الفني');
+                reject(new Error('فشل في تحميل المكتبة'));
+            }
+        };
+        script.onerror = () => {
+            console.error('❌ خطأ في تحميل مكتبة التحليل الفني');
+            reject(new Error('خطأ في تحميل المكتبة'));
+        };
+        
+        document.head.appendChild(script);
+    });
+}
+
         this.coins = [];
         this.config = {
             apiUrl: "https://www.okx.com/api/v5",
@@ -14,12 +44,15 @@ class YaserCrypto {
     }
 
    async init() {
-    // اختبار المكتبة
-    if (typeof TI !== 'undefined') {
-        console.log('✅ مكتبة التحليل الفني تم تحميلها بنجاح');
-    } else {
-        console.error('❌ فشل في تحميل مكتبة التحليل الفني');
-    }
+    // تحميل مكتبة التحليل الفني
+    await this.loadTechnicalIndicators();
+    
+    this.showLoading();
+    await this.fetchData();
+    this.analyzeCoins();
+    this.renderCoins();
+}
+
     
     this.showLoading();
     await this.fetchData();

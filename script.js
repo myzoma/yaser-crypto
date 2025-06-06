@@ -1130,8 +1130,40 @@ window.onclick = function(event) {
     }
 }
 
+calculateCVD(coin) {
+    const volume = coin.volume || 1000000;
+    const change24h = coin.change24h;
+    
+    let buyVolumeRatio;
+    if (change24h > 5) {
+        buyVolumeRatio = 0.75;
+    } else if (change24h > 0) {
+        buyVolumeRatio = 0.6;
+    } else {
+        buyVolumeRatio = 0.4;
+    }
+    
+    const buyVolume = volume * buyVolumeRatio;
+    const sellVolume = volume * (1 - buyVolumeRatio);
+    const cvdPercentage = ((buyVolume - sellVolume) / volume) * 100;
+    
+    let strength = cvdPercentage > 20 ? 'قوي' : cvdPercentage > 10 ? 'متوسط' : 'ضعيف';
+    
+    return {
+        percentage: cvdPercentage,
+        strength: strength,
+        buyVolume: buyVolume,
+        sellVolume: sellVolume
+    };
+}
+
+calculateParabolicSAR(coin) {
+    return coin.change24h > 0 ? coin.price * 0.95 : coin.price * 1.05;
+}
+
+} // نهاية الكلاس
+
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
-   
 });

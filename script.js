@@ -234,6 +234,74 @@ class YaserCrypto {
         throw error;
     }
 }
+async fetchHistoricalData(symbol, limit = 100) {
+    try {
+        const apiUrl = `https://www.okx.com/api/v5/market/history-candles?instId=${symbol}-USDT&bar=1H&limit=${limit}`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.data || data.data.length === 0) {
+            return null;
+        }
+
+        // تحويل البيانات إلى الشكل المطلوب
+        return data.data.map(candle => ({
+            timestamp: parseInt(candle[0]),
+            open: parseFloat(candle[1]),
+            high: parseFloat(candle[2]),
+            low: parseFloat(candle[3]),
+            close: parseFloat(candle[4]),
+            volume: parseFloat(candle[5])
+        })).reverse(); // ترتيب من الأقدم للأحدث
+
+    } catch (error) {
+        console.warn(`فشل في جلب البيانات التاريخية لـ ${symbol}:`, error.message);
+        return null;
+    }
+}
+calculateSimpleIndicators(coin) {
+    // الطريقة المبسطة الأصلية كـ backup
+    coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
+    if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
+    if (coin.technicalIndicators.rsi < 0) coin.technicalIndicators.rsi = 0;
+
+    coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
+    coin.technicalIndicators.macdSignal = 0;
+    coin.technicalIndicators.macdHistogram = coin.technicalIndicators.macd;
+
+    coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
+
+    const currentPrice = coin.price;
+    coin.technicalIndicators.ema20 = currentPrice;
+    coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
+
+    // فيبوناتشي مبسط
+    const low24h = currentPrice * (1 - (coin.change24h / 100));
+    const high24h = currentPrice;
+    const range = high24h - low24h;
+
+    coin.technicalIndicators.fibonacci = {
+        level0: high24h,
+        level236: high24h + (range * 0.236),
+        level382: high24h + (range * 0.382),
+        level500: high24h + (range * 0.500),
+        level618: high24h + (range * 0.618),
+        level786: low24h + (range * 0.214),
+        level1000: low24h
+    };
+}
 
   async calculateTechnicalIndicators(coin) {
     try {

@@ -1,3 +1,5 @@
+// إصدار محسن v3.0 - تحسينات شاملة للمؤشرات الفنية
+console.log('🚀 إصدار محسن v3.0 - ' + new Date().toLocaleTimeString());
 class YaserCrypto {
     constructor() {
         this.coins = [];

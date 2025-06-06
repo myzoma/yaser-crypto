@@ -277,28 +277,28 @@ if (change > 5) {
 
 }
 
-   // حساب المتوسطات المتحركة المحسنة
+  // حساب المتوسطات المتحركة المحسنة
 const currentPrice = coin.price;
 coin.technicalIndicators.ema20 = currentPrice * (1 - (coin.change24h / 100) * 0.15);
 coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.35);
 
+// تصحيح حساب مستويات فيبوناتشي للاتجاه الصاعد
+const low24h = currentPrice * (1 - (coin.change24h / 100)); // أقل سعر (قبل الارتفاع)
+const high24h = currentPrice; // أعلى سعر (السعر الحالي)
 
-    // تصحيح حساب مستويات فيبوناتشي للاتجاه الصاعد
-    const low24h = currentPrice * (1 - (coin.change24h / 100)); // أقل سعر (قبل الارتفاع)
-    const high24h = currentPrice; // أعلى سعر (السعر الحالي)
-    
-    const range = high24h - low24h;
-    
-    // مستويات فيبوناتشي للاتجاه الصاعد (الأهداف أعلى من السعر الحالي)
-    coin.technicalIndicators.fibonacci = {
-        level0: high24h, // 0% = السعر الحالي
-        level236: high24h + (range * 0.236), // هدف 1
-        level382: high24h + (range * 0.382), // هدف 2  
-        level500: high24h + (range * 0.500), // هدف 3
-        level618: high24h + (range * 0.618), // هدف 4
-        level786: low24h + (range * 0.214), // دعم قوي
-        level1000: low24h // 100% = أقل سعر
-    };
+const range = high24h - low24h;
+
+// مستويات فيبوناتشي للاتجاه الصاعد (الأهداف أعلى من السعر الحالي)
+coin.technicalIndicators.fibonacci = {
+    level0: high24h, // 0% = السعر الحالي
+    level236: high24h + (range * 0.236), // هدف 1
+    level382: high24h + (range * 0.382), // هدف 2
+    level500: high24h + (range * 0.500), // هدف 3
+    level618: high24h + (range * 0.618), // هدف 4
+    level786: low24h + (range * 0.214), // دعم قوي
+    level1000: low24h // 100% = أقل سعر
+}; // <- هذا القوس والفاصلة المنقوطة كانا مفقودين
+
 
     console.log(`📈 ${coin.symbol} فيبوناتشي: الحالي=${high24h.toFixed(6)} | T1=${coin.technicalIndicators.fibonacci.level236.toFixed(6)} | T2=${coin.technicalIndicators.fibonacci.level382.toFixed(6)} | T3=${coin.technicalIndicators.fibonacci.level500.toFixed(6)}`);
 }

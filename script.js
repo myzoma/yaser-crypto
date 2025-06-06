@@ -1089,8 +1089,6 @@ async init() {
         this.showError('فشل في تحليل البيانات. يرجى المحاولة مرة أخرى.');
     }
 }
-
-
 // في نهاية الملف
 document.addEventListener('DOMContentLoaded', function() {
     const app = new YaserCrypto();

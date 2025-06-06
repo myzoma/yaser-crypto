@@ -1,64 +1,59 @@
 class YaserCrypto {
     constructor() {
-        async loadTechnicalIndicators() {
-    return new Promise((resolve, reject) => {
-        // التحقق إذا كانت المكتبة محملة مسبقاً
-        if (typeof TI !== 'undefined') {
-            console.log('✅ مكتبة التحليل الفني متوفرة مسبقاً');
-            resolve();
-            return;
-        }
-
-        // إنشاء script tag وتحميل المكتبة
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/technicalindicators@3.1.0/dist/browser.js';
-        script.onload = () => {
-            if (typeof TI !== 'undefined') {
-                console.log('✅ تم تحميل مكتبة التحليل الفني بنجاح');
-                resolve();
-            } else {
-                console.error('❌ فشل في تحميل مكتبة التحليل الفني');
-                reject(new Error('فشل في تحميل المكتبة'));
-            }
-        };
-        script.onerror = () => {
-            console.error('❌ خطأ في تحميل مكتبة التحليل الفني');
-            reject(new Error('خطأ في تحميل المكتبة'));
-        };
-        
-        document.head.appendChild(script);
-    });
-}
-
         this.coins = [];
         this.config = {
-            apiUrl: "https://www.okx.com/api/v5",
-            requestDelay: 500,
-            maxCoins: 50,
-            minChange: 1,
-            maxChange: 15,
-            minVolume: 100000
+            // ... باقي الكود
         };
         this.requestDelay = 500;
         this.init();
     }
 
-   async init() {
-    // تحميل مكتبة التحليل الفني
-    await this.loadTechnicalIndicators();
-    
-    this.showLoading();
-    await this.fetchData();
-    this.analyzeCoins();
-    this.renderCoins();
-}
+    // أضف هذه الدالة هنا
+    async loadTechnicalIndicators() {
+        console.log('🔄 محاولة تحميل مكتبة التحليل الفني...');
+        
+        return new Promise((resolve, reject) => {
+            // التحقق إذا كانت المكتبة محملة مسبقاً
+            if (typeof TI !== 'undefined') {
+                console.log('✅ مكتبة التحليل الفني متوفرة مسبقاً');
+                resolve();
+                return;
+            }
 
-    
-    this.showLoading();
-    await this.fetchData();
-    this.analyzeCoins();
-    this.renderCoins();
-}
+            // إنشاء script tag وتحميل المكتبة
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/technicalindicators@3.1.0/dist/browser.js';
+            script.onload = () => {
+                console.log('📦 تم تحميل الملف، التحقق من المكتبة...');
+                setTimeout(() => {
+                    if (typeof TI !== 'undefined') {
+                        console.log('✅ تم تحميل مكتبة التحليل الفني بنجاح');
+                        resolve();
+                    } else {
+                        console.error('❌ المكتبة غير متوفرة بعد التحميل');
+                        resolve(); // نكمل حتى لو فشلت
+                    }
+                }, 100);
+            };
+            script.onerror = () => {
+                console.error('❌ خطأ في تحميل مكتبة التحليل الفني');
+                resolve(); // نكمل حتى لو فشلت
+            };
+            
+            document.head.appendChild(script);
+        });
+    }
+
+    async init() {
+        // تحميل مكتبة التحليل الفني
+        await this.loadTechnicalIndicators();
+        
+        this.showLoading();
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
+    }
+
 
  showLoading() {
         document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';

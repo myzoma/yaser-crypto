@@ -246,18 +246,19 @@ class YaserCrypto {
     }
     coin.technicalIndicators.rsi = Math.max(0, Math.min(100, coin.technicalIndicators.rsi));
 
-    // حساب MACD محسن
-    const volume = coin.volume || 1000000;
-    if (change > 5) {
-        coin.technicalIndicators.macd = 0.3 + (change - 5) * 0.05;
-        coin.technicalIndicators.macdSignal = 0.2;
-    } else if (change > 0) {
-        coin.technicalIndicators.macd = change * 0.04;
-        coin.technicalIndicators.macdSignal = change * 0.02;
-    } else {
-        coin.technicalIndicators.macd = change * 0.03;
-        coin.technicalIndicators.macdSignal = change * 0.01;
-    }
+   // حساب MACD محسن
+const volume = coin.volume || 1000000;
+if (change > 5) {
+    coin.technicalIndicators.macd = 0.3 + (change - 5) * 0.05;
+    coin.technicalIndicators.macdSignal = 0.2;
+} else if (change > 0) {
+    coin.technicalIndicators.macd = change * 0.04;
+    coin.technicalIndicators.macdSignal = change * 0.02;
+} else {
+    coin.technicalIndicators.macd = change * 0.03;
+    coin.technicalIndicators.macdSignal = change * 0.01;
+}
+
 
     // حساب MFI محسن
     const volumeWeight = Math.log10(volume / 1000000 + 1);
@@ -276,10 +277,11 @@ class YaserCrypto {
 
 }
 
-    // حساب المتوسطات المتحركة
-    const currentPrice = coin.price;
-    coin.technicalIndicators.ema20 = currentPrice;
-    coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
+   // حساب المتوسطات المتحركة المحسنة
+const currentPrice = coin.price;
+coin.technicalIndicators.ema20 = currentPrice * (1 - (coin.change24h / 100) * 0.15);
+coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.35);
+
 
     // تصحيح حساب مستويات فيبوناتشي للاتجاه الصاعد
     const low24h = currentPrice * (1 - (coin.change24h / 100)); // أقل سعر (قبل الارتفاع)

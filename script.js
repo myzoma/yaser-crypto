@@ -230,9 +230,9 @@ class YaserCrypto {
     }
 }
 
-   calculateTechnicalIndicators(coin) {
-    // حساب RSI
-   const change = coin.change24h;
+  calculateTechnicalIndicators(coin) {
+    // حساب RSI محسن
+    const change = coin.change24h;
     if (change > 10) {
         coin.technicalIndicators.rsi = 75 + Math.min(change - 10, 15);
     } else if (change > 5) {
@@ -244,37 +244,37 @@ class YaserCrypto {
     } else {
         coin.technicalIndicators.rsi = 30 + Math.max(change + 5, -15);
     }
-    
-    // تحديد الحدود
     coin.technicalIndicators.rsi = Math.max(0, Math.min(100, coin.technicalIndicators.rsi));
 
-// حساب MACD محسن
-const change = coin.change24h;
-const volume = coin.volume || 1000000;
-const volumeWeight = Math.min(volume / 10000000, 2); // وزن الحجم
+    // حساب MACD محسن
+    const volume = coin.volume || 1000000;
+    if (change > 5) {
+        coin.technicalIndicators.macd = 0.3 + (change - 5) * 0.05;
+        coin.technicalIndicators.macdSignal = 0.2;
+    } else if (change > 0) {
+        coin.technicalIndicators.macd = change * 0.04;
+        coin.technicalIndicators.macdSignal = change * 0.02;
+    } else {
+        coin.technicalIndicators.macd = change * 0.03;
+        coin.technicalIndicators.macdSignal = change * 0.01;
+    }
 
-if (change > 7) {
-    coin.technicalIndicators.macd = 0.5 + (change - 7) * 0.1;
-    coin.technicalIndicators.macdSignal = 0.3;
-} else if (change > 3) {
-    coin.technicalIndicators.macd = 0.2 + (change - 3) * 0.075;
-    coin.technicalIndicators.macdSignal = 0.1;
-} else if (change > 0) {
-    coin.technicalIndicators.macd = change * 0.05 * volumeWeight;
-    coin.technicalIndicators.macdSignal = 0;
-} else if (change > -3) {
-    coin.technicalIndicators.macd = change * 0.05;
-    coin.technicalIndicators.macdSignal = -0.1;
-} else {
-    coin.technicalIndicators.macd = -0.3 + (change + 3) * 0.05;
-    coin.technicalIndicators.macdSignal = -0.2;
+    // حساب MFI محسن
+    const volumeWeight = Math.log10(volume / 1000000 + 1);
+    if (change > 10) {
+        coin.technicalIndicators.mfi = 75 + Math.min(change - 10, 20) + volumeWeight * 2;
+    } else if (change > 5) {
+        coin.technicalIndicators.mfi = 65 + (change - 5) * 2 + volumeWeight;
+    } else if (change > 0) {
+        coin.technicalIndicators.mfi = 55 + change * 2 + volumeWeight * 0.5;
+    } else if (change > -5) {
+        coin.technicalIndicators.mfi = 45 + change * 1.5;
+    } else {
+        coin.technicalIndicators.mfi = 25 + Math.max(change + 5, -15);
+    }
+    coin.technicalIndicators.mfi = Math.max(0, Math.min(100, coin.technicalIndicators.mfi));
+
 }
-
-// حساب MACD Histogram
-coin.technicalIndicators.macdHistogram = coin.technicalIndicators.macd - coin.technicalIndicators.macdSignal;
-   
-    // حساب MFI
-    coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
 
     // حساب المتوسطات المتحركة
     const currentPrice = coin.price;

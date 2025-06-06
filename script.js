@@ -1092,8 +1092,7 @@ async init() {
 }
 
 
-// تهيئة التطبيق مع إضافة الأنماط
+// في نهاية الملف
 document.addEventListener('DOMContentLoaded', function() {
     const app = new YaserCrypto();
-    app.addCVDStyles();
 });

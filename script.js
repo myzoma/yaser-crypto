@@ -246,10 +246,31 @@ class YaserCrypto {
     // تحديد الحدود
     coin.technicalIndicators.rsi = Math.max(0, Math.min(100, coin.technicalIndicators.rsi));
 
-    // حساب MACD
-    coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
-    coin.technicalIndicators.macdSignal = 0;
+// حساب MACD محسن
+const change = coin.change24h;
+const volume = coin.volume || 1000000;
+const volumeWeight = Math.min(volume / 10000000, 2); // وزن الحجم
 
+if (change > 7) {
+    coin.technicalIndicators.macd = 0.5 + (change - 7) * 0.1;
+    coin.technicalIndicators.macdSignal = 0.3;
+} else if (change > 3) {
+    coin.technicalIndicators.macd = 0.2 + (change - 3) * 0.075;
+    coin.technicalIndicators.macdSignal = 0.1;
+} else if (change > 0) {
+    coin.technicalIndicators.macd = change * 0.05 * volumeWeight;
+    coin.technicalIndicators.macdSignal = 0;
+} else if (change > -3) {
+    coin.technicalIndicators.macd = change * 0.05;
+    coin.technicalIndicators.macdSignal = -0.1;
+} else {
+    coin.technicalIndicators.macd = -0.3 + (change + 3) * 0.05;
+    coin.technicalIndicators.macdSignal = -0.2;
+}
+
+// حساب MACD Histogram
+coin.technicalIndicators.macdHistogram = coin.technicalIndicators.macd - coin.technicalIndicators.macdSignal;
+   
     // حساب MFI
     coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
 

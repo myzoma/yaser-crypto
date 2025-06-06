@@ -277,10 +277,12 @@ if (change > 5) {
 
 }
 // حساب Cumulative Volume Delta (CVD) محسن
+   coin.technicalIndicators.cvd = this.calculateCVD(coin);
     const change = coin.change24h;
     const volume = coin.volume || 1000000;
     const currentPrice = coin.price;
-    
+
+
     // تقدير CVD بناءً على التغيير والحجم
     let buyVolume, sellVolume;
     

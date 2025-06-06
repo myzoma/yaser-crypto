@@ -8,51 +8,72 @@ class YaserCrypto {
         this.init();
     }
 
-    // أضف هذه الدالة هنا
-    async loadTechnicalIndicators() {
-        console.log('🔄 محاولة تحميل مكتبة التحليل الفني...');
+  async loadTechnicalIndicators() {
+    console.log('🔄 محاولة تحميل مكتبة التحليل الفني...');
+    
+    return new Promise((resolve) => {
+        // سنستخدم حسابات مبسطة لكن أكثر دقة
+        console.log('✅ سيتم استخدام حسابات محسنة مبنية محلياً');
         
-        return new Promise((resolve, reject) => {
-            // التحقق إذا كانت المكتبة محملة مسبقاً
-            if (typeof TI !== 'undefined') {
-                console.log('✅ مكتبة التحليل الفني متوفرة مسبقاً');
-                resolve();
-                return;
-            }
-
-            // إنشاء script tag وتحميل المكتبة
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/technicalindicators@3.1.0/dist/browser.js';
-            script.onload = () => {
-                console.log('📦 تم تحميل الملف، التحقق من المكتبة...');
-                setTimeout(() => {
-                    if (typeof TI !== 'undefined') {
-                        console.log('✅ تم تحميل مكتبة التحليل الفني بنجاح');
-                        resolve();
-                    } else {
-                        console.error('❌ المكتبة غير متوفرة بعد التحميل');
-                        resolve(); // نكمل حتى لو فشلت
-                    }
-                }, 100);
-            };
-            script.onerror = () => {
-                console.error('❌ خطأ في تحميل مكتبة التحليل الفني');
-                resolve(); // نكمل حتى لو فشلت
-            };
+        // إضافة دوال التحليل الفني المحلية
+        window.CustomTA = {
+            // حساب RSI مبسط لكن أدق
+            calculateRSI: (prices, period = 14) => {
+                if (prices.length < period) return 50;
+                
+                let gains = 0, losses = 0;
+                
+                for (let i = 1; i < Math.min(prices.length, period + 1); i++) {
+                    const change = prices[i] - prices[i - 1];
+                    if (change > 0) gains += change;
+                    else losses -= change;
+                }
+                
+                const avgGain = gains / period;
+                const avgLoss = losses / period;
+                
+                if (avgLoss === 0) return 100;
+                const rs = avgGain / avgLoss;
+                return 100 - (100 / (1 + rs));
+            },
             
-            document.head.appendChild(script);
-        });
-    }
-
-    async init() {
-        // تحميل مكتبة التحليل الفني
-        await this.loadTechnicalIndicators();
+            // حساب EMA
+            calculateEMA: (prices, period) => {
+                if (prices.length === 0) return 0;
+                if (prices.length < period) return prices[prices.length - 1];
+                
+                const multiplier = 2 / (period + 1);
+                let ema = prices[0];
+                
+                for (let i = 1; i < prices.length; i++) {
+                    ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
+                }
+                
+                return ema;
+            }
+        };
         
-        this.showLoading();
-        await this.fetchData();
-        this.analyzeCoins();
-        this.renderCoins();
-    }
+        resolve();
+    });
+}
+
+
+async init() {
+    // تحميل مكتبة التحليل الفني
+    await this.loadTechnicalIndicators();
+    
+    // اختبار الحسابات
+    const testPrices = [10, 11, 10.5, 12, 11.5, 13, 12.5];
+    const testRSI = window.CustomTA.calculateRSI(testPrices);
+    const testEMA = window.CustomTA.calculateEMA(testPrices, 5);
+    
+    console.log(`🧪 اختبار الحسابات: RSI=${testRSI.toFixed(2)}, EMA=${testEMA.toFixed(2)}`);
+    
+    this.showLoading();
+    await this.fetchData();
+    this.analyzeCoins();
+    this.renderCoins();
+}
 
 
  showLoading() {

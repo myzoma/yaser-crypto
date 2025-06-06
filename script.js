@@ -1077,7 +1077,6 @@ async fetchData() {
     }
 }
 
-// تحديث دالة init لتكون متزامنة
 async init() {
     this.showLoading();
     try {

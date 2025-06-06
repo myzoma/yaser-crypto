@@ -2,79 +2,23 @@ class YaserCrypto {
     constructor() {
         this.coins = [];
         this.config = {
-            // ... باقي الكود
+            apiUrl: "https://www.okx.com/api/v5",
+            requestDelay: 500,
+            maxCoins: 50,
+            minChange: 1,
+            maxChange: 15,
+            minVolume: 100000
         };
         this.requestDelay = 500;
         this.init();
     }
 
-  async loadTechnicalIndicators() {
-    console.log('🔄 محاولة تحميل مكتبة التحليل الفني...');
-    
-    return new Promise((resolve) => {
-        // سنستخدم حسابات مبسطة لكن أكثر دقة
-        console.log('✅ سيتم استخدام حسابات محسنة مبنية محلياً');
-        
-        // إضافة دوال التحليل الفني المحلية
-        window.CustomTA = {
-            // حساب RSI مبسط لكن أدق
-            calculateRSI: (prices, period = 14) => {
-                if (prices.length < period) return 50;
-                
-                let gains = 0, losses = 0;
-                
-                for (let i = 1; i < Math.min(prices.length, period + 1); i++) {
-                    const change = prices[i] - prices[i - 1];
-                    if (change > 0) gains += change;
-                    else losses -= change;
-                }
-                
-                const avgGain = gains / period;
-                const avgLoss = losses / period;
-                
-                if (avgLoss === 0) return 100;
-                const rs = avgGain / avgLoss;
-                return 100 - (100 / (1 + rs));
-            },
-            
-            // حساب EMA
-            calculateEMA: (prices, period) => {
-                if (prices.length === 0) return 0;
-                if (prices.length < period) return prices[prices.length - 1];
-                
-                const multiplier = 2 / (period + 1);
-                let ema = prices[0];
-                
-                for (let i = 1; i < prices.length; i++) {
-                    ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
-                }
-                
-                return ema;
-            }
-        };
-        
-        resolve();
-    });
-}
-
-
-async init() {
-    // تحميل مكتبة التحليل الفني
-    await this.loadTechnicalIndicators();
-    
-    // اختبار الحسابات
-    const testPrices = [10, 11, 10.5, 12, 11.5, 13, 12.5];
-    const testRSI = window.CustomTA.calculateRSI(testPrices);
-    const testEMA = window.CustomTA.calculateEMA(testPrices, 5);
-    
-    console.log(`🧪 اختبار الحسابات: RSI=${testRSI.toFixed(2)}, EMA=${testEMA.toFixed(2)}`);
-    
-    this.showLoading();
-    await this.fetchData();
-    this.analyzeCoins();
-    this.renderCoins();
-}
-
+    async init() {
+        this.showLoading();
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
+    }
 
  showLoading() {
         document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
@@ -86,8 +30,6 @@ async init() {
     
    async fetchData() {
     try {
-        console.log('🔥 اختبار: هل وصل التعديل هنا؟');
-        console.log('🚀 بدء عملية جلب البيانات...');
         console.log('🚀 بدء عملية جلب البيانات...');
         
         const candidateSymbols = await this.fetchTopGainers();
@@ -285,172 +227,87 @@ async init() {
         throw error;
     }
 }
-async fetchHistoricalData(symbol, limit = 100) {
-    try {
-        const apiUrl = `https://www.okx.com/api/v5/market/history-candles?instId=${symbol}-USDT&bar=1H&limit=${limit}`;
-        
-        const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (!data.data || data.data.length === 0) {
-            return null;
-        }
-
-        // تحويل البيانات إلى الشكل المطلوب
-        return data.data.map(candle => ({
-            timestamp: parseInt(candle[0]),
-            open: parseFloat(candle[1]),
-            high: parseFloat(candle[2]),
-            low: parseFloat(candle[3]),
-            close: parseFloat(candle[4]),
-            volume: parseFloat(candle[5])
-        })).reverse(); // ترتيب من الأقدم للأحدث
-
-    } catch (error) {
-        console.warn(`فشل في جلب البيانات التاريخية لـ ${symbol}:`, error.message);
-        return null;
+   calculateTechnicalIndicators(coin) {
+    // حساب RSI
+   const change = coin.change24h;
+    if (change > 10) {
+        coin.technicalIndicators.rsi = 75 + Math.min(change - 10, 15);
+    } else if (change > 5) {
+        coin.technicalIndicators.rsi = 65 + (change - 5);
+    } else if (change > 0) {
+        coin.technicalIndicators.rsi = 55 + (change * 2);
+    } else if (change > -5) {
+        coin.technicalIndicators.rsi = 45 + (change * 2);
+    } else {
+        coin.technicalIndicators.rsi = 30 + Math.max(change + 5, -15);
     }
-}
-calculateSimpleIndicators(coin) {
-    // الطريقة المبسطة الأصلية كـ backup
-    coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
-    if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
-    if (coin.technicalIndicators.rsi < 0) coin.technicalIndicators.rsi = 0;
+    
+    // تحديد الحدود
+    coin.technicalIndicators.rsi = Math.max(0, Math.min(100, coin.technicalIndicators.rsi));
 
+    // حساب MACD
     coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
     coin.technicalIndicators.macdSignal = 0;
-    coin.technicalIndicators.macdHistogram = coin.technicalIndicators.macd;
 
+    // حساب MFI
     coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
 
+    // حساب المتوسطات المتحركة
     const currentPrice = coin.price;
     coin.technicalIndicators.ema20 = currentPrice;
     coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
 
-    // فيبوناتشي مبسط
-    const low24h = currentPrice * (1 - (coin.change24h / 100));
-    const high24h = currentPrice;
+    // تصحيح حساب مستويات فيبوناتشي للاتجاه الصاعد
+    const low24h = currentPrice * (1 - (coin.change24h / 100)); // أقل سعر (قبل الارتفاع)
+    const high24h = currentPrice; // أعلى سعر (السعر الحالي)
+    
     const range = high24h - low24h;
-
+    
+    // مستويات فيبوناتشي للاتجاه الصاعد (الأهداف أعلى من السعر الحالي)
     coin.technicalIndicators.fibonacci = {
-        level0: high24h,
-        level236: high24h + (range * 0.236),
-        level382: high24h + (range * 0.382),
-        level500: high24h + (range * 0.500),
-        level618: high24h + (range * 0.618),
-        level786: low24h + (range * 0.214),
-        level1000: low24h
+        level0: high24h, // 0% = السعر الحالي
+        level236: high24h + (range * 0.236), // هدف 1
+        level382: high24h + (range * 0.382), // هدف 2  
+        level500: high24h + (range * 0.500), // هدف 3
+        level618: high24h + (range * 0.618), // هدف 4
+        level786: low24h + (range * 0.214), // دعم قوي
+        level1000: low24h // 100% = أقل سعر
     };
+
+    console.log(`📈 ${coin.symbol} فيبوناتشي: الحالي=${high24h.toFixed(6)} | T1=${coin.technicalIndicators.fibonacci.level236.toFixed(6)} | T2=${coin.technicalIndicators.fibonacci.level382.toFixed(6)} | T3=${coin.technicalIndicators.fibonacci.level500.toFixed(6)}`);
 }
 
-  async calculateTechnicalIndicators(coin) {
-    try {
-        // جلب بيانات تاريخية أكثر للحسابات الدقيقة
-        const historicalData = await this.fetchHistoricalData(coin.symbol);
-        
-        if (!historicalData || historicalData.length < 14) {
-            // في حالة عدم توفر بيانات كافية، نستخدم الطريقة المبسطة
-            this.calculateSimpleIndicators(coin);
-            return;
-        }
-
-        const closes = historicalData.map(d => d.close);
-        const highs = historicalData.map(d => d.high);
-        const lows = historicalData.map(d => d.low);
-        const volumes = historicalData.map(d => d.volume);
-
-        // حساب RSI الصحيح (يحتاج 14 فترة على الأقل)
-        if (closes.length >= 14) {
-            const rsiValues = TI.RSI.calculate({
-                values: closes,
-                period: 14
-            });
-            coin.technicalIndicators.rsi = rsiValues[rsiValues.length - 1] || 50;
-        } else {
-            coin.technicalIndicators.rsi = this.estimateRSIFromChange(coin.change24h);
-        }
-
-        // حساب MACD الصحيح
-        if (closes.length >= 26) {
-            const macdData = TI.MACD.calculate({
-                values: closes,
-                fastPeriod: 12,
-                slowPeriod: 26,
-                signalPeriod: 9,
-                SimpleMAOscillator: false,
-                SimpleMASignal: false
-            });
-            
-            if (macdData.length > 0) {
-                const lastMACD = macdData[macdData.length - 1];
-                coin.technicalIndicators.macd = lastMACD.MACD || 0;
-                coin.technicalIndicators.macdSignal = lastMACD.signal || 0;
-                coin.technicalIndicators.macdHistogram = lastMACD.histogram || 0;
-            }
-        } else {
-            // القيم المبسطة في حالة عدم توفر بيانات كافية
-            coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
-            coin.technicalIndicators.macdSignal = 0;
-            coin.technicalIndicators.macdHistogram = coin.technicalIndicators.macd;
-        }
-
-        // حساب المتوسطات المتحركة الأسية
-        if (closes.length >= 20) {
-            const ema20Values = TI.EMA.calculate({
-                values: closes,
-                period: 20
-            });
-            coin.technicalIndicators.ema20 = ema20Values[ema20Values.length - 1] || coin.price;
-        } else {
-            coin.technicalIndicators.ema20 = coin.price;
-        }
-
-        if (closes.length >= 50) {
-            const ema50Values = TI.EMA.calculate({
-                values: closes,
-                period: 50
-            });
-            coin.technicalIndicators.ema50 = ema50Values[ema50Values.length - 1] || coin.price * 0.98;
-        } else {
-            coin.technicalIndicators.ema50 = coin.price * (1 - (coin.change24h / 100) * 0.3);
-        }
-
-        // حساب MFI (Money Flow Index)
-        if (closes.length >= 14 && volumes.length >= 14) {
-            const mfiValues = TI.MFI.calculate({
-                high: highs.slice(-14),
-                low: lows.slice(-14),
-                close: closes.slice(-14),
-                volume: volumes.slice(-14),
-                period: 14
-            });
-            coin.technicalIndicators.mfi = mfiValues[mfiValues.length - 1] || 50;
-        } else {
-            coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
-        }
-
-        // حساب مستويات فيبوناتشي المحسنة
-        this.calculateImprovedFibonacci(coin, highs, lows);
-
-        console.log(`📊 ${coin.symbol} - مؤشرات محسنة: RSI=${coin.technicalIndicators.rsi.toFixed(2)}, MACD=${coin.technicalIndicators.macd.toFixed(4)}, MFI=${coin.technicalIndicators.mfi.toFixed(2)}`);
-
-    } catch (error) {
-        console.warn(`⚠️ فشل في حساب المؤشرات المتقدمة لـ ${coin.symbol}, استخدام الطريقة المبسطة:`, error.message);
-        this.calculateSimpleIndicators(coin);
+    estimateRSIFromChange(change24h) {
+        if (change24h > 5) return 70;
+        if (change24h > 2) return 60;
+        if (change24h > 0) return 55;
+        if (change24h > -2) return 45;
+        if (change24h > -5) return 40;
+        return 30;
     }
-}
 
+    estimateMFIFromVolume(volume, change24h) {
+        const baseValue = change24h > 0 ? 60 : 40;
+        const volumeBonus = Math.min(volume / 1000000 * 10, 20);
+        return Math.min(Math.max(baseValue + volumeBonus, 0), 100);
+    }
+
+    calculateFibonacci(highs, lows) {
+        const high = Math.max(...highs);
+        const low = Math.min(...lows);
+        const diff = high - low;
+                
+        return {
+            level0: high,
+            level236: high - (diff * 0.236),
+            level382: high - (diff * 0.382),
+            level500: high - (diff * 0.500),
+            level618: high - (diff * 0.618),
+            level786: high - (diff * 0.786),
+            level100: low
+        };
+    }
 calculateScore(coin) {
     const conditions = {};
     const changePercent = coin.change24h;

@@ -395,7 +395,7 @@ calculateScore(coin) {
     const ema20 = coin.technicalIndicators.ema20;
     const ema50 = coin.technicalIndicators.ema50;
 
-    // الشروط الموجودة...
+    // الشروط الأساسية
     if (changePercent >= 3) {
         conditions.rise3Percent = true;
     }
@@ -420,15 +420,15 @@ calculateScore(coin) {
         conditions.mfiBullish = true;
     }
 
-    // إضافة شرط CVD الجديد
-    if (cvd.percentage > 10) {
+    // شرط CVD الجديد
+    if (cvd && cvd.percentage > 10) {
         conditions.cvdBullish = true;
     }
 
-    // حساب عدد الشروط المحققة (الآن 7 شروط بدلاً من 6)
+    // حساب عدد الشروط المحققة (الآن 7 شروط)
     const achievedConditions = Object.keys(conditions).length;
 
-    // تحديث الحالات الخاصة
+    // الحالات الخاصة
     if (changePercent > 7 && achievedConditions >= 5) {
         conditions.strongRise = true;
     }
@@ -437,7 +437,7 @@ calculateScore(coin) {
         conditions.perfectScore = true;
     }
 
-    // حساب النقاط المحدث
+    // حساب النقاط المحدث للـ 7 شروط
     let baseScore = 0;
     if (achievedConditions === 7) {
         baseScore = 100;
@@ -463,14 +463,15 @@ calculateScore(coin) {
     coin.achievedConditionsCount = achievedConditions;
 
     console.log(`📊 ${coin.symbol}: الشروط=${achievedConditions}/7, التغيير=${changePercent.toFixed(2)}%, النقاط=${baseScore}`);
-    console.log(` - CVD إيجابي: ${conditions.cvdBullish ? '✓' : '✗'} (${cvd.percentage.toFixed(2)}% - ${cvd.strength})`);
-    console.log(`   - ارتفاع 3%: ${conditions.rise3Percent ? '✓' : '✗'}`);
-    console.log(`   - ارتفاع 4%: ${conditions.rise4Percent ? '✓' : '✗'}`);
-    console.log(`   - اختراق المتوسطات: ${conditions.breakoutMA ? '✓' : '✗'} (السعر:${currentPrice} >= EMA20:${ema20} و >= EMA50:${ema50})`);
-    console.log(`   - RSI > 50: ${conditions.rsiBullish ? '✓' : '✗'} (${rsi})`);
-    console.log(`   - MACD صاعد: ${conditions.macdBullish ? '✓' : '✗'} (MACD:${macd}, Signal:${macdSignal})`);
-    console.log(`   - MFI > 50: ${conditions.mfiBullish ? '✓' : '✗'} (${mfi})`);
+    console.log(` - ارتفاع 3%: ${conditions.rise3Percent ? '✓' : '✗'}`);
+    console.log(` - ارتفاع 4%: ${conditions.rise4Percent ? '✓' : '✗'}`);
+    console.log(` - اختراق المتوسطات: ${conditions.breakoutMA ? '✓' : '✗'}`);
+    console.log(` - RSI > 50: ${conditions.rsiBullish ? '✓' : '✗'} (${rsi})`);
+    console.log(` - MACD صاعد: ${conditions.macdBullish ? '✓' : '✗'}`);
+    console.log(` - MFI > 50: ${conditions.mfiBullish ? '✓' : '✗'} (${mfi})`);
+    console.log(` - CVD إيجابي: ${conditions.cvdBullish ? '✓' : '✗'} (${cvd ? cvd.percentage.toFixed(2) + '%' : 'N/A'})`);
 }
+
 
 
     analyzeCoins() {

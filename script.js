@@ -847,18 +847,32 @@ calculateScore(coin) {
             console.log(`${coin.rank}. ${coin.symbol}: ${coin.achievedConditionsCount}/6 شروط, ${coin.change24h.toFixed(2)}%, النقاط=${coin.score}`);
         });
     }
-   calculateTargets(coin) {
+  calculateTargets(coin) {
     const fib = coin.technicalIndicators.fibonacci;
     const currentPrice = coin.price;
     
+    // فحص الأمان
+    if (!fib) {
+        coin.targets = {
+            entry: currentPrice,
+            stopLoss: currentPrice * 0.95,
+            target1: currentPrice * 1.05,
+            target2: currentPrice * 1.10,
+            target3: currentPrice * 1.15,
+            target4: currentPrice * 1.20
+        };
+        return;
+    }
+
     coin.targets = {
-        entry: currentPrice, // الدخول بالسعر الحالي
-        stopLoss: fib.level786, // وقف خسارة عند دعم قوي
-        target1: fib.level236, // هدف 1 (أعلى من السعر)
-        target2: fib.level382, // هدف 2
-        target3: fib.level500, // هدف 3
-        target4: fib.level618  // هدف 4
+        entry: currentPrice,
+        stopLoss: fib.level786,
+        target1: fib.level236,
+        target2: fib.level382,
+        target3: fib.level500,
+        target4: fib.level618
     };
+
     
     console.log(`🎯 ${coin.symbol} الأهداف المصححة: Entry=${coin.targets.entry.toFixed(6)} | T1=${coin.targets.target1.toFixed(6)} | T2=${coin.targets.target2.toFixed(6)} | T3=${coin.targets.target3.toFixed(6)} | SL=${coin.targets.stopLoss.toFixed(6)}`);
 }

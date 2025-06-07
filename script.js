@@ -1055,10 +1055,6 @@ window.onclick = function(event) {
         modal.style.display = 'none';
     }
 }
-
-// تشغيل التطبيق
-document.addEventListener('DOMContentLoaded', function() {
-    window.yaserCrypto = new YaserCrypto();
 addSecretButton() {
     const secretArea = document.createElement('div');
     secretArea.style.cssText = `
@@ -1087,4 +1083,8 @@ addSecretButton() {
     
     document.body.appendChild(secretArea);
 }
+// تشغيل التطبيق
+document.addEventListener('DOMContentLoaded', function() {
+    window.yaserCrypto = new YaserCrypto();
+
 });

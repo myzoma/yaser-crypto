@@ -241,15 +241,197 @@ processHistoricalDataWithVolume(candlesData) {
         confirm: candle[8] === "1" // تأكيد إغلاق الشمعة
     })).reverse();
 }
+calculateRSI(closes, period = 14) {
+    if (closes.length < period + 1) {
+        return 50; // قيمة افتراضية
+    }
+    
+    let gains = 0;
+    let losses = 0;
+    
+    // حساب المتوسط الأولي
+    for (let i = 1; i <= period; i++) {
+        const change = closes[i] - closes[i - 1];
+        if (change > 0) {
+            gains += change;
+        } else {
+            losses += Math.abs(change);
+        }
+    }
+    
+    let avgGain = gains / period;
+    let avgLoss = losses / period;
+    
+    // حساب RSI للفترات المتبقية
+    for (let i = period + 1; i < closes.length; i++) {
+        const change = closes[i] - closes[i - 1];
+        const gain = change > 0 ? change : 0;
+        const loss = change < 0 ? Math.abs(change) : 0;
+        
+        avgGain = ((avgGain * (period - 1)) + gain) / period;
+        avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+    }
+    
+    if (avgLoss === 0) return 100;
+    
+    const rs = avgGain / avgLoss;
+    return 100 - (100 / (1 + rs));
+}
+
+calculateEMA(closes, period) {
+    if (closes.length === 0) return 0;
+    if (closes.length < period) return closes[closes.length - 1];
+    
+    const multiplier = 2 / (period + 1);
+    let ema = closes[0];
+    
+    for (let i = 1; i < closes.length; i++) {
+        ema = (closes[i] * multiplier) + (ema * (1 - multiplier));
+    }
+    
+    return ema;
+}
+
+calculateMFI(highs, lows, closes, volumes, period = 14) {
+    if (closes.length < period + 1) {
+        return 50; // قيمة افتراضية
+    }
+    
+    const typicalPrices = [];
+    const moneyFlows = [];
+    
+    for (let i = 0; i < closes.length; i++) {
+        const typicalPrice = (highs[i] + lows[i] + closes[i]) / 3;
+        typicalPrices.push(typicalPrice);
+        
+        if (i > 0) {
+            const moneyFlow = typicalPrice * volumes[i];
+            moneyFlows.push({
+                value: moneyFlow,
+                isPositive: typicalPrice > typicalPrices[i - 1]
+            });
+        }
+    }
+    
+    if (moneyFlows.length < period) return 50;
+    
+    const recentFlows = moneyFlows.slice(-period);
+    const positiveFlow = recentFlows
+        .filter(flow => flow.isPositive)
+        .reduce((sum, flow) => sum + flow.value, 0);
+    
+    const negativeFlow = recentFlows
+        .filter(flow => !flow.isPositive)
+        .reduce((sum, flow) => sum + flow.value, 0);
+    
+    if (negativeFlow === 0) return 100;
+    
+    const moneyRatio = positiveFlow / negativeFlow;
+    return 100 - (100 / (1 + moneyRatio));
+}
+
+calculateBollingerBands(closes, period = 20, multiplier = 2) {
+    if (closes.length < period) {
+        const currentPrice = closes[closes.length - 1] || 0;
+        return {
+            upper: currentPrice * 1.02,
+            middle: currentPrice,
+            lower: currentPrice * 0.98
+        };
+    }
+    
+    const recentCloses = closes.slice(-period);
+    const sma = recentCloses.reduce((sum, price) => sum + price, 0) / period;
+    
+    const variance = recentCloses.reduce((sum, price) => {
+        return sum + Math.pow(price - sma, 2);
+    }, 0) / period;
+    
+    const standardDeviation = Math.sqrt(variance);
+    
+    return {
+        upper: sma + (standardDeviation * multiplier),
+        middle: sma,
+        lower: sma - (standardDeviation * multiplier)
+    };
+}
+
+calculateStochastic(highs, lows, closes, period = 14) {
+    if (closes.length < period) {
+        return { k: 50, d: 50 };
+    }
+    
+    const recentHighs = highs.slice(-period);
+    const recentLows = lows.slice(-period);
+    const currentClose = closes[closes.length - 1];
+    
+    const highestHigh = Math.max(...recentHighs);
+    const lowestLow = Math.min(...recentLows);
+    
+    const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
+    
+    // حساب %D (متوسط متحرك بسيط لـ %K)
+    const kValues = [];
+    for (let i = Math.max(0, closes.length - 3); i < closes.length; i++) {
+        const periodHighs = highs.slice(Math.max(0, i - period + 1), i + 1);
+        const periodLows = lows.slice(Math.max(0, i - period + 1), i + 1);
+        const periodHigh = Math.max(...periodHighs);
+        const periodLow = Math.min(...periodLows);
+        
+        if (periodHigh !== periodLow) {
+            kValues.push(((closes[i] - periodLow) / (periodHigh - periodLow)) * 100);
+        }
+    }
+    
+    const d = kValues.length > 0 ? kValues.reduce((sum, val) => sum + val, 0) / kValues.length : 50;
+    
+    return { k: k || 50, d: d || 50 };
+}
+
+calculateMACD(closes) {
+    if (closes.length < 26) {
+        return { macd: 0, signal: 0, histogram: 0 };
+    }
+    
+    const ema12 = this.calculateEMAArray(closes, 12);
+    const ema26 = this.calculateEMAArray(closes, 26);
+    
+    const macdLine = ema12[ema12.length - 1] - ema26[ema26.length - 1];
+    
+    // حساب Signal line (EMA 9 من MACD)
+    const macdValues = [];
+    for (let i = 25; i < closes.length; i++) {
+        const ema12Val = this.calculateEMAArray(closes.slice(0, i + 1), 12);
+        const ema26Val = this.calculateEMAArray(closes.slice(0, i + 1), 26);
+        macdValues.push(ema12Val[ema12Val.length - 1] - ema26Val[ema26Val.length - 1]);
+    }
+    
+    const signalLine = macdValues.length >= 9 ? 
+        this.calculateEMAArray(macdValues, 9)[macdValues.length - 1] : 0;
+    
+    return {
+        macd: macdLine,
+        signal: signalLine,
+        histogram: macdLine - signalLine
+    };
+}
+
+calculateEMAArray(data, period) {
+    if (data.length === 0) return [];
+    
+    const multiplier = 2 / (period + 1);
+    const emaArray = [data[0]];
+    
+    for (let i = 1; i < data.length; i++) {
+        const ema = (data[i] * multiplier) + (emaArray[i - 1] * (1 - multiplier));
+        emaArray.push(ema);
+    }
+    
+    return emaArray;
+}
 
 
    calculateTechnicalIndicators(coin) {
-       calculateRSI(closes, period = 14)
-calculateEMA(closes, period)
-calculateMFI(highs, lows, closes, volumes, period = 14)
-calculateBollingerBands(closes, period = 20, multiplier = 2)
-calculateStochastic(highs, lows, closes, period = 14)
-
     const historicalData = coin.historicalData;
     const closes = historicalData.map(d => d.close);
     const highs = historicalData.map(d => d.high);

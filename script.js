@@ -1084,8 +1084,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(btn);
     }, 3000);
 
-    // أضف هذا في ملف JavaScript في موقعك الحالي
-setTimeout(() => {
+  setTimeout(() => {
     const btn = document.createElement('button');
     btn.innerHTML = '📊 متتبع التوصيات';
     btn.style.cssText = `
@@ -1115,11 +1114,9 @@ setTimeout(() => {
         btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
     };
     
-    window.open('yaser-signals-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
-        // سحب البيانات من الصفحة الحالية
+    btn.onclick = () => {
         const coinsData = [];
         
-        // البحث عن بيانات العملات في صفحتك
         const coinElements = document.querySelectorAll('.coin-card, [data-coin]');
         coinElements.forEach((element, index) => {
             const text = element.textContent;
@@ -1136,12 +1133,10 @@ setTimeout(() => {
             }
         });
         
-        // حفظ البيانات في localStorage
         localStorage.setItem('yaserCoinsData', JSON.stringify(coinsData));
         localStorage.setItem('yaserDataTimestamp', Date.now().toString());
         
-        // فتح المتتبع
-        window.open('crypto-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
+        window.open('yaser-signals-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
     };
     
     document.body.appendChild(btn);

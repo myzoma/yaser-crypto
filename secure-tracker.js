@@ -45,20 +45,22 @@ class SecureRecommendationTracker {
         localStorage.setItem('sec_recs_data', encrypted);
     }
 
-    async captureRecommendations() {
-        if (!isLoggedIn) return;
-        
-        try {
-                      // محاولة الحصول على البيانات من النافذة الأصلية
-            const mainWindow = window.opener || window.parent;
-            if (mainWindow && mainWindow.yaserCrypto && mainWindow.yaserCrypto.coins) {
-                coins = mainWindow.yaserCrypto.coins.slice(0, 15);
-            } else {
-                // إذا لم تتوفر البيانات، استخدم API مباشرة
-                coins = await this.fetchTopCoinsDirectly();
-            }
+   async captureRecommendations() {
+    if (!isLoggedIn) return;
             
-            let newCount = 0;
+    try {
+        let coins; // إضافة تعريف المتغير هنا
+        
+        // محاولة الحصول على البيانات من النافذة الأصلية
+        const mainWindow = window.opener || window.parent;
+        if (mainWindow && mainWindow.yaserCrypto && mainWindow.yaserCrypto.coins) {
+            coins = mainWindow.yaserCrypto.coins.slice(0, 15);
+        } else {
+            // إذا لم تتوفر البيانات، استخدم API مباشرة
+            coins = await this.fetchTopCoinsDirectly();
+        }
+        
+        let newCount = 0;
             coins.forEach(coin => {
                 const existing = this.recommendations.find(r => 
                     r.symbol === coin.symbol && 

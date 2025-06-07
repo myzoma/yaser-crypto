@@ -1,367 +1,42 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المحفظة</title>
+    <title>متتبع التوصيات</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #0a0a0a; 
-            color: white; 
-            margin: 0; 
-            padding: 0;
-            overflow: hidden;
-        }
-        
-        /* شاشة تسجيل الدخول */
-        .login-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .login-box {
-            background: #2a2a2a;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            min-width: 300px;
-        }
-        
-        .login-title {
-            color: #00d4aa;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        
-        .login-input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        
-        .login-input:focus {
-            outline: none;
-            border-color: #00d4aa;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            background: #00d4aa;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        
-        .login-btn:hover {
-            background: #00b894;
-        }
-        
-        .error-msg {
-            color: #ff4757;
-            margin-top: 10px;
-            display: none;
-        }
-        
-        /* المحتوى الرئيسي */
-        .main-content {
-            display: none;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #1a1a1a;
-            border-radius: 10px;
-        }
-        
-        .logout-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 15px; 
-            margin-bottom: 30px; 
-        }
-        
-        .stat-card { 
-            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-            padding: 20px; 
-            border-radius: 10px; 
-            text-align: center;
-            border: 1px solid #333;
-        }
-        
-        .recommendations-table { 
-            background: #1a1a1a; 
-            border-radius: 10px; 
-            overflow: hidden;
-            border: 1px solid #333;
-        }
-        
-        .table-header { 
-            background: #333; 
-            padding: 15px; 
-            font-weight: bold; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; 
-            gap: 10px; 
-        }
-        
-        .table-row { 
-            padding: 15px; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; 
-            gap: 10px; 
-            border-bottom: 1px solid #333;
-            transition: background 0.2s;
-        }
-        
-        .table-row:hover {
-            background: #2a2a2a;
-        }
-        
-        .success { color: #00ff88; }
-        .failed { color: #ff4757; }
-        .pending { color: #ffa502; }
-        
-        .controls { 
-            margin-bottom: 20px; 
-            text-align: center;
-            padding: 20px;
-            background: #1a1a1a;
-            border-radius: 10px;
-        }
-        
-        button { 
-            background: #00d4aa; 
-            color: white; 
-            border: none; 
-            padding: 12px 20px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            margin: 0 5px;
-            font-size: 14px;
-        }
-        
-        button:hover { 
-            background: #00b894; 
-        }
-        
-        .danger-btn {
-            background: #ff4757;
-        }
-        
-        .danger-btn:hover {
-            background: #ff3742;
-        }
-        
-        /* إخفاء شريط العنوان */
-        .hide-title {
-            position: absolute;
-            top: -1000px;
-            left: -1000px;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .controls { margin-bottom: 20px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        th { background: #f8f9fa; }
+        .profit-positive { color: #28a745; font-weight: bold; }
+        .profit-negative { color: #dc3545; font-weight: bold; }
+        .status-completed { background: #d4edda; }
+        .status-pending { background: #fff3cd; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
     </style>
 </head>
 <body>
-    <!-- شاشة تسجيل الدخول -->
-    <div id="loginScreen" class="login-screen">
-        <div class="login-box">
-            <div class="login-title">🔐 تسجيل الدخول</div>
-            <input type="password" id="passwordInput" class="login-input" placeholder="كلمة المرور" maxlength="50">
-            <button onclick="attemptLogin()" class="login-btn">دخول</button>
-            <div id="errorMsg" class="error-msg">كلمة مرور خاطئة!</div>
-        </div>
-    </div>
-
-    <!-- المحتوى الرئيسي -->
-    <div id="mainContent" class="main-content">
-        <div class="header">
-            <div>
-                <h1>📊 نظام إدارة المحفظة السري</h1>
-                <p>آخر تحديث: <span id="lastUpdate">--</span></p>
-            </div>
-            <div>
-                <button onclick="logout()" class="logout-btn">خروج</button>
-            </div>
-        </div>
-
+    <div class="container">
+        <h1>📊 متتبع التوصيات</h1>
+        
         <div class="controls">
-            <button onclick="captureRecommendations()">📊 التقاط التوصيات</button>
-            <button onclick="updatePrices()">🔄 تحديث الأسعار</button>
-            <button onclick="generateReport()">📈 تقرير مفصل</button>
-            <button onclick="autoUpdate()">⚡ تحديث تلقائي</button>
-            <button onclick="exportData()">📤 تصدير</button>
-            <button onclick="importData()" class="danger-btn">📥 استيراد</button>
-            <button onclick="clearData()" class="danger-btn">🗑️ مسح البيانات</button>
+            <button class="btn-primary" onclick="tracker.captureRecommendations()">📊 التقاط التوصيات</button>
+            <button class="btn-success" onclick="tracker.updatePrices()">🔄 تحديث الأسعار</button>
+            <button class="btn-info" onclick="tracker.generateReport()">📈 تقرير مفصل</button>
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>💰 إجمالي الربح</h3>
-                <div id="totalProfit" class="success">$0</div>
-            </div>
-            <div class="stat-card">
-                <h3>📈 التوصيات النشطة</h3>
-                <div id="activeRecs">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>✅ نجحت (24 ساعة)</h3>
-                <div id="success1d" class="success">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>🎯 نجحت (3 أيام)</h3>
-                <div id="success3d" class="success">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>🏆 نجحت (7 أيام)</h3>
-                <div id="success7d" class="success">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>📊 معدل النجاح</h3>
-                <div id="successRate">0%</div>
-            </div>
-        </div>
-
-        <div class="recommendations-table">
-            <div class="table-header">
-                <div>العملة</div>
-                <div>الدخول</div>
-                <div>الحالي</div>
-                <div>الهدف 1</div>
-                <div>الربح %</div>
-                <div>الحالة</div>
-                <div>المدة</div>
-                <div>الإجراءات</div>
-            </div>
-            <div id="recommendationsBody"></div>
-        </div>
+        
+        <div class="stats" id="stats"></div>
+        <div id="recommendations"></div>
     </div>
 
-    <input type="file" id="importFile" accept=".json" style="display: none;">
-
-    <script>
-        // كلمة المرور المشفرة (يمكنك تغييرها)
-        const ENCRYPTED_PASSWORD = btoa('212160Nm'); // غير كلمة المرور هنا
-        
-        let isLoggedIn = false;
-        let autoUpdateInterval = null;
-        
-        // محاولة تسجيل الدخول
-        function attemptLogin() {
-            const password = document.getElementById('passwordInput').value;
-            const encrypted = btoa(password);
-            
-            if (encrypted === ENCRYPTED_PASSWORD) {
-                isLoggedIn = true;
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                
-                // بدء النظام
-                tracker.init();
-                
-                // إخفاء عنوان الصفحة
-                document.title = 'نظام إدارة';
-                
-            } else {
-                document.getElementById('errorMsg').style.display = 'block';
-                document.getElementById('passwordInput').value = '';
-                
-                // إخفاء رسالة الخطأ بعد 3 ثوان
-                setTimeout(() => {
-                    document.getElementById('errorMsg').style.display = 'none';
-                }, 3000);
-            }
-        }
-        
-        // تسجيل الخروج
-        function logout() {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                isLoggedIn = false;
-                document.getElementById('loginScreen').style.display = 'flex';
-                document.getElementById('mainContent').style.display = 'none';
-                document.getElementById('passwordInput').value = '';
-                
-                // إيقاف التحديث التلقائي
-                if (autoUpdateInterval) {
-                    clearInterval(autoUpdateInterval);
-                    autoUpdateInterval = null;
-                }
-            }
-        }
-        
-        // التحديث التلقائي
-        function autoUpdate() {
-            if (autoUpdateInterval) {
-                clearInterval(autoUpdateInterval);
-                autoUpdateInterval = null;
-                alert('تم إيقاف التحديث التلقائي');
-            } else {
-                autoUpdateInterval = setInterval(() => {
-                    if (isLoggedIn) {
-                        tracker.updatePrices();
-                    }
-                }, 300000); // كل 5 دقائق
-                alert('تم تفعيل التحديث التلقائي (كل 5 دقائق)');
-            }
-        }
-        
-        // Enter للدخول
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !isLoggedIn) {
-                attemptLogin();
-            }
-        });
-        
-        // منع النقر بالزر الأيمن
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-        
-        // منع اختصارات المطور
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-                (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-            }
-        });
-    </script>
-    
-    <script src="secure-tracker.js"></script>
+    <script src="secure-tracker-simple.js"></script>
 </body>
 </html>

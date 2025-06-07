@@ -829,62 +829,68 @@ findNearestSupport(price, fib) {
     }
 
     showCoinDetails(coin) {
-        const modal = document.getElementById('coinModal');
-        const modalBody = document.getElementById('modalBody');
-        const fib = coin.technicalIndicators.fibonacci;
-        const targets = coin.targets;
-
-        modalBody.innerHTML = `
-            <div class="modal-header">
-                <div class="modal-coin-logo">${coin.symbol.charAt(0)}</div>
-                <h2>${coin.name}</h2>
-                <p>المركز: #${coin.rank} | النقاط: ${coin.score}</p>
-                <p>السعر الحالي: $${coin.price.toFixed(4)}</p>
-            </div>
-            <div class="technical-indicators">
-                <div class="indicator-card">
-                    <div class="indicator-title">RSI (14)</div>
-                    <div class="indicator-value">${(coin.technicalIndicators.rsi || 0).toFixed(2)}</div>
-                    <div style="color: ${coin.technicalIndicators.rsi > 50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${coin.technicalIndicators.rsi > 50 ? 'صاعد' : 'هابط'}
-                    </div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-title">MACD</div>
-                    <div class="indicator-value">${(coin.technicalIndicators.macd || 0).toFixed(4)}</div>
-                    <div style="color: ${coin.technicalIndicators.macd > coin.technicalIndicators.macdSignal ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${coin.technicalIndicators.macd > coin.technicalIndicators.macdSignal ? 'تقاطع صاعد' : 'تقاطع هابط'}
-                    </div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-title">EMA 20</div>
-                    <div class="indicator-value">$${(coin.technicalIndicators.ema20 || 0).toFixed(4)}</div>
-                    <div style="color: ${coin.price > coin.technicalIndicators.ema20 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${coin.price > coin.technicalIndicators.ema20 ? 'فوق المتوسط' : 'تحت المتوسط'}
-                    </div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-title">EMA 50</div>
-                    <div class="indicator-value">$${(coin.technicalIndicators.ema50 || 0).toFixed(4)}</div>
-                    <div style="color: ${coin.price > coin.technicalIndicators.ema50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${coin.price > coin.technicalIndicators.ema50 ? 'فوق المتوسط' : 'تحت المتوسط'}
-                    </div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-title">Parabolic SAR</div>
-                    <div class="indicator-value">$${(coin.technicalIndicators.parabolicSAR || 0).toFixed(4)}</div>
-                    <div style="color: ${coin.price > coin.technicalIndicators.parabolicSAR ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${coin.price > coin.technicalIndicators.parabolicSAR ? 'اتجاه صاعد' : 'اتجاه هابط'}
-                    </div>
-                </div>
-                <div class="indicator-card">
-                    <div class="indicator-title">MFI (14)</div>
-                    <div class="indicator-value">${(coin.technicalIndicators.mfi || 0).toFixed(2)}</div>
-                    <div style="color: ${coin.technicalIndicators.mfi > 50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
-                        ${coin.technicalIndicators.mfi > 50 ? 'سيولة قوية' : 'سيولة ضعيفة'}
-                    </div>
+    const modal = document.getElementById('coinModal');
+    const modalBody = document.getElementById('modalBody');
+    const fib = coin.technicalIndicators.fibonacci;
+    const targets = coin.targets;
+    modalBody.innerHTML = `
+        <div class="modal-header">
+            <div class="modal-coin-logo">${coin.symbol.charAt(0)}</div>
+            <h2>${coin.name}</h2>
+            <p>المركز: #${coin.rank} | النقاط: ${coin.score}</p>
+            <p>السعر الحالي: $${coin.price.toFixed(4)}</p>
+        </div>
+        <div class="technical-indicators">
+            <div class="indicator-card">
+                <div class="indicator-title">RSI (14)</div>
+                <div class="indicator-value">${(coin.technicalIndicators.rsi || 0).toFixed(2)}</div>
+                <div style="color: ${coin.technicalIndicators.rsi > 50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.technicalIndicators.rsi > 50 ? 'صاعد' : 'هابط'}
                 </div>
             </div>
+            <div class="indicator-card">
+                <div class="indicator-title">MACD</div>
+                <div class="indicator-value">${(coin.technicalIndicators.macd || 0).toFixed(4)}</div>
+                <div style="color: ${coin.technicalIndicators.macd > coin.technicalIndicators.macdSignal ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.technicalIndicators.macd > coin.technicalIndicators.macdSignal ? 'تقاطع صاعد' : 'تقاطع هابط'}
+                </div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">EMA 20</div>
+                <div class="indicator-value">$${(coin.technicalIndicators.ema20 || 0).toFixed(4)}</div>
+                <div style="color: ${coin.price > coin.technicalIndicators.ema20 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.price > coin.technicalIndicators.ema20 ? 'فوق المتوسط' : 'تحت المتوسط'}
+                </div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">EMA 50</div>
+                <div class="indicator-value">$${(coin.technicalIndicators.ema50 || 0).toFixed(4)}</div>
+                <div style="color: ${coin.price > coin.technicalIndicators.ema50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.price > coin.technicalIndicators.ema50 ? 'فوق المتوسط' : 'تحت المتوسط'}
+                </div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">Parabolic SAR</div>
+                <div class="indicator-value">$${(coin.technicalIndicators.parabolicSAR || 0).toFixed(4)}</div>
+                <div style="color: ${coin.price > coin.technicalIndicators.parabolicSAR ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.price > coin.technicalIndicators.parabolicSAR ? 'اتجاه صاعد' : 'اتجاه هابط'}
+                </div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">MFI (14)</div>
+                <div class="indicator-value">${(coin.technicalIndicators.mfi || 0).toFixed(2)}</div>
+                <div style="color: ${coin.technicalIndicators.mfi > 50 ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.technicalIndicators.mfi > 50 ? 'سيولة قوية' : 'سيولة ضعيفة'}
+                </div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">CVD</div>
+                <div class="indicator-value">${coin.technicalIndicators.cvd ? coin.technicalIndicators.cvd.value.toFixed(0) : 'N/A'}</div>
+                <div style="color: ${coin.technicalIndicators.cvd && coin.technicalIndicators.cvd.trend === 'bullish' ? '#00ff88' : '#ff4757'}; font-size: 0.9rem;">
+                    ${coin.technicalIndicators.cvd ? (coin.technicalIndicators.cvd.trend === 'bullish' ? 'حجم صاعد' : 'حجم هابط') : 'غير متاح'}
+                </div>
+            </div>
+        </div>
             <div class="targets-section">
                 <h3 style="color: #00d4aa; margin-bottom: 15px;">الأهداف والمستويات</h3>
                 <div class="targets-grid">

@@ -1084,43 +1084,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(btn);
     }, 3000);
 
- setTimeout(() => {
-    const btn = document.createElement('button');
-    btn.innerHTML = '📊 متتبع التوصيات';
-    btn.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        padding: 12px 20px;
-        background: linear-gradient(45deg, #4caf50, #45a049);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        z-index: 1000;
-        font-size: 14px;
-        font-weight: bold;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    `;
-    
-    btn.onclick = () => {
-        // نسخ بيانات العملات من الصفحة الحالية
-        const yaserCrypto = window.yaserCrypto || window.YaserCrypto;
-        let coinsData = [];
-        
-        if (yaserCrypto && yaserCrypto.coins) {
-            coinsData = yaserCrypto.coins.slice(0, 12);
-        }
-        
-        // حفظ البيانات
-        localStorage.setItem('yaserCoinsData', JSON.stringify(coinsData));
-        localStorage.setItem('yaserDataTimestamp', Date.now().toString());
-        
-        // فتح المتتبع الأصلي
-        window.open('yaser-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
-    };
-    
-    document.body.appendChild(btn);
-}, 2000);
+ 
 
 });

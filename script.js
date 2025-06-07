@@ -1083,4 +1083,68 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.body.appendChild(btn);
     }, 3000);
+
+    // أضف هذا في ملف JavaScript في موقعك الحالي
+setTimeout(() => {
+    const btn = document.createElement('button');
+    btn.innerHTML = '📊 متتبع التوصيات';
+    btn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        padding: 12px 20px;
+        background: linear-gradient(45deg, #4caf50, #45a049);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 1000;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    `;
+    
+    btn.onmouseover = () => {
+        btn.style.transform = 'translateY(-2px)';
+        btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)';
+    };
+    
+    btn.onmouseout = () => {
+        btn.style.transform = 'translateY(0)';
+        btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+    };
+    
+    window.open('yaser-signals-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
+        // سحب البيانات من الصفحة الحالية
+        const coinsData = [];
+        
+        // البحث عن بيانات العملات في صفحتك
+        const coinElements = document.querySelectorAll('.coin-card, [data-coin]');
+        coinElements.forEach((element, index) => {
+            const text = element.textContent;
+            const symbolMatch = text.match(/([A-Z]{3,10})/);
+            const numbers = text.match(/[\d.]+/g);
+            
+            if (symbolMatch && numbers && numbers.length >= 2) {
+                coinsData.push({
+                    symbol: symbolMatch[1],
+                    price: parseFloat(numbers[0]),
+                    change24h: parseFloat(numbers[1]),
+                    rank: index + 1
+                });
+            }
+        });
+        
+        // حفظ البيانات في localStorage
+        localStorage.setItem('yaserCoinsData', JSON.stringify(coinsData));
+        localStorage.setItem('yaserDataTimestamp', Date.now().toString());
+        
+        // فتح المتتبع
+        window.open('crypto-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
+    };
+    
+    document.body.appendChild(btn);
+}, 2000);
+
 });

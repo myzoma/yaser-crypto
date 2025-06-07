@@ -947,7 +947,7 @@ findNearestSupport(price, fib) {
     
     this.coins.forEach(coin => {
         this.calculateScore(coin);
-        this.calculateTargets(coin); // إضافة هذا السطر
+       
     });
     
     // ترتيب العملات

@@ -244,6 +244,12 @@ processHistoricalDataWithVolume(candlesData) {
 
 
    calculateTechnicalIndicators(coin) {
+       calculateRSI(closes, period = 14)
+calculateEMA(closes, period)
+calculateMFI(highs, lows, closes, volumes, period = 14)
+calculateBollingerBands(closes, period = 20, multiplier = 2)
+calculateStochastic(highs, lows, closes, period = 14)
+
     const historicalData = coin.historicalData;
     const closes = historicalData.map(d => d.close);
     const highs = historicalData.map(d => d.high);

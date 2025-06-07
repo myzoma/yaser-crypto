@@ -837,3 +837,184 @@ html {
     color: #ff4444;
 }
 
+.cvd-indicator .value {
+    font-weight: bold;
+}
+
+.orderbook-indicator .value {
+    font-size: 0.9em;
+}
+
+.above-vwap {
+    color: #00ff88;
+}
+
+.below-vwap {
+    color: #ff4444;
+}
+
+.divergence-alert {
+    margin: 10px 0;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    border-left: 4px solid;
+}
+
+.divergence-alert.bullish_divergence {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+.divergence-alert.bearish_divergence {
+    background: rgba(255, 68, 68, 0.1);
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.volume-analysis {
+    margin: 10px 0;
+}
+
+.volume-bar {
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.buy-volume {
+    background: linear-gradient(90deg, #00ff88, #00cc66);
+}
+
+.sell-volume {
+    background: linear-gradient(90deg, #ff4444, #cc3333);
+}
+
+.volume-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.8em;
+}
+
+.buy-label {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.sell-label {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.overbought {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.oversold {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.neutral {
+    color: #ffaa00;
+}
+
+/* تحسينات إضافية للعرض */
+.indicators-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+.indicator .label {
+    color: #aaa;
+    font-weight: 500;
+}
+
+.indicator .value {
+    font-weight: bold;
+    color: #fff;
+}
+
+/* تحسين عرض الأهداف */
+.targets {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.target {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+    font-size: 0.85em;
+}
+
+.target.stop-loss {
+    color: #ff4444;
+    font-weight: bold;
+    border-top: 1px solid rgba(255, 68, 68, 0.3);
+    padding-top: 5px;
+    margin-top: 8px;
+}
+
+.conditions-summary {
+    text-align: center;
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+/* تحسين بطاقات العملات حسب النقاط */
+.coin-card.high-score {
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.coin-card.medium-score {
+    border: 2px solid #ffaa00;
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.2);
+}
+
+.coin-card.low-score {
+    border: 2px solid #666;
+}
+
+.score-badge {
+    background: linear-gradient(135deg, #00ff88, #00cc66);
+    color: #000;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+}
+
+.coin-card.medium-score .score-badge {
+    background: linear-gradient(135deg, #ffaa00, #ff8800);
+}
+
+.coin-card.low-score .score-badge {
+    background: linear-gradient(135deg, #666, #444);
+    color: #fff;
+}

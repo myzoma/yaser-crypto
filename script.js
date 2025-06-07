@@ -1060,3 +1060,44 @@ document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
    
 });
+// إضافة زر سري (مخفي)
+addSecretButton() {
+    // إنشاء منطقة سرية غير مرئية
+    const secretArea = document.createElement('div');
+    secretArea.style.cssText = `
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 50px;
+        height: 50px;
+        background: transparent;
+        z-index: 9999;
+        cursor: pointer;
+    `;
+    
+    let clickCount = 0;
+    secretArea.addEventListener('click', () => {
+        clickCount++;
+        if (clickCount === 5) { // 5 نقرات سريعة
+            const password = prompt('🔐 كلمة المرور:');
+            if (password === 'MySecretPassword123') { // نفس كلمة المرور
+                window.open('secure-tracker.html', 'secureTracker', 'width=1400,height=900,scrollbars=yes');
+            }
+            clickCount = 0;
+        }
+        
+        // إعادة تعيين العداد بعد ثانيتين
+        setTimeout(() => { clickCount = 0; }, 2000);
+    });
+    
+    document.body.appendChild(secretArea);
+}
+
+// استدعاء في init()
+async init() {
+    this.showLoading();
+    await this.fetchData();
+    this.analyzeCoins();
+    this.renderCoins();
+    this.addSecretButton(); // إضافة هذا السطر
+}

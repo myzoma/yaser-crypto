@@ -4,24 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متتبع التوصيات</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
-        .controls { margin-bottom: 20px; }
-        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-info { background: #17a2b8; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-        th { background: #f8f9fa; }
-        .profit-positive { color: #28a745; font-weight: bold; }
-        .profit-negative { color: #dc3545; font-weight: bold; }
-        .status-completed { background: #d4edda; }
-        .status-pending { background: #fff3cd; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
-    </style>
+   <style>
+    body { 
+        font-family: Arial, sans-serif; 
+        margin: 20px; 
+        background: #0d1117; 
+        color: #e6edf3;
+    }
+    
+    .container { 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        background: #161b22; 
+        padding: 20px; 
+        border-radius: 10px; 
+        border: 1px solid #30363d;
+    }
+    
+    .controls { 
+        margin-bottom: 20px; 
+    }
+    
+    button { 
+        padding: 10px 20px; 
+        margin: 5px; 
+        border: none; 
+        border-radius: 5px; 
+        cursor: pointer; 
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary { 
+        background: #238be6; 
+        color: white; 
+    }
+    .btn-primary:hover { 
+        background: #1f7acc; 
+    }
+    
+    .btn-success { 
+        background: #2ea043; 
+        color: white; 
+    }
+    .btn-success:hover { 
+        background: #238636; 
+    }
+    
+    .btn-info { 
+        background: #1f6feb; 
+        color: white; 
+    }
+    .btn-info:hover { 
+        background: #1158c7; 
+    }
+    
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 20px; 
+        background: #0d1117;
+    }
+    
+    th, td { 
+        padding: 10px; 
+        border: 1px solid #30363d; 
+        text-align: center; 
+        color: #e6edf3;
+    }
+    
+    th { 
+        background: #21262d; 
+        color: #f0f6fc;
+        font-weight: 600;
+    }
+    
+    .profit-positive { 
+        color: #3fb950; 
+        font-weight: bold; 
+    }
+    
+    .profit-negative { 
+        color: #f85149; 
+        font-weight: bold; 
+    }
+    
+    .status-completed { 
+        background: #0d4429; 
+        color: #3fb950;
+    }
+    
+    .status-pending { 
+        background: #332b00; 
+        color: #d29922;
+    }
+    
+    .stats { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        gap: 15px; 
+        margin-bottom: 20px; 
+    }
+    
+    .stat-card { 
+        background: #21262d; 
+        padding: 15px; 
+        border-radius: 8px; 
+        text-align: center; 
+        border: 1px solid #30363d;
+        color: #e6edf3;
+    }
+    
+    .stat-card h3 {
+        color: #f0f6fc;
+        margin-top: 0;
+    }
+</style>
+
 </head>
 <body>
     <div class="container">

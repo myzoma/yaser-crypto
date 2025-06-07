@@ -429,6 +429,47 @@ calculateEMAArray(data, period) {
     
     return emaArray;
 }
+calculateFibonacci(highs, lows) {
+    if (!highs || !lows || highs.length === 0 || lows.length === 0) {
+        const defaultPrice = 1;
+        return {
+            level0: defaultPrice,
+            level236: defaultPrice * 1.236,
+            level382: defaultPrice * 1.382,
+            level500: defaultPrice * 1.500,
+            level618: defaultPrice * 1.618,
+            level786: defaultPrice * 0.786,
+            level1000: defaultPrice * 0.5
+        };
+    }
+    
+    const high = Math.max(...highs);
+    const low = Math.min(...lows);
+    const diff = high - low;
+    
+    if (diff === 0) {
+        return {
+            level0: high,
+            level236: high,
+            level382: high,
+            level500: high,
+            level618: high,
+            level786: high,
+            level1000: high
+        };
+    }
+    
+    // للاتجاه الصاعد - الأهداف أعلى من السعر الحالي
+    return {
+        level0: high, // 0% = السعر الحالي
+        level236: high + (diff * 0.236), // هدف 1
+        level382: high + (diff * 0.382), // هدف 2
+        level500: high + (diff * 0.500), // هدف 3
+        level618: high + (diff * 0.618), // هدف 4
+        level786: low + (diff * 0.214), // دعم قوي
+        level1000: low // 100% = أقل سعر
+    };
+}
 
 
    calculateTechnicalIndicators(coin) {

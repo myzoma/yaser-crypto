@@ -284,6 +284,13 @@ class YaserCrypto {
 
     // حساب CVD (Cumulative Volume Delta)
     coin.technicalIndicators.cvd = this.calculateCVD(historicalData, coin);
+       // حساب Parabolic SAR
+if (historicalData.length >= 2) {
+    coin.technicalIndicators.parabolicSAR = this.calculateParabolicSAR(historicalData);
+} else {
+    coin.technicalIndicators.parabolicSAR = coin.price * 0.98; // قيمة تقديرية
+}
+
 
     // حساب المتوسطات المتحركة
     const currentPrice = coin.price;
@@ -457,6 +464,54 @@ calculateEMAFromPrices(prices, period) {
     }
 
     return ema;
+}
+calculateParabolicSAR(historicalData, step = 0.02, maxStep = 0.2) {
+    if (!historicalData || historicalData.length < 2) {
+        return 0;
+    }
+
+    let sar = historicalData[0].low;
+    let trend = 1; // 1 للصاعد، -1 للهابط
+    let af = step; // عامل التسارع
+    let ep = historicalData[0].high; // النقطة القصوى
+
+    for (let i = 1; i < historicalData.length; i++) {
+        const current = historicalData[i];
+        const previous = historicalData[i - 1];
+
+        // حساب SAR الجديد
+        sar = sar + af * (ep - sar);
+
+        if (trend === 1) { // اتجاه صاعد
+            if (current.low <= sar) {
+                // تغيير الاتجاه إلى هابط
+                trend = -1;
+                sar = ep;
+                ep = current.low;
+                af = step;
+            } else {
+                if (current.high > ep) {
+                    ep = current.high;
+                    af = Math.min(af + step, maxStep);
+                }
+            }
+        } else { // اتجاه هابط
+            if (current.high >= sar) {
+                // تغيير الاتجاه إلى صاعد
+                trend = 1;
+                sar = ep;
+                ep = current.high;
+                af = step;
+            } else {
+                if (current.low < ep) {
+                    ep = current.low;
+                    af = Math.min(af + step, maxStep);
+                }
+            }
+        }
+    }
+
+    return sar;
 }
 
     estimateRSIFromChange(change24h) {

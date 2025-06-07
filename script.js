@@ -1059,33 +1059,28 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
 
+
+    setTimeout(() => {
+        const btn = document.createElement('button');
+        btn.innerHTML = '📊 فتح المتتبع';
+        btn.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 14px;
+        `;
+        
+        btn.onclick = () => {
+            window.open('secure-tracker.html', 'tracker', 'width=1400,height=900');
+        };
+        
+        document.body.appendChild(btn);
+    }, 3000);
 });
-// زر سري مستقل
-setTimeout(() => {
-    const secretArea = document.createElement('div');
-    secretArea.style.cssText = `
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 50px;
-        height: 50px;
-        background: transparent;
-        z-index: 9999;
-        cursor: pointer;
-    `;
-    
-    let clickCount = 0;
-    secretArea.addEventListener('click', () => {
-        clickCount++;
-        if (clickCount === 5) {
-            const password = prompt('🔐 كلمة المرور:');
-            if (password === 'MySecretPassword123') {
-                window.open('secure-tracker.html', 'tracker', 'width=1400,height=900');
-            }
-            clickCount = 0;
-        }
-        setTimeout(() => { clickCount = 0; }, 2000);
-    });
-    
-    document.body.appendChild(secretArea);
-}, 3000); // بعد 3 ثوان من تحميل الصفحة

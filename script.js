@@ -18,6 +18,7 @@ class YaserCrypto {
         await this.fetchData();
         this.analyzeCoins();
         this.renderCoins();
+         this.addSecretButton();
     }
 
  showLoading() {

@@ -1059,10 +1059,7 @@ window.onclick = function(event) {
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
-
-    // إضافة زر سري (مخفي)
 addSecretButton() {
-    // إنشاء منطقة سرية غير مرئية
     const secretArea = document.createElement('div');
     secretArea.style.cssText = `
         position: fixed;
@@ -1078,28 +1075,16 @@ addSecretButton() {
     let clickCount = 0;
     secretArea.addEventListener('click', () => {
         clickCount++;
-        if (clickCount === 5) { // 5 نقرات سريعة
+        if (clickCount === 5) {
             const password = prompt('🔐 كلمة المرور:');
-            if (password === 'MySecretPassword123') { // نفس كلمة المرور
-                window.open('secure-tracker.html', 'secureTracker', 'width=1400,height=900,scrollbars=yes');
+            if (password === 'MySecretPassword123') {
+                window.open('secure-tracker.html', 'tracker', 'width=1400,height=900');
             }
             clickCount = 0;
         }
-        
-        // إعادة تعيين العداد بعد ثانيتين
         setTimeout(() => { clickCount = 0; }, 2000);
     });
     
     document.body.appendChild(secretArea);
 }
-
-// استدعاء في init()
-async init() {
-    this.showLoading();
-    await this.fetchData();
-    this.analyzeCoins();
-    this.renderCoins();
-    this.addSecretButton(); // إضافة هذا السطر
-}
-
 });

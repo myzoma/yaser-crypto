@@ -1084,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(btn);
     }, 3000);
 
-  setTimeout(() => {
+ setTimeout(() => {
     const btn = document.createElement('button');
     btn.innerHTML = '📊 متتبع التوصيات';
     btn.style.cssText = `
@@ -1101,42 +1101,23 @@ document.addEventListener('DOMContentLoaded', function() {
         font-size: 14px;
         font-weight: bold;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
     `;
     
-    btn.onmouseover = () => {
-        btn.style.transform = 'translateY(-2px)';
-        btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)';
-    };
-    
-    btn.onmouseout = () => {
-        btn.style.transform = 'translateY(0)';
-        btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-    };
-    
     btn.onclick = () => {
-        const coinsData = [];
+        // نسخ بيانات العملات من الصفحة الحالية
+        const yaserCrypto = window.yaserCrypto || window.YaserCrypto;
+        let coinsData = [];
         
-        const coinElements = document.querySelectorAll('.coin-card, [data-coin]');
-        coinElements.forEach((element, index) => {
-            const text = element.textContent;
-            const symbolMatch = text.match(/([A-Z]{3,10})/);
-            const numbers = text.match(/[\d.]+/g);
-            
-            if (symbolMatch && numbers && numbers.length >= 2) {
-                coinsData.push({
-                    symbol: symbolMatch[1],
-                    price: parseFloat(numbers[0]),
-                    change24h: parseFloat(numbers[1]),
-                    rank: index + 1
-                });
-            }
-        });
+        if (yaserCrypto && yaserCrypto.coins) {
+            coinsData = yaserCrypto.coins.slice(0, 12);
+        }
         
+        // حفظ البيانات
         localStorage.setItem('yaserCoinsData', JSON.stringify(coinsData));
         localStorage.setItem('yaserDataTimestamp', Date.now().toString());
         
-        window.open('yaser-signals-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
+        // فتح المتتبع الأصلي
+        window.open('yaser-tracker.html', 'tracker', 'width=1400,height=900,scrollbars=yes');
     };
     
     document.body.appendChild(btn);

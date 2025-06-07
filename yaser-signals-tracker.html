@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متتبع توصيات ياسر كريبتو</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        
+        .signals-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .signal-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .coin-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        
+        .coin-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        .detail-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 متتبع توصيات ياسر كريبتو</h1>
+            <p>آخر تحديث: <span id="lastUpdate">جاري التحميل...</span></p>
+        </div>
+        
+        <div id="signalsContainer" class="signals-grid">
+            <div class="loading">جاري تحميل البيانات...</div>
+        </div>
+    </div>
+
+    <script>
+        // تحميل البيانات من localStorage
+        function loadData() {
+            const coinsData = JSON.parse(localStorage.getItem('yaserCoinsData') || '[]');
+            const timestamp = localStorage.getItem('yaserDataTimestamp');
+            
+            if (coinsData.length === 0) {
+                document.getElementById('signalsContainer').innerHTML = 
+                    '<div class="loading">لا توجد بيانات متاحة</div>';
+                return;
+            }
+            
+            // عرض وقت آخر تحديث
+            if (timestamp) {
+                const date = new Date(parseInt(timestamp));
+                document.getElementById('lastUpdate').textContent = date.toLocaleString('ar');
+            }
+            
+            // عرض البيانات
+            renderSignals(coinsData);
+        }
+        
+        function renderSignals(coins) {
+            const container = document.getElementById('signalsContainer');
+            
+            container.innerHTML = coins.map(coin => `
+                <div class="signal-card">
+                    <div class="coin-name">${coin.symbol}</div>
+                    <div class="coin-details">
+                        <div class="detail-item">
+                            <div class="detail-label">الترتيب</div>
+                            <div class="detail-value">#${coin.rank}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">السعر</div>
+                            <div class="detail-value">$${coin.price.toFixed(6)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">التغيير 24س</div>
+                            <div class="detail-value" style="color: #4caf50">+${coin.change24h.toFixed(2)}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">الهدف الأول</div>
+                            <div class="detail-value">$${(coin.price * 1.02).toFixed(6)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">الهدف الثاني</div>
+                            <div class="detail-value">$${(coin.price * 1.04).toFixed(6)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">وقف الخسارة</div>
+                            <div class="detail-value" style="color: #f44336">$${(coin.price * 0.98).toFixed(6)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // تحميل البيانات عند فتح الصفحة
+        loadData();
+        
+        // تحديث البيانات كل 30 ثانية
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>

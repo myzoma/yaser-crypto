@@ -1,0 +1,151 @@
+                                <div class="target-label">الهدف 2</div>
+                                <div class="target-value">$${signal.target2.toFixed(6)}</div>
+                            </div>
+                            <div class="target ${signal.achievedTargets.includes(3) ? 'achieved' : ''}">
+                                <div class="target-label">الهدف 3</div>
+                                <div class="target-value">$${signal.target3.toFixed(6)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="signal-footer">
+                            <div class="signal-status ${statusClass}">
+                                ${this.getStatusText(signal.status)}
+                            </div>
+                            <div class="profit-display ${profitClass}">
+                                ${signal.profit >= 0 ? '+' : ''}${signal.profit.toFixed(2)}%
+                            </div>
+                            <div>
+                                <button class="action-btn pin-btn ${signal.isPinned ? 'pinned' : ''}" 
+                                        onclick="tracker.togglePin('${signal.id}')">
+                                    ${signal.isPinned ? '📌' : '📍'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getStatusText(status) {
+                switch (status) {
+                    case 'active': return '🔄 نشطة';
+                    case 'success': return '✅ ناجحة';
+                    case 'failed': return '❌ فاشلة';
+                    default: return '⏳ في الانتظار';
+                }
+            }
+
+            updatePagination(totalItems) {
+                const totalPages = Math.ceil(totalItems / this.signalsPerPage);
+                
+                document.getElementById('pageInfo').textContent = 
+                    `صفحة ${this.currentPage} من ${totalPages}`;
+                
+                document.getElementById('prevPage').disabled = this.currentPage === 1;
+                document.getElementById('nextPage').disabled = this.currentPage === totalPages;
+            }
+
+            updateStats() {
+                const total = this.signals.length;
+                const active = this.signals.filter(s => s.status === 'active').length;
+                const success = this.signals.filter(s => s.status === 'success').length;
+                const totalProfit = this.signals.reduce((sum, s) => sum + s.profit, 0);
+
+                document.getElementById('totalSignals').textContent = total;
+                document.getElementById('activeSignals').textContent = active;
+                document.getElementById('successSignals').textContent = success;
+                document.getElementById('totalProfit').textContent = `${totalProfit.toFixed(2)}%`;
+            }
+
+            updateConnectionStatus(message, type) {
+                const statusEl = document.getElementById('connectionStatus');
+                statusEl.textContent = message;
+                statusEl.className = `connection-status ${type}`;
+            }
+
+            updateLastUpdateTime(date = new Date()) {
+                document.getElementById('lastUpdate').textContent = 
+                    `آخر تحديث: ${date.toLocaleString('ar')}`;
+            }
+
+            togglePin(signalId) {
+                const signal = this.signals.find(s => s.id === signalId);
+                if (signal) {
+                    signal.isPinned = !signal.isPinned;
+                    this.saveSignals();
+                    this.renderSignals();
+                }
+            }
+
+            showDailyReport() {
+                const today = new Date().toDateString();
+                const todaySignals = this.signals.filter(s => 
+                    new Date(s.createdAt).toDateString() === today
+                );
+
+                const report = {
+                    totalToday: todaySignals.length,
+                    successToday: todaySignals.filter(s => s.status === 'success').length,
+                    activeToday: todaySignals.filter(s => s.status === 'active').length,
+                    failedToday: todaySignals.filter(s => s.status === 'failed').length,
+                    profitToday: todaySignals.reduce((sum, s) => sum + s.profit, 0),
+                    bestPerformer: todaySignals.reduce((best, current) => 
+                        current.profit > (best?.profit || 0) ? current : best, null
+                    ),
+                    worstPerformer: todaySignals.reduce((worst, current) => 
+                        current.profit < (worst?.profit || 0) ? current : worst, null
+                    )
+                };
+
+                const reportContent = `
+                    <div class="report-item">
+                        <div class="report-number">${report.totalToday}</div>
+                        <div class="report-label">توصيات اليوم</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="report-number">${report.successToday}</div>
+                        <div class="report-label">ناجحة</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="report-number">${report.activeToday}</div>
+                        <div class="report-label">نشطة</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="report-number">${report.failedToday}</div>
+                        <div class="report-label">فاشلة</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="report-number">${report.profitToday.toFixed(2)}%</div>
+                        <div class="report-label">ربح اليوم</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="report-number">${report.bestPerformer?.coinName || 'لا يوجد'}</div>
+                        <div class="report-label">أفضل أداء</div>
+                    </div>
+                `;
+
+                document.getElementById('reportContent').innerHTML = reportContent;
+                document.getElementById('reportModal').style.display = 'block';
+            }
+
+            saveSignals() {
+                localStorage.setItem('yaserSignals', JSON.stringify(this.signals));
+            }
+
+            startAutoUpdate() {
+                // تحديث كل 30 ثانية
+                setInterval(() => {
+                    this.loadSignalsFromStorage();
+                    this.updateStats();
+                    this.renderSignals();
+                }, 30000);
+            }
+        }
+
+        // تشغيل التطبيق
+        const tracker = new YaserCryptoTracker();
+
+        // إضافة دالة عامة للتبديل
+        window.tracker = tracker;
+    </script>
+</body>
+</html>

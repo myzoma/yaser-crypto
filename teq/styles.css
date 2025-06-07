@@ -1,0 +1,942 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    direction: rtl;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+
+.last-update {
+    font-size: 0.9rem;
+    opacity: 0.6;
+    margin-bottom: 10px;
+}
+
+.connection-status {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.connection-status.loading {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+    border: 1px solid #2196f3;
+}
+
+.connection-status.success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border: 1px solid #4caf50;
+}
+
+.connection-status.error {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid #f44336;
+}
+
+.connection-status.warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.stat-card.total .stat-number { color: #64b5f6; }
+.stat-card.success .stat-number { color: #4caf50; }
+.stat-card.failed .stat-number { color: #f44336; }
+.stat-card.profit .stat-number { color: #ffd700; }
+
+.stat-label {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #4caf50, #45a049);
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #2196f3, #1976d2);
+    color: white;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.signals-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
+}
+
+.signals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.signals-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #000;
+}
+
+.signals-list {
+    display: grid;
+    gap: 20px;
+}
+
+.loading, .no-signals {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.signal-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.signal-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.signal-card.pinned {
+    border: 2px solid #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.signal-card.pinned::before {
+    content: "📌";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.2rem;
+}
+
+.signal-card.success {
+    border-left: 4px solid #4caf50;
+}
+
+.signal-card.failed {
+    border-left: 4px solid #f44336;
+}
+
+.signal-card.active {
+    border-left: 4px solid #2196f3;
+}
+
+.signal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.coin-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.coin-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffd700;
+}
+
+.coin-rank {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.signal-status {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-active { 
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+    border: 1px solid #2196f3;
+}
+
+.status-success { 
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border: 1px solid #4caf50;
+}
+
+.status-failed { 
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid #f44336;
+}
+
+.signal-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    text-align: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.targets {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.target {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.target.achieved {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4caf50;
+    color: #4caf50;
+    transform: scale(1.05);
+}
+
+.target-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.target-value {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.target-check {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #4caf50;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+
+.signal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.signal-time {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+.signal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+}
+
+.pin-btn {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    border: 1px solid #ffd700;
+}
+
+.pin-btn:hover {
+    background: #ffd700;
+    color: #000;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.page-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.report-stats {
+    margin-bottom: 30px;
+}
+
+.report-stats h4 {
+    margin-bottom: 20px;
+    color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.report-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.report-item.success {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.report-item.failed {
+    border-color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.report-item.active {
+    border-color: #2196f3;
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.report-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #ffd700;
+}
+
+.report-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.report-profit {
+    text-align: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.report-profit h5 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.report-details {
+    margin-top: 30px;
+}
+
+.report-details h4 {
+    margin-bottom: 20px;
+    color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.report-signal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.signal-name {
+    font-weight: 600;
+    color: #ffd700;
+}
+
+.signal-profit {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.signal-status-report {
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.signal-status-report.status-active {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+}
+
+.signal-status-report.status-success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.signal-status-report.status-failed {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .signals-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-tabs {
+        justify-content: center;
+    }
+    
+    .signal-details {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    
+    .targets {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .target {
+        min-width: auto;
+    }
+    
+    .signal-footer {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .report-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+    }
+    
+    .report-item {
+        padding: 15px;
+    }
+    
+    .report-number {
+        font-size: 1.5rem;
+    }
+    
+    .report-signal {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 20px 15px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .signals-container {
+        padding: 20px 15px;
+    }
+    
+    .signal-card {
+        padding: 15px;
+    }
+    
+    .coin-name {
+        font-size: 1.1rem;
+    }
+    
+    .signal-details {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .targets {
+        gap: 5px;
+    }
+    
+    .pagination {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 5% auto;
+        max-height: 90vh;
+    }
+    
+    .report-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* تأثيرات إضافية */
+.signal-card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loading {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* تحسين شريط التمرير */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.5);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.7);
+}
+
+/* تأثيرات التحويم المحسنة */
+.stat-card, .signal-card, .btn-primary, .btn-secondary, .tab-btn, .action-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.signal-card:hover .coin-name {
+    color: #ffed4e;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* تحسين الطباعة */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .header, .controls, .pagination, .modal {
+        display: none;
+    }
+    
+    .signal-card {
+        background: white;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+    }
+}
+
+/* دعم الوضع المظلم المحسن */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
+    }
+}
+
+/* تحسينات الوصولية */
+.btn-primary:focus, .btn-secondary:focus, .tab-btn:focus, .action-btn:focus {
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
+}
+
+.signal-card:focus-within {
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
+}
+
+/* تأثيرات الحركة المتقدمة */
+.target.achieved {
+    animation: targetAchieved 0.6s ease-out;
+}
+
+@keyframes targetAchieved {
+    0% {
+        transform: scale(1);
+        background: rgba(255, 255, 255, 0.05);
+    }
+    50% {
+        transform: scale(1.1);
+        background: rgba(76, 175, 80, 0.3);
+    }
+    100% {
+        transform: scale(1.05);
+        background: rgba(76, 175, 80, 0.2);
+    }
+}
+
+.connection-status {
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.connection-status.success {
+    animation: none;
+}
+
+/* تحسين عرض البيانات */
+.detail-value {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.target-value {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+/* إضافة تأثيرات للحالات المختلفة */
+.signal-card.success::after {
+    content: "✓";
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #4caf50;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.signal-card.failed::after {
+    content: "✗";
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #f44336;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.signal-card.active::after {
+    content: "⏳";
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.2rem;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+

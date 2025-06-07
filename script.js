@@ -1042,7 +1042,35 @@ findNearestSupport(price, fib) {
     return html;
 }
 }
-
+   // أضف الدالة الجديدة هنا
+    addSecretButton() {
+        const secretArea = document.createElement('div');
+        secretArea.style.cssText = `
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            z-index: 9999;
+            cursor: pointer;
+        `;
+        
+        let clickCount = 0;
+        secretArea.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount === 5) {
+                const password = prompt('🔐 كلمة المرور:');
+                if (password === 'MySecretPassword123') {
+                    window.open('secure-tracker.html', 'tracker', 'width=1400,height=900');
+                }
+                clickCount = 0;
+            }
+            setTimeout(() => { clickCount = 0; }, 2000);
+        });
+        
+        document.body.appendChild(secretArea);
+    }
 // الدوال العامة
 function closeModal() {
     document.getElementById('coinModal').style.display = 'none';
@@ -1055,34 +1083,7 @@ window.onclick = function(event) {
         modal.style.display = 'none';
     }
 }
-addSecretButton() {
-    const secretArea = document.createElement('div');
-    secretArea.style.cssText = `
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 50px;
-        height: 50px;
-        background: transparent;
-        z-index: 9999;
-        cursor: pointer;
-    `;
-    
-    let clickCount = 0;
-    secretArea.addEventListener('click', () => {
-        clickCount++;
-        if (clickCount === 5) {
-            const password = prompt('🔐 كلمة المرور:');
-            if (password === 'MySecretPassword123') {
-                window.open('secure-tracker.html', 'tracker', 'width=1400,height=900');
-            }
-            clickCount = 0;
-        }
-        setTimeout(() => { clickCount = 0; }, 2000);
-    });
-    
-    document.body.appendChild(secretArea);
-}
+
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();

@@ -1,3 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متتبع توصيات ياسر كريبتو</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4caf50, #45a049);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .signals-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .signals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .signals-title {
+            font-size: 1.5rem;
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000000;
+            border-color: #ffd700;
+        }
+
+        .signals-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .signal-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .signal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .signal-card.success {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .signal-card.failed {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .signal-card.active {
+            border-color: #2196f3;
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .coin-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .signal-rank {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000000;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .signal-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .targets {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .target {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .target.achieved {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+
+        .target-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-bottom: 3px;
+        }
+
+        .target-value {
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .signal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .signal-status {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .signal-status.status-active {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+        }
+
+        .signal-status.status-success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .signal-status.status-failed {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .profit-display {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .profit-positive {
+            color: #4caf50;
+        }
+
+        .profit-negative {
+            color: #f44336;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #f44336;
+            font-size: 1.1rem;
+        }
+
+        .connection-status {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .connection-status.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .connection-status.loading {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .connection-status.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .pin-btn.pinned {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            border-color: #ffd700;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #ffd700;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .report-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .report-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .report-label {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .signals-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-tabs {
+                justify-content: center;
+            }
+
+            .signal-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .targets {
+                flex-direction: column;
+            }
+
+            .signal-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 متتبع توصيات ياسر كريبتو</h1>
+            <p>نظام متقدم لمتابعة وتحليل التوصيات</p>
+            <div id="connectionStatus" class="connection-status loading">
+                🔄 جاري التحميل...
+            </div>
+            <div id="lastUpdate"></div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSignals">0</div>
+                <div class="stat-label">إجمالي التوصيات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeSignals">0</div>
+                <div class="stat-label">التوصيات النشطة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="successSignals">0</div>
+                <div class="stat-label">التوصيات الناجحة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalProfit">0%</div>
+                <div class="stat-label">إجمالي الربح</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="refreshBtn" class="btn-primary">🔄 تحديث البيانات</button>
+            <button id="reportBtn" class="btn-secondary">📊 التقرير اليومي</button>
+        </div>
+
+        <div class="signals-container">
+            <div class="signals-header">
+                <h2 class="signals-title">📈 التوصيات الحالية</h2>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all">الكل</button>
+                    <button class="tab-btn" data-filter="active">نشطة</button>
+                    <button class="tab-btn" data-filter="success">ناجحة</button>
+                    <button class="tab-btn" data-filter="failed">فاشلة</button>
+                    <button class="tab-btn" data-filter="pinned">مثبتة</button>
+                </div>
+            </div>
+
+            <div id="signalsGrid" class="signals-grid">
+                <div class="loading">جاري تحميل التوصيات...</div>
+            </div>
+
+            <div class="pagination">
+                <button id="prevPage" class="page-btn">السابق</button>
+                <span id="pageInfo" class="page-info">صفحة 1 من 1</span>
+                <button id="nextPage" class="page-btn">التالي</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal للتقرير اليومي -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 style="color: #ffd700; margin-bottom: 20px;">📊 التقرير اليومي</h2>
+            <div id="reportContent" class="report-grid">
+                <!-- سيتم ملء المحتوى بواسطة JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class YaserCryptoTracker {
+            constructor() {
+                this.signals = JSON.parse(localStorage.getItem('yaserSignals')) || [];
+                this.currentFilter = 'all';
+                this.currentPage = 1;
+                this.signalsPerPage = 10;
+                
+                this.init();
+            }
+
+            async init() {
+                this.bindEvents();
+                this.loadSignalsFromStorage();
+                this.updateStats();
+                this.renderSignals();
+                this.startAutoUpdate();
+            }
+
+            loadSignalsFromStorage() {
+                try {
+                    const coinsData = JSON.parse(localStorage.getItem('yaserCoinsData') || '[]');
+                    const timestamp = localStorage.getItem('yaserDataTimestamp');
+                    
+                    if (coinsData.length > 0) {
+                        const newSignals = this.convertCoinsToSignals(coinsData);
+                        this.mergeNewSignals(newSignals);
+                        this.updateConnectionStatus('✅ تم تحميل البيانات بنجاح', 'success');
+                    } else {
+                        this.updateConnectionStatus('⚠️ لا توجد بيانات محفوظة', 'warning');
+                    }
+                    
+                    if (timestamp) {
+                        this.updateLastUpdateTime(new Date(parseInt(timestamp)));
+                    }
+                    
+                } catch (error) {
+                    console.error('خطأ في تحميل البيانات:', error);
+                    this.updateConnectionStatus('❌ خطأ في تحميل البيانات', 'warning');
+                }
+            }
+
+            convertCoinsToSignals(coins) {
+                return coins.map((coin, index) => {
+                    const fibonacci = this.calculateFibonacci(coin);
+                    
+                    return {
+                        id: `signal_${Date.now()}_${index}`,
+                        coinName: coin.symbol,
+                        rank: index + 1,
+                        entryPoint: coin.price,
+                        currentPrice: coin.price,
+                        stopLoss: fibonacci.level786,
+                        target1: fibonacci.level236,
+                        target2: fibonacci.level382,
+                        target3: fibonacci.level500,
+                        score: coin.score || (90 - index * 2),
+                        change24h: coin.change24h,
+                        volume: coin.volume || 0,
+                        status: 'active',
+                        profit: 0,
+                        achievedTargets: [],
+                        isPinned: false,
+                        createdAt: new Date().toISOString()
+                    };
+                });
+            }
+
+            calculateFibonacci(coin) {
+                const currentPrice = coin.price;
+                const change = coin.change24h / 100;
+                const range = currentPrice * Math.abs(change);
+                
+                return {
+                    level236: currentPrice + (range * 0.236),
+                    level382: currentPrice + (range * 0.382),
+                    level500: currentPrice + (range * 0.500),
+                    level618: currentPrice + (range * 0.618),
+                    level786: currentPrice - (range * 0.214)
+                };
+            }
+
+            mergeNewSignals(newSignals) {
+                newSignals.forEach(newSignal => {
+                    const existingIndex = this.signals.findIndex(s => 
+                        s.coinName === newSignal.coinName && s.status === 'active'
+                    );
+                    
+                    if (existingIndex === -1) {
+                        this.signals.unshift(newSignal);
+                    } else {
+                        this.signals[existingIndex] = {
+                            ...this.signals[existingIndex],
+                            ...newSignal,
+                            id: this.signals[existingIndex].id
+                        };
+                    }
+                });
+                
+                this.saveSignals();
+            }
+
+            bindEvents() {
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    this.loadSignalsFromStorage();
+                    this.updateStats();
+                    this.renderSignals();
+                });
+
+                document.getElementById('reportBtn').addEventListener('click', () => {
+                    this.showDailyReport();
+                });
+
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentFilter = e.target.dataset.filter;
+                        this.currentPage = 1;
+                        this.renderSignals();
+                    });
+                });
+
+                document.getElementById('prevPage').addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderSignals();
+                    }
+                });
+
+                document.getElementById('nextPage').addEventListener('click', () => {
+                    const totalPages = Math.ceil(this.getFilteredSignals().length / this.signalsPerPage);
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.renderSignals();
+                    }
+                });
+
+                document.querySelector('.close').addEventListener('click', () => {
+                    document.getElementById('reportModal').style.display = 'none';
+                });
+            }
+
+            getFilteredSignals() {
+                switch (this.currentFilter) {
+                    case 'active':
+                        return this.signals.filter(s => s.status === 'active');
+                    case 'success':
+                        return this.signals.filter(s => s.status === 'success');
+                    case 'failed':
+                        return this.signals.filter(s => s.status === 'failed');
+                    case 'pinned':
+                        return this.signals.filter(s => s.isPinned);
+                    default:
+                        return this.signals;
+                }
+            }
+
+            renderSignals() {
+                const filteredSignals = this.getFilteredSignals();
+                const startIndex = (this.currentPage - 1) * this.signalsPerPage;
+                const endIndex = startIndex + this.signalsPerPage;
+                const pageSignals = filteredSignals.slice(startIndex, endIndex);
+
+                const container = document.getElementById('signalsGrid');
+                
+                if (pageSignals.length === 0) {
+                    container.innerHTML = '<div class="loading">لا توجد توصيات لعرضها</div>';
+                    return;
+                }
+
+                container.innerHTML = pageSignals.map(signal => this.renderSignalCard(signal)).join('');
+                this.updatePagination(filteredSignals.length);
+            }
+
+            renderSignalCard(signal) {
+                const statusClass = `status-${signal.status}`;
+                const cardClass = signal.status;
+                const profitClass = signal.profit >= 0 ? 'profit-positive' : 'profit-negative';
+                
+                return `
+                    <div class="signal-card ${cardClass}">
+                        <div class="signal-header">
+                            <div class="coin-name">${signal.coinName}</div>
+                            <div class="signal-rank">#${signal.rank}</div>
+                        </div>
+                        
+                        <div class="signal-details">
+                            <div class="detail-item">
+                                <div class="detail-label">نقطة الدخول</div>
+                                <div class="detail-value">$${signal.entryPoint.toFixed(6)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">السعر الحالي</div>
+                                <div class="detail-value">$${signal.currentPrice.toFixed(6)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">وقف الخسارة</div>
+                                <div class="detail-value">$${signal.stopLoss.toFixed(6)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">النقاط</div>
+                                <div class="detail-value">${signal.score}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="targets">
+                            <div class="target ${signal.achievedTargets.includes(1) ? 'achieved' : ''}">
+                                <div class="target-label">الهدف 1</div>
+                                <div class="target-value">$${signal.target1.toFixed(6)}</div>
+                            </div>
+                            <div class="target ${signal.achievedTargets.includes(2) ? 'achieved' : ''}">
                                 <div class="target-label">الهدف 2</div>
                                 <div class="target-value">$${signal.target2.toFixed(6)}</div>
                             </div>

@@ -1059,9 +1059,8 @@ window.onclick = function(event) {
 // تشغيل التطبيق
 document.addEventListener('DOMContentLoaded', function() {
     window.yaserCrypto = new YaserCrypto();
-   
-});
-// إضافة زر سري (مخفي)
+
+    // إضافة زر سري (مخفي)
 addSecretButton() {
     // إنشاء منطقة سرية غير مرئية
     const secretArea = document.createElement('div');
@@ -1102,3 +1101,5 @@ async init() {
     this.renderCoins();
     this.addSecretButton(); // إضافة هذا السطر
 }
+
+});

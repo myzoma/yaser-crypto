@@ -13,7 +13,6 @@
             padding: 0;
         }
 
-        /* المحتوى الرئيسي */
         .main-content {
             padding: 20px;
             max-width: 1400px;
@@ -111,7 +110,6 @@
     </style>
 </head>
 <body>
-    <!-- المحتوى الرئيسي -->
     <div id="mainContent" class="main-content">
         <div class="header">
             <div>
@@ -121,13 +119,13 @@
         </div>
 
         <div class="controls">
-            <button onclick="captureRecommendations()">📊 التقاط التوصيات</button>
-            <button onclick="updatePrices()">🔄 تحديث الأسعار</button>
-            <button onclick="generateReport()">📈 تقرير مفصل</button>
+            <button onclick="tracker.captureRecommendations()">📊 التقاط التوصيات</button>
+            <button onclick="tracker.updatePrices()">🔄 تحديث الأسعار</button>
+            <button onclick="tracker.generateReport()">📈 تقرير مفصل</button>
             <button onclick="autoUpdate()">⚡ تحديث تلقائي</button>
-            <button onclick="exportData()">📤 تصدير</button>
-            <button onclick="importData()" class="danger-btn">📥 استيراد</button>
-            <button onclick="clearData()" class="danger-btn">🗑️ مسح البيانات</button>
+            <button onclick="tracker.exportData()">📤 تصدير</button>
+            <button onclick="tracker.importData()" class="danger-btn">📥 استيراد</button>
+            <button onclick="tracker.clearData()" class="danger-btn">🗑️ مسح البيانات</button>
         </div>
 
         <div class="stats-grid">
@@ -176,8 +174,8 @@
 
     <script>
         let autoUpdateInterval = null;
+        let isLoggedIn = true; // متغير وهمي لتجنب الأخطاء
 
-        // التحديث التلقائي
         function autoUpdate() {
             if (autoUpdateInterval) {
                 clearInterval(autoUpdateInterval);
@@ -185,17 +183,23 @@
                 alert('تم إيقاف التحديث التلقائي');
             } else {
                 autoUpdateInterval = setInterval(() => {
-                    tracker.updatePrices();
-                }, 300000); // كل 5 دقائق
+                    if (typeof tracker !== 'undefined') {
+                        tracker.updatePrices();
+                    }
+                }, 300000);
                 alert('تم تفعيل التحديث التلقائي (كل 5 دقائق)');
             }
         }
 
-        // بدء النظام عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof tracker !== 'undefined') {
-                tracker.init();
-            }
+        // انتظار تحميل الصفحة والسكريبت
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (typeof tracker !== 'undefined') {
+                    tracker.init();
+                } else {
+                    console.error('tracker object not found');
+                }
+            }, 100);
         });
     </script>
 

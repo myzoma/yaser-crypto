@@ -28,15 +28,215 @@
         <h1>📊 متتبع التوصيات</h1>
         
         <div class="controls">
-            <button class="btn-primary" onclick="tracker.captureRecommendations()">📊 التقاط التوصيات</button>
-            <button class="btn-success" onclick="tracker.updatePrices()">🔄 تحديث الأسعار</button>
-            <button class="btn-info" onclick="tracker.generateReport()">📈 تقرير مفصل</button>
+            <button class="btn-primary" onclick="captureRecommendations()">📊 التقاط التوصيات</button>
+            <button class="btn-success" onclick="updatePrices()">🔄 تحديث الأسعار</button>
+            <button class="btn-info" onclick="generateReport()">📈 تقرير مفصل</button>
         </div>
         
         <div class="stats" id="stats"></div>
         <div id="recommendations"></div>
     </div>
 
-    <script src="secure-tracker-simple.js"></script>
+    <script>
+        let recommendations = JSON.parse(localStorage.getItem('recommendations') || '[]');
+
+        function captureRecommendations() {
+            try {
+                // محاولة الحصول على البيانات من النافذة الأصلية
+                let coins = [];
+                
+                if (window.opener && window.opener.yaserCrypto && window.opener.yaserCrypto.coins) {
+                    coins = window.opener.yaserCrypto.coins.slice(0, 15);
+                    console.log('تم الحصول على', coins.length, 'عملة من النافذة الأصلية');
+                } else {
+                    alert('⚠️ لا يمكن الوصول للبيانات. افتح هذه الصفحة من الصفحة الأصلية');
+                    return;
+                }
+
+                if (coins.length === 0) {
+                    alert('❌ لا توجد عملات للتقاط');
+                    return;
+                }
+
+                // حفظ التوصيات
+                coins.forEach(coin => {
+                    const rec = {
+                        id: Date.now() + Math.random(),
+                        symbol: coin.symbol,
+                        entryPrice: coin.price,
+                        currentPrice: coin.price,
+                        target1: coin.targets?.target1 || coin.price * 1.05,
+                        target2: coin.targets?.target2 || coin.price * 1.10,
+                        target3: coin.targets?.target3 || coin.price * 1.15,
+                        stopLoss: coin.targets?.stopLoss || coin.price * 0.95,
+                        timestamp: new Date().toISOString(),
+                        status: 'pending',
+                        profit: 0,
+                        rank: coin.rank || 0,
+                        score: coin.score || 0
+                    };
+                    recommendations.push(rec);
+                });
+
+                localStorage.setItem('recommendations', JSON.stringify(recommendations));
+                renderRecommendations();
+                updateStats();
+                alert(`✅ تم التقاط ${coins.length} توصية`);
+
+            } catch (error) {
+                console.error('خطأ في التقاط التوصيات:', error);
+                alert('❌ خطأ في التقاط التوصيات');
+            }
+        }
+
+        async function updatePrices() {
+            if (recommendations.length === 0) {
+                alert('❌ لا توجد توصيات للتحديث');
+                return;
+            }
+
+            try {
+                for (let rec of recommendations) {
+                    if (rec.status === 'pending') {
+                        // محاكاة تحديث السعر (استبدل بـ API حقيقي)
+                        const randomChange = (Math.random() - 0.5) * 0.1; // تغيير عشوائي ±5%
+                        rec.currentPrice = rec.entryPrice * (1 + randomChange);
+                        rec.profit = ((rec.currentPrice - rec.entryPrice) / rec.entryPrice) * 100;
+
+                        // فحص الأهداف
+                        if (rec.currentPrice >= rec.target1) {
+                            rec.status = 'completed';
+                        } else if (rec.currentPrice <= rec.stopLoss) {
+                            rec.status = 'stopped';
+                        }
+                    }
+                }
+
+                localStorage.setItem('recommendations', JSON.stringify(recommendations));
+                renderRecommendations();
+                updateStats();
+                alert('✅ تم تحديث الأسعار');
+
+            } catch (error) {
+                console.error('خطأ في تحديث الأسعار:', error);
+                alert('❌ خطأ في تحديث الأسعار');
+            }
+        }
+
+        function renderRecommendations() {
+            const container = document.getElementById('recommendations');
+            
+            if (recommendations.length === 0) {
+                container.innerHTML = '<p>لا توجد توصيات. اضغط "التقاط التوصيات" للبدء.</p>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>العملة</th>
+                            <th>سعر الدخول</th>
+                            <th>السعر الحالي</th>
+                            <th>الهدف الأول</th>
+                            <th>الربح %</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recommendations.map(rec => `
+                            <tr class="status-${rec.status}">
+                                <td><strong>${rec.symbol}</strong></td>
+                                <td>${rec.entryPrice.toFixed(6)}</td>
+                                <td>${rec.currentPrice.toFixed(6)}</td>
+                                <td>${rec.target1.toFixed(6)}</td>
+                                <td class="${rec.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                                    ${rec.profit.toFixed(2)}%
+                                </td>
+                                <td>${getStatusText(rec.status)}</td>
+                                <td>${new Date(rec.timestamp).toLocaleDateString('ar')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function updateStats() {
+            const total = recommendations.length;
+            const completed = recommendations.filter(r => r.status === 'completed').length;
+            const pending = recommendations.filter(r => r.status === 'pending').length;
+            const stopped = recommendations.filter(r => r.status === 'stopped').length;
+            const successRate = total > 0 ? ((completed / total) * 100).toFixed(1) : 0;
+            const avgProfit = total > 0 ? (recommendations.reduce((sum, r) => sum + r.profit, 0) / total).toFixed(2) : 0;
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <h3>📊 إجمالي التوصيات</h3>
+                    <p style="font-size: 24px; font-weight: bold;">${total}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>✅ نجح</h3>
+                    <p style="font-size: 24px; font-weight: bold; color: #28a745;">${completed}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>⏳ قيد الانتظار</h3>
+                    <p style="font-size: 24px; font-weight: bold; color: #ffc107;">${pending}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📈 معدل النجاح</h3>
+                    <p style="font-size: 24px; font-weight: bold; color: #17a2b8;">${successRate}%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>💰 متوسط الربح</h3>
+                    <p style="font-size: 24px; font-weight: bold; color: ${avgProfit >= 0 ? '#28a745' : '#dc3545'};">${avgProfit}%</p>
+                </div>
+            `;
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return '⏳ قيد الانتظار';
+                case 'completed': return '✅ تم تحقيق الهدف';
+                case 'stopped': return '❌ وقف خسارة';
+                default: return status;
+            }
+        }
+
+        function generateReport() {
+            if (recommendations.length === 0) {
+                alert('❌ لا توجد بيانات للتقرير');
+                return;
+            }
+
+            const report = `
+                📊 تقرير التوصيات
+                ==================
+                إجمالي التوصيات: ${recommendations.length}
+                نجح: ${recommendations.filter(r => r.status === 'completed').length}
+                قيد الانتظار: ${recommendations.filter(r => r.status === 'pending').length}
+                معدل النجاح: ${recommendations.length > 0 ? ((recommendations.filter(r => r.status === 'completed').length / recommendations.length) * 100).toFixed(1) : 0}%
+                
+                أفضل العملات:
+                ${recommendations
+                    .filter(r => r.profit > 0)
+                    .sort((a, b) => b.profit - a.profit)
+                    .slice(0, 5)
+                    .map(r => `${r.symbol}: +${r.profit.toFixed(2)}%`)
+                    .join('\n')}
+            `;
+            
+            alert(report);
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            renderRecommendations();
+            updateStats();
+        });
+    </script>
 </body>
 </html>

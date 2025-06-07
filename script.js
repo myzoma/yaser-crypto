@@ -61,7 +61,8 @@ class YaserCrypto {
                 
                 const coin = await this.fetchCoinData(symbol);
                 
-                if (coin && typeof coin.change24h === 'number' && !isNaN(coin.change24h)) {
+              if (coin && coin.symbol && coin.price > 0) {
+
                     results.push(coin);
                     console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}%`);
                 } else {

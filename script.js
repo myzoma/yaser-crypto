@@ -491,7 +491,7 @@ calculateFibonacci(highs, lows) {
     coin.technicalIndicators.macdHistogram = macdData.histogram;
     
     coin.technicalIndicators.mfi = this.calculateMFI(highs, lows, closes, volumes, 14);
-    coin.technicalIndicators.fibonacci = this.calculateFibonacci(highs, lows);
+   
     coin.technicalIndicators.bollingerBands = this.calculateBollingerBands(closes, 20, 2);
     coin.technicalIndicators.stochastic = this.calculateStochastic(highs, lows, closes, 14);
     

@@ -197,16 +197,18 @@ header {
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
 }
 
+/* حل المشكلة الأولى: تعديل موضع رقم المركز */
 .rank-badge {
     position: absolute;
     top: 15px;
-    left: 15px;
+    right: 15px; /* تغيير من left إلى right */
     color: #000 !important;
     padding: 5px 12px;
     border-radius: 20px;
     font-weight: bold;
     font-size: 12px;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    z-index: 10; /* إضافة z-index لضمان الظهور فوق العناصر الأخرى */
 }
 
 .coin-header {
@@ -214,6 +216,7 @@ header {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    padding-right: 60px; /* إضافة مساحة لتجنب التداخل مع رقم المركز */
 }
 
 .coin-symbol {
@@ -297,7 +300,7 @@ header {
     font-weight: bold;
 }
 
-/* تنسيق النافذة المنبثقة المحسن */
+/* حل المشكلة الرابعة: تحسين حجم النافذة المنبثقة */
 .modal {
     display: none;
     position: fixed;
@@ -312,13 +315,13 @@ header {
 
 .modal-content {
     background: var(--bg-card);
-    margin: 2% auto;
+    margin: 1% auto; /* تقليل الهامش */
     padding: 0;
     border: 2px solid var(--primary-color);
     border-radius: 20px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 95vh;
+    width: 95%; /* زيادة العرض */
+    max-width: 1100px; /* زيادة العرض الأقصى */
+    max-height: 98vh; /* زيادة الارتفاع الأقصى */
     overflow-y: auto;
     position: relative;
     box-shadow: 0 0 50px rgba(0, 204, 255, 0.4);
@@ -343,7 +346,7 @@ header {
 
 .modal-header {
     background: linear-gradient(135deg, var(--bg-dark), var(--bg-card));
-    padding: 25px;
+    padding: 20px; /* تقليل الحشو */
     border-bottom: 2px solid var(--primary-color);
     border-radius: 18px 18px 0 0;
     text-align: center;
@@ -351,8 +354,8 @@ header {
 
 .modal-header h2 {
     color: var(--primary-color);
-    font-size: 1.8rem;
-    margin-bottom: 10px;
+    font-size: 1.6rem; /* تقليل حجم الخط */
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -361,7 +364,7 @@ header {
 
 .source-info {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .priority-badge {
@@ -377,48 +380,72 @@ header {
 .modal-content-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 25px;
-    padding: 25px;
+    gap: 20px; /* تقليل المسافة */
+    padding: 20px; /* تقليل الحشو */
     border-bottom: 1px solid #333;
 }
 
 .price-section h3,
 .score-section h3 {
     color: var(--primary-color);
-    margin-bottom: 15px;
-    font-size: 1.2rem;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
 }
 
+/* حل المشكلة الثانية: تنسيق معلومات السعر في جدول */
 .price-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    display: block; /* تغيير من flex */
     margin-bottom: 15px;
 }
 
 .current-price {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: bold;
     color: #fff;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 .price-change {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     padding: 5px 10px;
     border-radius: 10px;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
 .price-range {
     display: grid;
     gap: 8px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    background: var(--bg-dark);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #333;
 }
 
 .price-range div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #444;
+    color: var(--text-light);
+}
+
+.price-range div:last-child {
+    border-bottom: none;
+}
+
+.price-range .label {
     color: var(--text-muted);
+    font-weight: 500;
+}
+
+.price-range .value {
+    color: #fff;
+    font-weight: bold;
 }
 
 .score-display {
@@ -427,7 +454,7 @@ header {
 }
 
 .score-number {
-    font-size: 3rem;
+    font-size: 2.5rem; /* تقليل الحجم */
     font-weight: bold;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
@@ -437,37 +464,37 @@ header {
 
 .score-label {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .rank-info {
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--primary-color);
     font-weight: bold;
 }
 
 .technical-section {
-    padding: 25px;
+    padding: 20px;
     border-bottom: 1px solid #333;
 }
 
 .technical-section h3 {
     color: var(--primary-color);
-    margin-bottom: 20px;
-    font-size: 1.3rem;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
 }
 
 .indicators-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
 }
 
 .indicator-item {
     background: var(--bg-dark);
-    padding: 15px;
-    border-radius: 12px;
+    padding: 12px;
+    border-radius: 10px;
     border: 1px solid #333;
     display: flex;
     justify-content: space-between;
@@ -477,11 +504,13 @@ header {
 .indicator-label {
     color: var(--text-muted);
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
 .indicator-value {
     color: #fff;
     font-weight: bold;
+    font-size: 0.9rem;
 }
 
 .indicator-value.good {
@@ -493,30 +522,30 @@ header {
 }
 
 .indicator-status {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .targets-section {
-    padding: 25px;
+    padding: 20px;
     border-bottom: 1px solid #333;
 }
 
 .targets-section h3 {
     color: var(--primary-color);
-    margin-bottom: 20px;
-    font-size: 1.3rem;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
 }
 
 .targets-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
 }
 
 .target-item {
     background: var(--bg-dark);
-    padding: 15px;
-    border-radius: 12px;
+    padding: 12px;
+    border-radius: 10px;
     text-align: center;
     border: 1px solid #333;
     transition: all 0.3s ease;
@@ -549,24 +578,24 @@ header {
 
 .target-label {
     color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
     display: block;
 }
 
 .target-value {
     color: #fff;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .target-percent {
     font-weight: bold;
-    font-size: 0.95rem;
-    padding: 3px 8px;
-    border-radius: 8px;
+    font-size: 0.85rem;
+    padding: 2px 6px;
+    border-radius: 6px;
 }
 
 .target-1 .target-percent {
@@ -590,29 +619,29 @@ header {
 }
 
 .conditions-section {
-    padding: 25px;
+    padding: 20px;
     border-bottom: 1px solid #333;
 }
 
 .conditions-section h3 {
     color: var(--primary-color);
-    margin-bottom: 20px;
-    font-size: 1.3rem;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
 }
 
 .conditions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
 }
 
 .condition-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.3s ease;
 }
@@ -630,7 +659,7 @@ header {
 }
 
 .condition-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 
@@ -639,116 +668,233 @@ header {
 }
 
 .recommendation-section {
-    padding: 25px;
+    padding: 20px;
     border-bottom: 1px solid #333;
 }
 
 .recommendation-section h3 {
     color: var(--primary-color);
-    margin-bottom: 20px;
-    font-size: 1.3rem;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
 }
 
 .recommendation-box {
     background: var(--bg-dark);
-    padding: 20px;
-    border-radius: 15px;
+    padding: 15px;
+    border-radius: 12px;
     border: 2px solid var(--primary-color);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .recommendation-title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 15px;
-    padding: 10px;
-    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 8px;
     background: rgba(0, 204, 255, 0.1);
     color: var(--primary-color);
 }
 
 .recommendation-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
 }
 
 .detail-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 6px 0;
     border-bottom: 1px solid #333;
 }
 
 .detail-label {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .detail-value {
     color: #fff;
     font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
+/* حل المشكلة الثالثة: تنسيق استراتيجية الاستثمار في جدول */
 .investment-strategy {
     background: var(--bg-dark);
-    padding: 20px;
-    border-radius: 15px;
+    padding: 15px;
+    border-radius: 12px;
     border: 1px solid var(--teal-color);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .investment-strategy h4 {
     color: var(--teal-color);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    text-align: center;
+    padding: 8px;
+    background: rgba(0, 150, 136, 0.1);
+    border-radius: 8px;
+}
+
+.investment-strategy-table {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.strategy-item {
+    background: rgba(0, 150, 136, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.strategy-icon {
+    color: var(--teal-color);
     font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.strategy-text {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.3;
 }
 
 .investment-strategy ul {
     list-style: none;
     padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
 }
 
 .investment-strategy li {
-    padding: 8px 0;
-    padding-right: 20px;
+    padding: 8px 10px;
     position: relative;
     color: var(--text-light);
-    font-size: 0.95rem;
-    line-height: 1.4;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    background: rgba(0, 150, 136, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .investment-strategy li::before {
     content: '💡';
+    flex-shrink: 0;
+}
+
+/* حل المشكلة الخامسة: تنسيق استراتيجية توزيع رأس المال أفقياً */
+.capital-distribution {
+    background: var(--bg-dark);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid var(--secondary-color);
+    margin-bottom: 15px;
+}
+
+.capital-distribution h4 {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 10px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 10px;
+}
+
+.capital-distribution-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 15px;
+    flex-wrap: wrap;
+    direction: rtl;
+}
+
+.capital-item {
+    flex: 1;
+    min-width: 150px;
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.capital-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+}
+
+.capital-item::before {
+    content: '';
     position: absolute;
+    top: 0;
+    left: 0;
     right: 0;
-    top: 8px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+    border-radius: 12px 12px 0 0;
+}
+
+.capital-percentage {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--secondary-color);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.capital-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.capital-description {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    line-height: 1.3;
 }
 
 .risk-warning {
     background: rgba(255, 53, 71, 0.1);
     border: 1px solid var(--danger-color);
-    padding: 20px;
-    border-radius: 15px;
+    padding: 15px;
+    border-radius: 12px;
 }
 
 .risk-warning h4 {
     color: var(--danger-color);
-    margin-bottom: 10px;
-    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-size: 1rem;
 }
 
 .risk-warning p {
     color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.85rem;
+    line-height: 1.4;
 }
 
 .modal-footer {
-    padding: 20px 25px;
+    padding: 15px 20px;
     background: var(--bg-dark);
     border-radius: 0 0 18px 18px;
     text-align: center;
@@ -756,7 +902,7 @@ header {
 
 .data-source small {
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 
 /* تحسين ترتيب المراكز */
@@ -818,13 +964,14 @@ header {
     }
     
     .modal-content {
-        width: 95%;
-        margin: 5% auto;
+        width: 98%;
+        margin: 1% auto;
+        max-height: 98vh;
     }
     
     .modal-content-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 15px;
     }
     
     .indicators-grid {
@@ -847,12 +994,39 @@ header {
         grid-template-columns: 1fr;
         gap: 15px;
     }
+    
+    .coin-header {
+        padding-right: 50px;
+    }
+    
+    .rank-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+    
+    /* تحسين توزيع رأس المال للجوال */
+    .capital-distribution-horizontal {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .capital-item {
+        min-width: auto;
+    }
+    
+    .investment-strategy ul {
+        grid-template-columns: 1fr;
+    }
+    
+    .investment-strategy-table {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
     .modal-content {
-        width: 98%;
-        margin: 2% auto;
+        width: 99%;
+        margin: 0.5% auto;
     }
     
     .targets-grid {
@@ -861,18 +1035,42 @@ header {
     
     .coin-header {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         text-align: center;
+        padding-right: 20px;
+    }
+    
+    .rank-badge {
+        top: 10px;
+        right: 10px;
+        font-size: 9px;
+        padding: 2px 6px;
     }
     
     .modal-header h2 {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         flex-direction: column;
         gap: 5px;
     }
     
     .score-number {
-        font-size: 2.5rem;
+        font-size: 2rem;
+    }
+    
+    .capital-percentage {
+        font-size: 1.5rem;
+    }
+    
+    .modal-header,
+    .technical-section,
+    .targets-section,
+    .conditions-section,
+    .recommendation-section {
+        padding: 15px;
+    }
+    
+    .modal-content-grid {
+        padding: 15px;
     }
 }
 
@@ -887,6 +1085,10 @@ header {
 
 .condition-item:hover {
     transform: translateX(5px);
+}
+
+.capital-item:active {
+    transform: translateY(0);
 }
 
 /* تحسين شريط التمرير */
@@ -922,6 +1124,10 @@ header {
     animation: fadeIn 0.3s ease-out;
 }
 
+.capital-item {
+    animation: fadeIn 0.6s ease-out;
+}
+
 /* تحسين النصوص العربية */
 .arabic-text {
     font-family: 'Tajawal', 'Arial', sans-serif;
@@ -946,9 +1152,108 @@ button:active, .btn:active {
 /* تحسين إمكانية الوصول */
 .coin-card:focus,
 .target-item:focus,
-.condition-item:focus {
+.condition-item:focus,
+.capital-item:focus {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
+}
+
+/* تحسينات إضافية لمعلومات السعر */
+.price-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-dark);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+
+.price-info-table th,
+.price-info-table td {
+    padding: 10px 12px;
+    text-align: right;
+    border-bottom: 1px solid #444;
+}
+
+.price-info-table th {
+    background: rgba(0, 204, 255, 0.1);
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.price-info-table td {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.price-info-table tr:last-child th,
+.price-info-table tr:last-child td {
+    border-bottom: none;
+}
+
+.price-info-table .value-positive {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.price-info-table .value-negative {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+/* تحسين عرض الأهداف والنقاط */
+.targets-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-dark);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #333;
+    margin-bottom: 15px;
+}
+
+.targets-table th,
+.targets-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+}
+
+.targets-table th {
+    background: rgba(0, 204, 255, 0.1);
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.targets-table td {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.targets-table tr:last-child td {
+    border-bottom: none;
+}
+
+.targets-table .target-1-cell {
+    background: rgba(0, 200, 83, 0.05);
+    color: var(--success-color);
+}
+
+.targets-table .target-2-cell {
+    background: rgba(255, 152, 0, 0.05);
+    color: var(--warning-color);
+}
+
+.targets-table .target-3-cell {
+    background: rgba(156, 39, 176, 0.05);
+    color: var(--purple-color);
+}
+
+.targets-table .stop-loss-cell {
+    background: rgba(255, 53, 71, 0.05);
+    color: var(--danger-color);
 }
 
 /* تحسين الطباعة */
@@ -968,4 +1273,97 @@ button:active, .btn:active {
     .nav-links {
         display: none;
     }
+    
+    .capital-distribution-horizontal {
+        flex-direction: row;
+        page-break-inside: avoid;
+    }
 }
+
+/* تحسينات إضافية للألوان والتباين */
+.high-contrast {
+    --text-light: #ffffff;
+    --text-muted: #cccccc;
+    --bg-card: #1a1a1a;
+    --bg-dark: #0d0d0d;
+}
+
+/* تحسين التحميل والانتقالات */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.slide-in-right {
+    transform: translateX(100px);
+    opacity: 0;
+    animation: slideInRight 0.6s ease-out forwards;
+}
+
+@keyframes slideInRight {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* تحسين عرض البيانات المتعددة المصادر */
+.multi-source-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.multi-source-indicator::before {
+    content: '📊';
+    font-size: 0.8rem;
+}
+
+/* تحسين عرض حالة الاتصال */
+.connection-status {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.connection-status.online {
+    background: rgba(0, 200, 83, 0.2);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.connection-status.offline {
+    background: rgba(255, 53, 71, 0.2);
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+/* تحسين آخر تحديث */
+.last-update {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 10px;
+    padding: 5px;
+    background: rgba(0, 204, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 204, 255, 0.2);
+}
+
+.last-update::before {
+    content: '🕒 ';
+}
+

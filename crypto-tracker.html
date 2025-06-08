@@ -1,57 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متتبع توصيات YASER CRYPTO</title>
-    <link rel="stylesheet" href="crypto-styles.css">
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 متتبع توصيات YASER CRYPTO</h1>
-            <p>تتبع وتحليل التوصيات من موقع ياسر كريبتو</p>
-        </div>
-        
-        <div class="controls">
-            <button class="btn-primary" onclick="fetchRecommendations()">جلب التوصيات</button>
-            <button class="btn-secondary" onclick="showDetailedReport()">التقرير المفصل</button>
-            <button class="btn-danger" onclick="clearData()">مسح البيانات</button>
-        </div>
-        
-        <div id="status" class="status"></div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number success" id="successCount">0</div>
-                <div>توصيات ناجحة</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number error" id="failedCount">0</div>
-                <div>توصيات فاشلة</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number info" id="totalCount">0</div>
-                <div>إجمالي التوصيات</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="successRate">0%</div>
-                <div>نسبة النجاح</div>
-            </div>
-        </div>
-        
-        <div class="recommendations" id="recommendationsContainer"></div>
-    </div>
-    
-    <!-- Modal للتقرير المفصل -->
-    <div id="reportModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>📊 التقرير المفصل</h2>
-            <div id="detailedReport"></div>
-        </div>
-    </div>
-
-    <script src="crypto-tracker.js"></script>
-</body>
-</html>

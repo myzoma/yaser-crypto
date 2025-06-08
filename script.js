@@ -1152,11 +1152,5 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة مع مصادر متعددة');
     window.yaserCryptoInstance = new YaserCrypto();
-// اضغط Ctrl + Shift + R للتقارير
-document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.shiftKey && e.key === 'Z') {
-        e.preventDefault();
-        window.open('reports.html', '_blank');
-    }
-});
+
 });

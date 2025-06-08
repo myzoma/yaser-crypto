@@ -804,142 +804,352 @@ class YaserCrypto {
         let html = '';
         
         this.coins.forEach(coin => {
-            const indicators = coin.technicalIndicators;
-            const conditions = coin.conditions;
+            // تحديد أيقونة المركز
+            let rankIcon = '';
+            let rankClass = '';
             
-            // تحديد لون الكارت حسب النقاط
-            let cardClass = 'coin-card';
-            if (coin.score >= 80) cardClass += ' excellent';
-            else if (coin.score >= 60) cardClass += ' good';
-            else if (coin.score >= 40) cardClass += ' average';
-            else cardClass += ' poor';
-            
-            // أيقونة المصدر
+            if (coin.rank === 1) {
+                rankIcon = '🥇';
+                rankClass = 'first-place';
+            } else if (coin.rank === 2) {
+                rankIcon = '🥈';
+                rankClass = 'second-place';
+            } else if (coin.rank === 3) {
+                rankIcon = '🥉';
+                rankClass = 'third-place';
+            } else {
+                rankIcon = `#${coin.rank}`;
+                rankClass = 'other-place';
+            }
+
+            // تحديد أيقونة المصدر
             const sourceIcon = coin.dataSource === 'binance' ? '🟡' : '🔵';
-            const priorityBadge = coin.priority === 3 ? '<span class="priority-badge">⭐ مؤكد</span>' : '';
+            const priorityBadge = coin.priority === 3 ? '<span class="multi-source">⭐</span>' : '';
             
+            // تحديد لون النقاط
+            let scoreClass = '';
+            if (coin.score >= 90) scoreClass = 'score-excellent';
+            else if (coin.score >= 80) scoreClass = 'score-very-good';
+            else if (coin.score >= 70) scoreClass = 'score-good';
+            else if (coin.score >= 60) scoreClass = 'score-average';
+            else scoreClass = 'score-poor';
+
             html += `
-                <div class="${cardClass}">
+                <div class="coin-card ${rankClass}" onclick="openModal('${coin.symbol}')">
+                    <div class="rank-badge">
+                        <span class="rank-icon">${rankIcon}</span>
+                    </div>
+                    
                     <div class="coin-header">
-                        <h3>${sourceIcon} ${coin.symbol} ${priorityBadge}</h3>
-                        <div class="rank">#{coin.rank}</div>
-                    </div>
-                    
-                    <div class="coin-info">
-                        <div class="price-info">
-                            <div class="price">$${coin.price.toFixed(6)}</div>
-                            <div class="change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
-                                ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
-                            </div>
+                        <div class="coin-symbol">
+                            ${sourceIcon} ${coin.symbol} ${priorityBadge}
                         </div>
-                        
-                        <div class="score">
-                            <div class="score-value">${coin.score}</div>
-                            <div class="score-label">نقطة</div>
+                        <div class="coin-score ${scoreClass}">
+                            ${coin.score}
                         </div>
                     </div>
                     
-                    <div class="technical-indicators">
-                        <div class="indicator">
-                            <span class="label">RSI:</span>
-                            <span class="value ${conditions.rsiGood ? 'good' : 'warning'}">${indicators.rsi.toFixed(1)}</span>
-                        </div>
-                        <div class="indicator">
-                            <span class="label">MFI:</span>
-                            <span class="value ${conditions.mfiHealthy ? 'good' : 'warning'}">${indicators.mfi.toFixed(1)}</span>
-                        </div>
-                        <div class="indicator">
-                            <span class="label">MACD:</span>
-                            <span class="value ${conditions.macdBullish ? 'good' : 'warning'}">${indicators.macd.toFixed(4)}</span>
-                        </div>
-                        <div class="indicator">
-                            <span class="label">CVD:</span>
-                            <span class="value ${conditions.cvdBullish ? 'good' : 'warning'}">${indicators.cvd.trend}</span>
-                        </div>
+                    <div class="coin-price">
+                        $${coin.price.toFixed(6)}
                     </div>
                     
-                    <div class="fibonacci-levels">
-                        <h4>🎯 أهداف فيبوناتشي:</h4>
-                        <div class="targets">
-                            <div class="target">T1: $${coin.targets.target1.toFixed(6)}</div>
-                            <div class="target">T2: $${coin.targets.target2.toFixed(6)}</div>
-                            <div class="target">T3: $${coin.targets.target3.toFixed(6)}</div>
-                        </div>
-                        <div class="stop-loss">🛑 وقف الخسارة: $${coin.targets.stopLoss.toFixed(6)}</div>
+                    <div class="coin-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
                     </div>
                     
-                    <div class="conditions">
-                        <div class="condition ${conditions.rsiGood ? 'met' : 'not-met'}">
-                            ${conditions.rsiGood ? '✅' : '❌'} RSI صحي
-                        </div>
-                        <div class="condition ${conditions.macdBullish ? 'met' : 'not-met'}">
-                            ${conditions.macdBullish ? '✅' : '❌'} MACD صاعد
-                        </div>
-                        <div class="condition ${conditions.cvdBullish ? 'met' : 'not-met'}">
-                            ${conditions.cvdBullish ? '✅' : '❌'} حجم صاعد
-                        </div>
-                        <div class="condition ${conditions.multiSource ? 'met' : 'not-met'}">
-                            ${conditions.multiSource ? '✅' : '❌'} مصادر متعددة
-                        </div>
-                    </div>
-                    
-                    <div class="volume-info">
-                        <small>الحجم: ${coin.volume.toLocaleString()} | المصدر: ${coin.dataSource.toUpperCase()}</small>
+                    <div class="coin-volume">
+                        الحجم: ${this.formatNumber(coin.volume)}
                     </div>
                 </div>
             `;
         });
         
         coinsGrid.innerHTML = html;
-        
-        // إضافة إحصائيات
-        this.renderStats();
+        console.log('✅ تم عرض البطاقات بنجاح');
     }
 
-    renderStats() {
-        const statsContainer = document.getElementById('stats');
-        if (!statsContainer) return;
+    formatNumber(num) {
+        if (num >= 1000000000) {
+            return (num / 1000000000).toFixed(1) + 'B';
+        } else if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toFixed(0);
+    }
+}
+
+// دوال النافذة المنبثقة
+function openModal(symbol) {
+    const modal = document.getElementById('coinModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    // البحث عن العملة
+    const yaserCrypto = window.yaserCryptoInstance;
+    if (!yaserCrypto || !yaserCrypto.coins) {
+        console.error('لا يمكن العثور على بيانات العملات');
+        return;
+    }
+    
+    const coin = yaserCrypto.coins.find(c => c.symbol === symbol);
+    if (!coin) {
+        console.error(`لا يمكن العثور على العملة ${symbol}`);
+        return;
+    }
+    
+    const indicators = coin.technicalIndicators;
+    const conditions = coin.conditions;
+    
+    // تحديد أيقونة المركز
+    let rankIcon = '';
+    if (coin.rank === 1) rankIcon = '🥇';
+    else if (coin.rank === 2) rankIcon = '🥈';
+    else if (coin.rank === 3) rankIcon = '🥉';
+    else rankIcon = `#${coin.rank}`;
+    
+    // تحديد أيقونة المصدر
+    const sourceIcon = coin.dataSource === 'binance' ? '🟡 Binance' : '🔵 OKX';
+    const priorityBadge = coin.priority === 3 ? '<span class="priority-badge">⭐ مؤكد من مصدرين</span>' : '';
+    
+    modalBody.innerHTML = `
+        <div class="modal-header">
+            <h2>${rankIcon} ${coin.symbol} ${priorityBadge}</h2>
+            <div class="source-info">${sourceIcon}</div>
+        </div>
         
-        const totalCoins = this.coins.length;
-        const excellentCoins = this.coins.filter(c => c.score >= 80).length;
-        const goodCoins = this.coins.filter(c => c.score >= 60 && c.score < 80).length;
-        const multiSourceCoins = this.coins.filter(c => c.priority === 3).length;
-        const okxCoins = this.coins.filter(c => c.dataSource === 'okx').length;
-        const binanceCoins = this.coins.filter(c => c.dataSource === 'binance').length;
-        
-        statsContainer.innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">${totalCoins}</div>
-                    <div class="stat-label">إجمالي العملات</div>
+        <div class="modal-content-grid">
+            <div class="price-section">
+                <h3>معلومات السعر</h3>
+                <div class="price-info">
+                    <div class="current-price">$${coin.price.toFixed(6)}</div>
+                    <div class="price-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
+                    </div>
                 </div>
-                <div class="stat-card excellent">
-                    <div class="stat-number">${excellentCoins}</div>
-                    <div class="stat-label">عملات ممتازة (80+)</div>
-                </div>
-                <div class="stat-card good">
-                    <div class="stat-number">${goodCoins}</div>
-                    <div class="stat-label">عملات جيدة (60-79)</div>
-                </div>
-                <div class="stat-card priority">
-                    <div class="stat-number">${multiSourceCoins}</div>
-                    <div class="stat-label">مؤكدة من مصدرين</div>
-                </div>
-                <div class="stat-card okx">
-                    <div class="stat-number">${okxCoins}</div>
-                    <div class="stat-label">🔵 OKX</div>
-                </div>
-                <div class="stat-card binance">
-                    <div class="stat-number">${binanceCoins}</div>
-                    <div class="stat-label">🟡 Binance</div>
+                <div class="price-range">
+                    <div>أعلى 24س: $${coin.high24h.toFixed(6)}</div>
+                    <div>أقل 24س: $${coin.low24h.toFixed(6)}</div>
+                    <div>الحجم: ${yaserCrypto.formatNumber(coin.volume)}</div>
                 </div>
             </div>
-        `;
+            
+            <div class="score-section">
+                <h3>نقاط التحليل</h3>
+                <div class="score-display">
+                    <div class="score-number">${coin.score}</div>
+                    <div class="score-label">نقطة</div>
+                </div>
+                <div class="rank-info">المركز: ${rankIcon}</div>
+            </div>
+        </div>
+        
+        <div class="technical-section">
+            <h3>المؤشرات الفنية</h3>
+            <div class="indicators-grid">
+                <div class="indicator-item">
+                    <span class="indicator-label">RSI:</span>
+                    <span class="indicator-value ${conditions.rsiGood ? 'good' : 'warning'}">${indicators.rsi.toFixed(1)}</span>
+                    <span class="indicator-status">${conditions.rsiGood ? '✅' : '⚠️'}</span>
+                </div>
+                <div class="indicator-item">
+                    <span class="indicator-label">MFI:</span>
+                    <span class="indicator-value ${conditions.mfiHealthy ? 'good' : 'warning'}">${indicators.mfi.toFixed(1)}</span>
+                    <span class="indicator-status">${conditions.mfiHealthy ? '✅' : '⚠️'}</span>
+                </div>
+                <div class="indicator-item">
+                    <span class="indicator-label">MACD:</span>
+                    <span class="indicator-value ${conditions.macdBullish ? 'good' : 'warning'}">${indicators.macd.toFixed(4)}</span>
+                    <span class="indicator-status">${conditions.macdBullish ? '✅' : '⚠️'}</span>
+                </div>
+                <div class="indicator-item">
+                    <span class="indicator-label">CVD:</span>
+                    <span class="indicator-value ${conditions.cvdBullish ? 'good' : 'warning'}">${indicators.cvd.trend}</span>
+                    <span class="indicator-status">${conditions.cvdBullish ? '✅' : '⚠️'}</span>
+                </div>
+                <div class="indicator-item">
+                    <span class="indicator-label">EMA20:</span>
+                    <span class="indicator-value">${indicators.ema20.toFixed(6)}</span>
+                    <span class="indicator-status">${conditions.priceAboveEMA ? '✅' : '⚠️'}</span>
+                </div>
+                <div class="indicator-item">
+                    <span class="indicator-label">Parabolic SAR:</span>
+                    <span class="indicator-value">${indicators.parabolicSAR.toFixed(6)}</span>
+                    <span class="indicator-status">📊</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="targets-section">
+            <h3>🎯 أهداف فيبوناتشي</h3>
+            <div class="targets-grid">
+                <div class="target-item target-1">
+                    <span class="target-label">الهدف الأول:</span>
+                    <span class="target-value">$${coin.targets.target1.toFixed(6)}</span>
+                    <span class="target-percent">+${(((coin.targets.target1 - coin.price) / coin.price) * 100).toFixed(2)}%</span>
+                </div>
+                <div class="target-item target-2">
+                    <span class="target-label">الهدف الثاني:</span>
+                    <span class="target-value">$${coin.targets.target2.toFixed(6)}</span>
+                    <span class="target-percent">+${(((coin.targets.target2 - coin.price) / coin.price) * 100).toFixed(2)}%</span>
+                </div>
+                <div class="target-item target-3">
+                    <span class="target-label">الهدف الثالث:</span>
+                    <span class="target-value">$${coin.targets.target3.toFixed(6)}</span>
+                    <span class="target-percent">+${(((coin.targets.target3 - coin.price) / coin.price) * 100).toFixed(2)}%</span>
+                </div>
+                <div class="target-item stop-loss">
+                    <span class="target-label">🛑 وقف الخسارة:</span>
+                    <span class="target-value">$${coin.targets.stopLoss.toFixed(6)}</span>
+                    <span class="target-percent">${(((coin.targets.stopLoss - coin.price) / coin.price) * 100).toFixed(2)}%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="conditions-section">
+            <h3>شروط التحليل</h3>
+            <div class="conditions-grid">
+                <div class="condition-item ${conditions.rsiGood ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.rsiGood ? '✅' : '❌'}</span>
+                    <span class="condition-text">RSI في المنطقة الصحية</span>
+                </div>
+                <div class="condition-item ${conditions.macdBullish ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.macdBullish ? '✅' : '❌'}</span>
+                    <span class="condition-text">MACD في اتجاه صاعد</span>
+                </div>
+                <div class="condition-item ${conditions.mfiHealthy ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.mfiHealthy ? '✅' : '❌'}</span>
+                    <span class="condition-text">تدفق نقدي صحي</span>
+                </div>
+                <div class="condition-item ${conditions.cvdBullish ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.cvdBullish ? '✅' : '❌'}</span>
+                    <span class="condition-text">حجم التداول صاعد</span>
+                </div>
+                <div class="condition-item ${conditions.priceAboveEMA ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.priceAboveEMA ? '✅' : '❌'}</span>
+                    <span class="condition-text">السعر فوق المتوسط المتحرك</span>
+                </div>
+                <div class="condition-item ${conditions.volumeGood ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.volumeGood ? '✅' : '❌'}</span>
+                    <span class="condition-text">حجم تداول كافي</span>
+                </div>
+                <div class="condition-item ${conditions.changePositive ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.changePositive ? '✅' : '❌'}</span>
+                    <span class="condition-text">تغيير إيجابي خلال 24 ساعة</span>
+                </div>
+                <div class="condition-item ${conditions.multiSource ? 'met' : 'not-met'}">
+                    <span class="condition-icon">${conditions.multiSource ? '✅' : '❌'}</span>
+                    <span class="condition-text">مؤكد من مصادر متعددة</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="recommendation-section">
+            <h3>التوصية</h3>
+            <div class="recommendation-content">
+                ${getRecommendation(coin)}
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <div class="data-source">
+                <small>مصدر البيانات: ${sourceIcon} | آخر تحديث: ${new Date().toLocaleString('ar-SA')}</small>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+function getRecommendation(coin) {
+    const score = coin.score;
+    const conditions = coin.conditions;
+    
+    let recommendation = '';
+    let riskLevel = '';
+    let investmentPercent = '';
+    
+    if (score >= 90) {
+        recommendation = '🟢 توصية قوية بالشراء';
+        riskLevel = 'منخفض';
+        investmentPercent = '50%';
+    } else if (score >= 80) {
+        recommendation = '🟡 توصية بالشراء';
+        riskLevel = 'متوسط';
+        investmentPercent = '30%';
+    } else if (score >= 75) {
+        recommendation = '🟠 يمكن الشراء بحذر';
+        riskLevel = 'متوسط إلى عالي';
+        investmentPercent = '20%';
+    } else if (score >= 60) {
+        recommendation = '⚪ محايد - انتظار';
+        riskLevel = 'عالي';
+        investmentPercent = '10%';
+    } else {
+        recommendation = '🔴 لا ينصح بالشراء';
+        riskLevel = 'عالي جداً';
+        investmentPercent = '0%';
+    }
+    
+    const metConditions = Object.values(conditions).filter(Boolean).length;
+    const totalConditions = Object.keys(conditions).length;
+    
+    return `
+        <div class="recommendation-box">
+            <div class="recommendation-title">${recommendation}</div>
+            <div class="recommendation-details">
+                <div class="detail-item">
+                    <span class="detail-label">مستوى المخاطر:</span>
+                    <span class="detail-value">${riskLevel}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">نسبة الاستثمار المقترحة:</span>
+                    <span class="detail-value">${investmentPercent}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">الشروط المحققة:</span>
+                    <span class="detail-value">${metConditions}/${totalConditions}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">المصدر:</span>
+                    <span class="detail-value">${coin.priority === 3 ? 'مؤكد من مصدرين ⭐' : coin.dataSource.toUpperCase()}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="investment-strategy">
+            <h4>💡 استراتيجية الاستثمار:</h4>
+            <ul>
+                <li>ادخل بالسعر الحالي أو عند انخفاض طفيف</li>
+                <li>ضع وقف الخسارة عند: $${coin.targets.stopLoss.toFixed(6)}</li>
+                <li>الهدف الأول: $${coin.targets.target1.toFixed(6)} (+${(((coin.targets.target1 - coin.price) / coin.price) * 100).toFixed(2)}%)</li>
+                <li>الهدف الثاني: $${coin.targets.target2.toFixed(6)} (+${(((coin.targets.target2 - coin.price) / coin.price) * 100).toFixed(2)}%)</li>
+                <li>الهدف الثالث: $${coin.targets.target3.toFixed(6)} (+${(((coin.targets.target3 - coin.price) / coin.price) * 100).toFixed(2)}%)</li>
+            </ul>
+        </div>
+        
+        <div class="risk-warning">
+            <h4>⚠️ تحذير المخاطر:</h4>
+            <p>التداول في العملات المشفرة ينطوي على مخاطر عالية. لا تستثمر أكثر مما يمكنك تحمل خسارته. هذا التحليل لأغراض تعليمية فقط وليس نصيحة استثمارية.</p>
+        </div>
+    `;
+}
+
+function closeModal() {
+    const modal = document.getElementById('coinModal');
+    modal.style.display = 'none';
+}
+
+// إغلاق النافذة المنبثقة عند النقر خارجها
+window.onclick = function(event) {
+    const modal = document.getElementById('coinModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
 }
 
 // تشغيل التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة');
-    new YaserCrypto();
+    console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة مع مصادر متعددة');
+    window.yaserCryptoInstance = new YaserCrypto();
 });

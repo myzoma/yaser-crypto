@@ -1367,3 +1367,221 @@ button:active, .btn:active {
     content: '🕒 ';
 }
 
+/* إضافة تنسيق استراتيجية توزيع رأس المال تحت الهيدر */
+.capital-strategy-header {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-dark));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.capital-strategy-title {
+    color: var(--secondary-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.capital-strategy-title::before {
+    content: '💰';
+    font-size: 1.3rem;
+}
+
+.capital-strategy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    direction: rtl;
+}
+
+.capital-strategy-item {
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.capital-strategy-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+}
+
+.capital-strategy-item.gold::before {
+    background: linear-gradient(90deg, var(--secondary-color), #ffed4e);
+}
+
+.capital-strategy-item.silver::before {
+    background: linear-gradient(90deg, #C0C0C0, #E8E8E8);
+}
+
+.capital-strategy-item.bronze::before {
+    background: linear-gradient(90deg, #CD7F32, #D4A574);
+}
+
+.capital-strategy-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.2);
+}
+
+.strategy-medal {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.strategy-score-range {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.strategy-type {
+    color: var(--text-light);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.strategy-percentage {
+    background: rgba(255, 215, 0, 0.15);
+    color: var(--secondary-color);
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+/* تنسيق خاص لكل نوع استثمار */
+.capital-strategy-item.gold {
+    background: rgba(255, 215, 0, 0.08);
+    border-color: rgba(255, 215, 0, 0.4);
+}
+
+.capital-strategy-item.gold .strategy-percentage {
+    background: rgba(255, 215, 0, 0.2);
+    color: var(--secondary-color);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.capital-strategy-item.silver {
+    background: rgba(192, 192, 192, 0.08);
+    border-color: rgba(192, 192, 192, 0.4);
+}
+
+.capital-strategy-item.silver .strategy-percentage {
+    background: rgba(192, 192, 192, 0.2);
+    color: #C0C0C0;
+    border-color: rgba(192, 192, 192, 0.4);
+}
+
+.capital-strategy-item.bronze {
+    background: rgba(205, 127, 50, 0.08);
+    border-color: rgba(205, 127, 50, 0.4);
+}
+
+.capital-strategy-item.bronze .strategy-percentage {
+    background: rgba(205, 127, 50, 0.2);
+    color: #CD7F32;
+    border-color: rgba(205, 127, 50, 0.4);
+}
+
+/* تحسين الاستجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .capital-strategy-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .capital-strategy-header {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .capital-strategy-title {
+        font-size: 1.1rem;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .strategy-medal {
+        font-size: 1.5rem;
+    }
+    
+    .strategy-percentage {
+        font-size: 1.1rem;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .capital-strategy-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .capital-strategy-item {
+        padding: 12px;
+    }
+    
+    .capital-strategy-title {
+        font-size: 1rem;
+    }
+    
+    .strategy-score-range {
+        font-size: 1rem;
+    }
+    
+    .strategy-type {
+        font-size: 0.9rem;
+    }
+    
+    .strategy-percentage {
+        font-size: 1rem;
+        padding: 5px 10px;
+    }
+}
+
+/* تأثيرات بصرية إضافية */
+@keyframes strategyGlow {
+    0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+    100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+}
+
+.capital-strategy-item.gold:hover {
+    animation: strategyGlow 2s ease-in-out infinite;
+}
+
+/* تحسين إمكانية الوصول */
+.capital-strategy-item:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* إضافة فاصل بصري */
+.capital-strategy-separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    margin: 20px 0;
+    opacity: 0.3;
+}

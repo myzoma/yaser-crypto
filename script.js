@@ -981,25 +981,25 @@ function openModal(symbol) {
         </div>
         
         <div class="targets-section">
-            <h3>🎯 أهداف فيبوناتشي</h3>
+            <h3>🎯 مستويات فيبوناتشي</h3>
             <div class="targets-grid">
                 <div class="target-item target-1">
-                    <span class="target-label">الهدف الأول:</span>
+                    <span class="target-label">المستوى الأول:</span>
                     <span class="target-value">$${coin.targets.target1.toFixed(6)}</span>
                     <span class="target-percent">+${(((coin.targets.target1 - coin.price) / coin.price) * 100).toFixed(2)}%</span>
                 </div>
                 <div class="target-item target-2">
-                    <span class="target-label">الهدف الثاني:</span>
+                    <span class="target-label">المستوى الثاني:</span>
                     <span class="target-value">$${coin.targets.target2.toFixed(6)}</span>
                     <span class="target-percent">+${(((coin.targets.target2 - coin.price) / coin.price) * 100).toFixed(2)}%</span>
                 </div>
                 <div class="target-item target-3">
-                    <span class="target-label">الهدف الثالث:</span>
+                    <span class="target-label">المستوى الثالث:</span>
                     <span class="target-value">$${coin.targets.target3.toFixed(6)}</span>
                     <span class="target-percent">+${(((coin.targets.target3 - coin.price) / coin.price) * 100).toFixed(2)}%</span>
                 </div>
                 <div class="target-item stop-loss">
-                    <span class="target-label">🛑 وقف الخسارة:</span>
+                    <span class="target-label">🛑 المستوى الرابع:</span>
                     <span class="target-value">$${coin.targets.stopLoss.toFixed(6)}</span>
                     <span class="target-percent">${(((coin.targets.stopLoss - coin.price) / coin.price) * 100).toFixed(2)}%</span>
                 </div>

@@ -4,6 +4,12 @@
     "secretKey": "BD7C76F71D1A4E01B4C7E1A23B620365",
     "passphrase": "212160Nm$#",
     "refreshInterval": 30000,
+     },
+    "binance": {
+        "apiBaseUrl": "https://api.binance.com",
+        "apiKey": "dMT8VybD1wmQZvQyJJT8zpy9wJ5Qoen0soWSrp8FJYBgI6JVOMcakaWJcJ6LWe1S",
+        "secretKey": "EBm4Q3sUiwTefHzlb2JWUMBeCLmGhknAFfiQDO6VP3grCJW3vVL7hGvSpMD4z9ae",
+        "refreshInterval": 30000
     "maxCoins": 50,
     "fibonacciLevels": [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1],
     "rsiPeriod": 14,

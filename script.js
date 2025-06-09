@@ -224,7 +224,7 @@ class YaserCrypto {
         try {
             console.log('جاري جلب قائمة أعلى الرابحون من Binance...');
 
-            const response = await fetch('https://api.binance.com/api/v3/ticker/24hr', {
+            const response = await fetch('https://api1.binance.com/api/v3/ticker/24hr', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json'

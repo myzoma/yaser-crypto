@@ -674,4 +674,36 @@ class YaserCrypto {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة مع مصادر متعددة');
     window.yaserCryptoInstance = new YaserCrypto();
+    document.addEventListener('DOMContentLoaded', function() {
+    // ... كل كودك السابق هنا ...
+
+    // إضافة زر المشاركة
+    const shareBtn = document.getElementById('shareAsImageBtn');
+    if (shareBtn) {
+        shareBtn.onclick = function() {
+            // حدد العنصر الذي تريد تصويره (تفاصيل العملة)
+            const detailsDiv = document.getElementById('coinDetails');
+            if (!detailsDiv) {
+                alert("لم يتم العثور على تفاصيل العملة!");
+                return;
+            }
+            html2canvas(detailsDiv).then(canvas => {
+                // تحميل الصورة
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = 'recommendation.png';
+                link.click();
+                // فتح نافذة تويتر
+                const tweetText = encodeURIComponent("توصية عملة مميزة من YASER CRYPTO! 🚀 #Crypto #توصيات_عملات");
+                const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+                window.open(tweetUrl, '_blank');
+                // تنبيه للمستخدم
+                setTimeout(() => {
+                    alert("تم حفظ صورة التوصية!\nيرجى رفع الصورة في التغريدة يدويًا.");
+                }, 700);
+            });
+        }
+    }
+});
 });

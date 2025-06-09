@@ -4,14 +4,14 @@ class YaserCrypto {
         this.config = {
             okxApiUrl: "https://www.okx.com/api/v5",
             binanceApiUrl: "https://api.binance.com/api/v3",
-            requestDelay: 500,
+            requestDelay: 0,
             maxCoins: 50,
             minChange: 1,
-            maxChange: 15,
+            maxChange: 12,
             minVolume: 100000,
             dataSources: ['okx', 'binance']
         };
-        this.requestDelay = 500;
+        this.requestDelay = 0;
         this.init();
     }
 

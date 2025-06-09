@@ -3,7 +3,7 @@ class YaserCrypto {
         this.coins = [];
         this.config = {
             okxApiUrl: "https://www.okx.com/api/v5",
-            binanceApiUrl: "https://api.binance.com/api/v3",
+            binanceApiUrl: "https://api1.binance.com/api/v3",
             requestDelay: 0, // تسريع التحميل
             maxCoins: 12,    // عدد العملات النهائية للعرض والتحليل
             minChange: 1,
@@ -381,8 +381,8 @@ class YaserCrypto {
 
     async fetchCoinDataFromBinance(symbol) {
         try {
-            const tickerUrl = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}USDT`;
-            const klinesUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=1h&limit=100`;
+            const tickerUrl = `https://api1.binance.com/api/v3/ticker/24hr?symbol=${symbol}USDT`;
+            const klinesUrl = `https://api1.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=1h&limit=100`;
             const tickerResponse = await fetch(tickerUrl, {
                 method: 'GET',
                 headers: {

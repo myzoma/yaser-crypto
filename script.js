@@ -835,7 +835,7 @@ class YaserCrypto {
             else scoreClass = 'score-poor';
 
             html += `
-                <div class="coin-card ${rankClass}" onclick="openModal('${coin.symbol}')">
+               <div class="coin-card ${rankClass}" onclick="window.location.href='coin.html?symbol=${coin.symbol}'">
                     <div class="rank-badge">
                         <span class="rank-icon">${rankIcon}</span>
                     </div>
@@ -863,7 +863,7 @@ class YaserCrypto {
                 </div>
             `;
         });
-        
+        localStorage.setItem('yaserCryptoCoins', JSON.stringify(this.coins));
         coinsGrid.innerHTML = html;
         console.log('✅ تم عرض البطاقات بنجاح');
     }

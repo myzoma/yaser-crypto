@@ -1154,7 +1154,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.yaserCryptoInstance = new YaserCrypto();
 // باقي الكود الموجود...
 
-// أضف هذا السطر في النهاية
-document.head.appendChild(Object.assign(document.createElement('script'), {src: 'recommendations-manager.js'}));
 
 });

@@ -10,7 +10,7 @@
         "apiKey": "dMT8VybD1wmQZvQyJJT8zpy9wJ5Qoen0soWSrp8FJYBgI6JVOMcakaWJcJ6LWe1S",
         "secretKey": "EBm4Q3sUiwTefHzlb2JWUMBeCLmGhknAFfiQDO6VP3grCJW3vVL7hGvSpMD4z9ae",
         "refreshInterval": 30000
-    "maxCoins": 50,
+    "maxCoins": 12,
     "fibonacciLevels": [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1],
     "rsiPeriod": 14,
     "macdFast": 12,

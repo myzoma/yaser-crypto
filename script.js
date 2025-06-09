@@ -1152,5 +1152,9 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة مع مصادر متعددة');
     window.yaserCryptoInstance = new YaserCrypto();
+// باقي الكود الموجود...
+
+// أضف هذا السطر في النهاية
+document.head.appendChild(Object.assign(document.createElement('script'), {src: 'recommendations-manager.js'}));
 
 });

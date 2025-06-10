@@ -8,24 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-
 </head>
 <body>
+    <!-- شريط التحميل الاحترافي -->
+    <div id="pageLoader">
+        <div class="loader-container">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">جاري التحميل...</div>
+        </div>
+    </div>
     
     <header>
         <div class="header-content">
-            <!-- اسم الموقع والوصف على اليمين -->
            <div class="container">
             <div class="header-content">
               <h1 style="text-align: right; margin: 0px; color: rgb(255, 215, 0); font-size: 1.5rem;"><br /></h1>
-<h2 style="text-align: right; margin: 0px;">
-        <font face="arial black" style="" size="6"><i class="fas fa-coins"></i><font color="#00ccff" style=""> YASER</font><span style="color: rgb(255, 215, 0);"> CRYPTO&nbsp; &nbsp;&nbsp;</span></font></h2>
-               
+              <h2 style="text-align: right; margin: 0px;">
+                <span class="site-title"><i class="fas fa-coins"></i><span style="color:#00ccff;"> YASER</span><span style="color: rgb(255, 215, 0);"> CRYPTO&nbsp; &nbsp;&nbsp;</span></span>
+              </h2>
             </div>
             </div>
             
-            <!-- الروابط في أقصى اليسار -->
             <nav class="navigation">
                 <ul class="nav-links">
                     <li><a href="https://edraone.blogspot.com/" class="active">الرئيسية</a></li>
@@ -39,46 +42,40 @@
     </header>
 
    <main>
-      
-
-
-   <!-- إضافة هذا القسم بين الهيدر والبطاقات في ملف HTML -->
-<div class="capital-strategy-header">
-    <h3 class="capital-strategy-title">استراتيجية توزيع رأس المال</h3>
-    <div class="capital-strategy-grid">
-        <div class="capital-strategy-item gold">
-            <span class="strategy-medal">🥇</span>
-            <span class="strategy-score-range">90-100</span>
-            <span class="strategy-type">استثمار أساسي</span>
-            <span class="strategy-percentage">50%</span>
-        </div>
-        <div class="capital-strategy-item silver">
-            <span class="strategy-medal">🥈</span>
-            <span class="strategy-score-range">80-89</span>
-            <span class="strategy-type">استثمار ثانوي</span>
-            <span class="strategy-percentage">30%</span>
-        </div>
-        <div class="capital-strategy-item bronze">
-            <span class="strategy-medal">🥉</span>
-            <span class="strategy-score-range">75-79</span>
-            <span class="strategy-type">استثمار تكميلي</span>
-            <span class="strategy-percentage">20%</span>
+   <!-- ... باقي الصفحة كما هو ... -->
+    <div class="capital-strategy-header">
+        <h3 class="capital-strategy-title">استراتيجية توزيع رأس المال</h3>
+        <div class="capital-strategy-grid">
+            <div class="capital-strategy-item gold">
+                <span class="strategy-medal">🥇</span>
+                <span class="strategy-score-range">90-100</span>
+                <span class="strategy-type">استثمار أساسي</span>
+                <span class="strategy-percentage">50%</span>
+            </div>
+            <div class="capital-strategy-item silver">
+                <span class="strategy-medal">🥈</span>
+                <span class="strategy-score-range">80-89</span>
+                <span class="strategy-type">استثمار ثانوي</span>
+                <span class="strategy-percentage">30%</span>
+            </div>
+            <div class="capital-strategy-item bronze">
+                <span class="strategy-medal">🥉</span>
+                <span class="strategy-score-range">75-79</span>
+                <span class="strategy-type">استثمار تكميلي</span>
+                <span class="strategy-percentage">20%</span>
+            </div>
         </div>
     </div>
-</div>
-<div class="capital-strategy-separator"></div>
+    <div class="capital-strategy-separator"></div>
 
-    <!-- الآن container العملات -->
     <div class="ranking-container">
         <h4>ترتيب العملات حسب نتيجة السباق</h4>
         <div class="coins-grid" id="coinsGrid">
             <!-- البطاقات ستظهر هنا -->
         </div>
     </div>
-</main>
+   </main>
 
-
-    <!-- النافذة المنبثقة -->
     <div class="modal" id="coinModal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -87,8 +84,6 @@
             </div>
         </div>
     </div>
-   
-<div id="coinsGrid"></div>
     <script src="script.js"></script>
 </body>
 </html>

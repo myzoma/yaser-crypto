@@ -63,6 +63,7 @@ header {
     color: #00ccff;      /* لون أزرق */
     font-weight: 900;    /* عريض جدًا */
     letter-spacing: 1px;
+    text-align: right;
 }
 
 .crypto {
@@ -70,6 +71,7 @@ header {
     font-weight: 900;    /* عريض جدًا */
     margin-right: 8px;
     letter-spacing: 1px;
+    text-align: right;
 }
 .logo-section {
     text-align: right;

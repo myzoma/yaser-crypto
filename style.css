@@ -1691,3 +1691,47 @@ button:active, .btn:active {
     font-size: 0.7rem;
     padding: 1px 4px;
 }
+/* ... جميع أنماطك القديمة ... */
+
+/* شريط التحميل الاحترافي */
+#pageLoader {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.96);
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s;
+}
+
+.loader-container {
+    text-align: center;
+}
+
+.loader-spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #00ccff;
+    border-top: 6px solid #ffd700;
+    border-radius: 50%;
+    animation: loader-spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+    box-shadow: 0 0 24px #00ccff55;
+}
+
+@keyframes loader-spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+
+.loader-text {
+    color: #fff;
+    font-family: 'Tajawal', Arial, sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    text-shadow: 0 2px 8px #00ccff33;
+}
+
+/* ... باقي الأنماط كما هي ... */

@@ -31,16 +31,6 @@ body {
     text-align: right;
 }
 
-header {
-    background: var(--bg-dark);
-    padding: 20px 0;
-    box-shadow: 0 8px 32px rgba(0, 204, 255, 0.2);
-    border-bottom: 2px solid var(--primary-color);
-    background-attachment: local;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
@@ -48,30 +38,37 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-.site-logo {
-    font-family: 'Tajawal', 'Arial Black', Arial, sans-serif;
-    font-weight: 900;
-    font-size: 2.5rem;
-    letter-spacing: 2px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    /* المسافة تلقائياً بين الطرفين */
 }
 
-.yaser {
-    color: #00ccff;      /* لون أزرق */
-    font-weight: 900;    /* عريض جدًا */
+.site-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Tajawal', 'Arial Black', Arial, sans-serif;
+    font-size: 2.1rem;
+    font-weight: 900;
     letter-spacing: 1px;
-    text-align: right;
 }
 
 .crypto {
-    color: #ffd700;      /* لون ذهبي */
-    font-weight: 900;    /* عريض جدًا */
-    margin-right: 8px;
+    color: #ffd700;
+    font-weight: 900;
+    margin-left: 4px;
     letter-spacing: 1px;
-    text-align: right;
+}
+.yaser {
+    color: #00ccff;
+    font-weight: 900;
+    margin-left: 7px;
+    letter-spacing: 1px;
+}
+
+.site-logo i {
+    color: #fff;
+    font-size: 2.2rem;
+    margin-right: 2px;
+    margin-top: 2px;
 }
 .logo-section {
     text-align: right;

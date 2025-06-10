@@ -4,14 +4,14 @@ class YaserCrypto {
         this.config = {
             okxApiUrl: "https://www.okx.com/api/v5",
             binanceApiUrl: "https://api1.binance.com/api/v3",
-            requestDelay: 0, // تسريع التحميل
-            maxCoins: 12,    // عدد العملات النهائية للعرض والتحليل
+            requestDelay: 0,
+            maxCoins: 12,
             minChange: 1,
             maxChange: 15,
             minVolume: 100000,
             dataSources: ['okx', 'binance']
         };
-        this.requestDelay = 0; // تسريع التحميل
+        this.requestDelay = 0;
         this.init();
     }
 
@@ -24,10 +24,25 @@ class YaserCrypto {
 
     showLoading() {
         document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
+        // إظهار شريط التحميل
+        const loader = document.getElementById('pageLoader');
+        if (loader) {
+            loader.style.opacity = "1";
+            loader.style.display = "flex";
+        }
+    }
+
+    hideLoader() {
+        const loader = document.getElementById('pageLoader');
+        if(loader){
+            loader.style.opacity = "0";
+            setTimeout(()=>loader.style.display="none", 400);
+        }
     }
 
     showError(message) {
         document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+        this.hideLoader(); // إخفاء الشريط في حالة الخطأ أيضًا
     }
 
     async fetchData() {
@@ -594,14 +609,16 @@ class YaserCrypto {
         return ema;
     }
 
-    renderCoins() {
+     renderCoins() {
         const coinsGrid = document.getElementById('coinsGrid');
         if (!coinsGrid) {
             console.error('عنصر coinsGrid غير موجود');
+            this.hideLoader();
             return;
         }
         if (this.coins.length === 0) {
             coinsGrid.innerHTML = '<div class="no-data">لا توجد عملات للعرض</div>';
+            this.hideLoader();
             return;
         }
         let html = '';
@@ -629,7 +646,7 @@ class YaserCrypto {
             else if (coin.score >= 60) scoreClass = 'score-average';
             else scoreClass = 'score-poor';
             html += `
-               <div class="coin-card ${rankClass}" onclick="window.location.href='coin.html?symbol=${coin.symbol}'">
+                <div class="coin-card ${rankClass}" onclick="window.location.href='coin.html?symbol=${coin.symbol}'">
                     <div class="rank-badge">
                         <span class="rank-icon">${rankIcon}</span>
                     </div>
@@ -655,9 +672,9 @@ class YaserCrypto {
         });
         localStorage.setItem('yaserCryptoCoins', JSON.stringify(this.coins));
         coinsGrid.innerHTML = html;
+        this.hideLoader();
         console.log('✅ تم عرض البطاقات بنجاح');
     }
-
     formatNumber(num) {
         if (num >= 1000000000) {
             return (num / 1000000000).toFixed(1) + 'B';

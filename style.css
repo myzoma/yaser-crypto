@@ -1757,7 +1757,7 @@ button:active, .btn:active {
 /* ...زر الدعم ... */
 .donate-btn {
     display: inline-block;
-    background-color: #00c4cc;
+    background-color: #ffd700;
     color: #fff;
     padding: 10px 16px;
     margin-top: 8px;

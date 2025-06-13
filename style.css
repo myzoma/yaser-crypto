@@ -744,7 +744,7 @@ body {
 /* ✅ تنسيق عناصر استراتيجية توزيع رأس المال لتكون مناسبة لكل الشاشات */
 .capital-strategy-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 

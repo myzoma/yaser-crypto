@@ -1754,4 +1754,20 @@ button:active, .btn:active {
     text-shadow: 0 2px 8px #00ccff33;
 }
 
-/* ... باقي الأنماط كما هي ... */
+/* ...زر الدعم ... */
+.donate-btn {
+    display: inline-block;
+    background-color: #00c4cc;
+    color: #fff;
+    padding: 10px 16px;
+    margin-top: 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.donate-btn:hover {
+    background-color: #0099a6;
+}

@@ -469,6 +469,9 @@ body {
 }
 
 .score-display {
+    display: flex;
+    flex-direction: column; /* يجعل الترتيب عموديًا */
+    align-items: center;     /* توسيط العناصر أفقيًا */
     text-align: center;
     margin-bottom: 15px;
 }

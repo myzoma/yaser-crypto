@@ -123,15 +123,16 @@
                 <h2>${coin.rank === 1 ? '🥇' : coin.rank === 2 ? '🥈' : coin.rank === 3 ? '🥉' : '#' + coin.rank} ${coin.symbol} ${coin.priority === 3 ? '<span class="priority-badge">⭐ مؤكد من مصدرين</span>' : ''}</h2>
                 <div class="source-info">${coin.dataSource === 'binance' ? '🟡 Binance' : '🔵 OKX'}</div>
             </div>
-           <div class="modal-content-grid">
-    <div class="price-section">
-        <h3>معلومات السعر</h3>
-        <div class="price-info">
-            <div class="current-price">$${coin.price?.toFixed(6) ?? '-'}</div>
-            <div class="price-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
-                ${(coin.change24h >= 0 ? '+' : '') + (coin.change24h?.toFixed(2) ?? '-')}%
-            </div>
+          <div class="modal-content-grid" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-top: 1px solid #444; border-bottom: 1px solid #444;">
+    <!-- السعر على اليسار -->
+    <div class="price-section" style="flex: 1; text-align: left;">
+        <div class="current-price" style="font-size: 1.5rem; font-weight: bold; color: #00ccff;">
+            $${coin.price?.toFixed(6) ?? '-'}
         </div>
+        <div class="price-change ${coin.change24h >= 0 ? 'positive' : 'negative'}" style="font-size: 1rem; margin-top: 5px;">
+            ${(coin.change24h >= 0 ? '+' : '') + (coin.change24h?.toFixed(2) ?? '-')}%
+        </div>
+    </div>
         <div class="price-range">
             <div>أعلى 24س: $${coin.high24h?.toFixed(6) ?? '-'}</div>
             <div>أقل 24س: $${coin.low24h?.toFixed(6) ?? '-'}</div>

@@ -1759,4 +1759,23 @@ button:active, .btn:active {
     text-shadow: 0 2px 8px #00ccff33;
 }
 
-/* ... باقي الأنماط كما هي ... */
+/* ... الروابط متجاوبه مع الجوال ... */
+@media (max-width: 768px) {
+  .header-content {
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-right: 0;
+  }
+
+  .nav-links a {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}

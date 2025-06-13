@@ -1756,18 +1756,17 @@ button:active, .btn:active {
 
 /* ...زر الدعم ... */
 .donate-btn {
-    display: inline-block;
-    background-color: #ffd700;
-    color: #fff;
-    padding: 10px 16px;
-    margin-top: 8px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: background 0.3s ease;
-    font-size: 0.9rem;
+  background-color: #009688; /* نفس لون الاستراتيجية */
+  color: white;
+  padding: 8px 20px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  transition: background 0.3s ease;
 }
 
 .donate-btn:hover {
-    background-color: #0099a6;
+  background-color: #00796b; /* لون أغمق عند التمرير */
 }

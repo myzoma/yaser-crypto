@@ -741,93 +741,88 @@ body {
     font-size: 0.9rem;
 }
 
-/* ✅ تنسيق عناصر استراتيجية توزيع رأس المال لتكون مناسبة لكل الشاشات */
-.capital-strategy-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+/* حل المشكلة الثالثة: تنسيق استراتيجية الاستثمار في جدول */
+.investment-strategy {
+    background: var(--bg-dark);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--teal-color);
+    margin-bottom: 15px;
 }
 
-.capital-strategy-item {
-  padding: 12px;
-  border-radius: 10px;
-  text-align: center;
-  font-family: 'Tajawal', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.investment-strategy h4 {
+    color: var(--teal-color);
+    margin-bottom: 12px;
+    font-size: 1rem;
+    text-align: center;
+    padding: 8px;
+    background: rgba(0, 150, 136, 0.1);
+    border-radius: 8px;
 }
 
-/* أيقونة الميدالية */
-.capital-strategy-item .strategy-medal {
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-}
-
-/* نطاق النتيجة */
-.capital-strategy-item .strategy-score-range {
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: var(--text-light);
-}
-
-/* نوع الاستثمار */
-.capital-strategy-item .strategy-type {
-  font-size: 0.85rem;
-  color: var(--text-light);
-  margin-top: 3px;
-}
-
-/* النسبة */
-.capital-strategy-item .strategy-percentage {
-  font-size: 0.85rem;
-  color: var(--teal-color);
-  font-weight: bold;
-  margin-top: 3px;
-}
-
-/* ✅ تصميم زر التبرع داخل البطاقة */
-.capital-strategy-item a.donation-button {
-  margin-top: 8px;
-  padding: 7px 14px;
-  background-color: #ffd700;
-  color: #111827;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 0.85rem;
-  text-decoration: none;
-  transition: background 0.3s ease;
-}
-
-.capital-strategy-item a.donation-button:hover {
-  background-color: #e6c200;
-}
-
-/* ✅ استجابة الهواتف */
-@media (max-width: 480px) {
-  .capital-strategy-grid {
-    grid-template-columns: 1fr 1fr;
+.investment-strategy-table {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 10px;
-  }
+    margin-bottom: 10px;
+}
 
-  .capital-strategy-item {
+.strategy-item {
+    background: rgba(0, 150, 136, 0.05);
     padding: 10px;
-  }
+    border-radius: 8px;
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-  .capital-strategy-item .strategy-medal {
-    font-size: 1.3rem;
-  }
+.strategy-icon {
+    color: var(--teal-color);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
 
-  .capital-strategy-item .strategy-score-range,
-  .capital-strategy-item .strategy-type,
-  .capital-strategy-item .strategy-percentage {
-    font-size: 0.8rem;
-  }
+.strategy-text {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
 
-  .capital-strategy-item a.donation-button {
-    font-size: 0.8rem;
-    padding: 6px 12px;
-  }
+.investment-strategy ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.investment-strategy li {
+    padding: 8px 10px;
+    position: relative;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.3;
+    background: rgba(0, 150, 136, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.investment-strategy li::before {
+    content: '💡';
+    flex-shrink: 0;
+}
+
+/* حل المشكلة الخامسة: تنسيق استراتيجية توزيع رأس المال أفقياً */
+.capital-distribution {
+    background: var(--bg-dark);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid var(--secondary-color);
+    margin-bottom: 15px;
 }
 
 .capital-distribution h4 {
@@ -1759,23 +1754,4 @@ button:active, .btn:active {
     text-shadow: 0 2px 8px #00ccff33;
 }
 
-/* ... الروابط متجاوبه مع الجوال ... */
-@media (max-width: 768px) {
-  .header-content {
-    flex-wrap: wrap;
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .nav-links {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 8px;
-    padding-right: 0;
-  }
-
-  .nav-links a {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
-}
+/* ... باقي الأنماط كما هي ... */

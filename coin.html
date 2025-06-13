@@ -123,30 +123,32 @@
                 <h2>${coin.rank === 1 ? '🥇' : coin.rank === 2 ? '🥈' : coin.rank === 3 ? '🥉' : '#' + coin.rank} ${coin.symbol} ${coin.priority === 3 ? '<span class="priority-badge">⭐ مؤكد من مصدرين</span>' : ''}</h2>
                 <div class="source-info">${coin.dataSource === 'binance' ? '🟡 Binance' : '🔵 OKX'}</div>
             </div>
-            <div class="modal-content-grid">
-                <div class="price-section">
-                    <h3>معلومات السعر</h3>
-                    <div class="price-info">
-                        <div class="current-price">$${coin.price?.toFixed(6) ?? '-'}</div>
-                        <div class="price-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
-                            ${(coin.change24h >= 0 ? '+' : '') + (coin.change24h?.toFixed(2) ?? '-')}%
-                        </div>
-                    </div>
-                    <div class="price-range">
-                        <div>أعلى 24س: $${coin.high24h?.toFixed(6) ?? '-'}</div>
-                        <div>أقل 24س: $${coin.low24h?.toFixed(6) ?? '-'}</div>
-                        <div>الحجم: ${formatNumber(coin.volume)}</div>
-                    </div>
-                </div>
-                <div class="score-section">
-                    <h3>نقاط التحليل</h3>
-                    <div class="score-display">
-                        <div class="score-number">${coin.score}</div>
-                        <div class="score-label">نقطة</div>
-                    </div>
-                    <div class="rank-info">المركز: ${coin.rank === 1 ? '🥇' : coin.rank === 2 ? '🥈' : coin.rank === 3 ? '🥉' : '#' + coin.rank}</div>
-                </div>
+           <div class="modal-content-grid">
+    <div class="price-section">
+        <h3>معلومات السعر</h3>
+        <div class="price-info">
+            <div class="current-price">$${coin.price?.toFixed(6) ?? '-'}</div>
+            <div class="price-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                ${(coin.change24h >= 0 ? '+' : '') + (coin.change24h?.toFixed(2) ?? '-')}%
             </div>
+        </div>
+        <div class="price-range">
+            <div>أعلى 24س: $${coin.high24h?.toFixed(6) ?? '-'}</div>
+            <div>أقل 24س: $${coin.low24h?.toFixed(6) ?? '-'}</div>
+            <div>الحجم: ${formatNumber(coin.volume)}</div>
+        </div>
+    </div>
+
+    <div class="score-section">
+        <h3>نقاط التحليل</h3>
+        <div class="score-display">
+            <div class="score-label">نقطة</div> <!-- ← تم رفعه فوق -->
+            <div class="score-number">${coin.score}</div>
+        </div>
+        <div class="rank-info">المركز: ${coin.rank === 1 ? '🥇' : coin.rank === 2 ? '🥈' : coin.rank === 3 ? '🥉' : '#' + coin.rank}</div>
+    </div>
+</div>
+
             <div class="technical-section">
                 <h3>المؤشرات الفنية</h3>
                 <div class="indicators-grid">

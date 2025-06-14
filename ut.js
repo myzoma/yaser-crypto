@@ -39,7 +39,7 @@ class UTBotScanner {
         }
     }
 
-    calculateATR(candles, period = 14) {
+    calculateATR(candles, period = 1) {
         if (candles.length < period + 1) return 0;
         
         let atrSum = 0;
@@ -77,7 +77,7 @@ class UTBotScanner {
         }));
 
         // استخدام نفس إعدادات المؤشر الأصلي
-        const atr = this.calculateATR(candles, 14); // atrPeriods = 14
+        const atr = this.calculateATR(candles, 1); // atrPeriods = 14
         const keyValue = 2.0; // Key_value = 2
         
         const current = candles[candles.length - 1];

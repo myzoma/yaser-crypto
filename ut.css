@@ -72,7 +72,14 @@
     margin-left: 6px;
     font-size: 14px;
 }
+.sell-signal-item {
+    border-left-color: #f44336;
+}
 
+.buy-signal-item:hover, .sell-signal-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
 .timeframe-indicator {
     background: #2196F3;
     color: white;

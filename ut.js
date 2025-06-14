@@ -77,7 +77,7 @@ class UTBotScanner {
         }));
 
         // استخدام نفس إعدادات المؤشر الأصلي
-        const atr = this.calculateATR(candles, 1); // atrPeriods = 14
+        const atr = this.calculateATR(candles, 14); // atrPeriods = 14
         const keyValue = 2.0; // Key_value = 2
         
         const current = candles[candles.length - 1];

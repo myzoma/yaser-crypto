@@ -232,11 +232,16 @@ async function loadUTBotSignals() {
         }
 
         const signalsHTML = signals.map(signal => `
-            <div class="buy-signal-item" title="قوة الإشارة: ${signal.strength.toFixed(2)}%">
-                <span class="timeframe-indicator">${signal.timeframe}</span>
-                ${signal.symbol.replace('-USDT', '/USDT')} - $${signal.price} (${signal.change24h}%)
-            </div>
-        `).join('');
+    <div class="buy-signal-item" title="قوة الإشارة: ${signal.strength.toFixed(2)}%">
+        <span class="timeframe-indicator">${signal.timeframe}</span>
+        <strong>${signal.symbol.replace('-USDT', '/USDT')}</strong> - 
+        <span style="color: #4CAF50; font-weight: bold;">$${signal.price}</span>
+        <span style="color: ${parseFloat(signal.change24h) >= 0 ? '#4CAF50' : '#f44336'}; margin-left: 5px;">
+            (${signal.change24h}%)
+        </span>
+    </div>
+`).join('');
+
         
         container.innerHTML = signalsHTML;
         

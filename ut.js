@@ -192,7 +192,7 @@ class UTBotScanner {
 
             const finalSignals = Array.from(uniqueSignals.values())
                 .sort((a, b) => b.score - a.score)
-                .slice(0, 10);
+                .slice(0, 3);
 
             console.log(`🎉 تم تحليل وترتيب ${allSignals.length} إشارة وعرض أفضل ${finalSignals.length} عملة`);
             

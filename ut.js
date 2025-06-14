@@ -39,7 +39,7 @@ class UTBotScanner {
         }
     }
 
-    calculateATR(candles, period = 10) {
+    calculateATR(candles, period = 14) {
         if (candles.length < period + 1) return 0;
         
         let atrSum = 0;
@@ -57,65 +57,58 @@ class UTBotScanner {
         return atrSum / period;
     }
 
-    async checkUTBotSignal(symbol, timeframe) {
-        try {
-            const response = await fetch(
-                `${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`
-            );
-            
-            const result = await response.json();
-            if (result.code !== '0' || !result.data) return null;
-            
-            const klines = result.data;
-            if (klines.length < 20) return null;
+   async checkUTBotSignal(symbol, timeframe) {
+    try {
+        const response = await fetch(
+            `${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`
+        );
+        
+        const result = await response.json();
+        if (result.code !== '0' || !result.data) return null;
+        
+        const klines = result.data;
+        if (klines.length < 20) return null;
 
-            const candles = klines.map(k => ({
-                high: parseFloat(k[2]),
-                low: parseFloat(k[3]),
-                close: parseFloat(k[4]),
-                hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
-            }));
+        const candles = klines.map(k => ({
+            high: parseFloat(k[2]),
+            low: parseFloat(k[3]),
+            close: parseFloat(k[4]),
+            hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
+        }));
 
-            const atr = this.calculateATR(candles, 10);
-            const keyValue = 0.8;
+        // استخدام نفس إعدادات المؤشر الأصلي
+        const atr = this.calculateATR(candles, 14); // atrPeriods = 14
+        const keyValue = 2.0; // Key_value = 2
+        
+        const current = candles[candles.length - 1];
+        const previous = candles[candles.length - 2];
+        
+        // حساب UT Bot بالطريقة الأصلية
+        const upperBand = current.hl2 + (atr * keyValue);
+        
+        // إشارة شراء: اختراق النطاق العلوي (نفس منطق المؤشر الأصلي)
+        if (current.close > upperBand && previous.close <= upperBand) {
+            const strength = ((current.close - upperBand) / upperBand * 100);
+            const timeframeBonus = timeframe === '1H' ? 15 : 10;
             
-            const current = candles[candles.length - 1];
-            const previous = candles[candles.length - 2];
-            const prev2 = candles[candles.length - 3];
+            console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
             
-            const upperBand = current.hl2 + (atr * keyValue);
-            
-            const buyConditions = [
-                current.close > upperBand && previous.close <= upperBand,
-                current.close > upperBand * 0.98 && 
-                current.close > previous.close && 
-                previous.close > prev2.close,
-                current.close > upperBand * 1.01
-            ];
-            
-            const isBuySignal = buyConditions.some(condition => condition);
-            
-            if (isBuySignal) {
-                const strength = ((current.close - upperBand) / upperBand * 100);
-                const timeframeBonus = timeframe === '1H' ? 15 : 10;
-                
-                console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
-                
-                return {
-                    symbol: symbol,
-                    price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
-                    timeframe: timeframe,
-                    strength: strength,
-                    score: Math.abs(strength) + timeframeBonus,
-                    change24h: await this.get24hChange(symbol)
-                };
-            }
-            
-            return null;
-        } catch (error) {
-            return null;
+            return {
+                symbol: symbol,
+                price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
+                timeframe: timeframe,
+                strength: strength,
+                score: Math.abs(strength) + timeframeBonus,
+                change24h: await this.get24hChange(symbol)
+            };
         }
+        
+        return null;
+    } catch (error) {
+        return null;
     }
+}
+
 
     async get24hChange(symbol) {
         try {

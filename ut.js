@@ -39,7 +39,7 @@ class UTBotScanner {
         }
     }
 
-    calculateATR(candles, period = 1) {
+    calculateATR(candles, period = 10) {
         if (candles.length < period + 1) return 0;
         
         let atrSum = 0;
@@ -57,71 +57,65 @@ class UTBotScanner {
         return atrSum / period;
     }
 
-   async checkUTBotSignal(symbol, timeframe) {
-    try {
-        const response = await fetch(
-            `${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`
-        );
-        
-        const result = await response.json();
-        if (result.code !== '0' || !result.data) return null;
-        
-        const klines = result.data;
-        if (klines.length < 20) return null;
+    async checkUTBotSignal(symbol, timeframe) {
+        try {
+            const response = await fetch(
+                `${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`
+            );
+            
+            const result = await response.json();
+            if (result.code !== '0' || !result.data) return null;
+            
+            const klines = result.data;
+            if (klines.length < 20) return null;
 
-        const candles = klines.map(k => ({
-            high: parseFloat(k[2]),
-            low: parseFloat(k[3]),
-            close: parseFloat(k[4]),
-            hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
-        }));
+            const candles = klines.map(k => ({
+                high: parseFloat(k[2]),
+                low: parseFloat(k[3]),
+                close: parseFloat(k[4]),
+                hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
+            }));
 
-       // حساب UT Bot بالطريقة الأصلية
-const upperBand = current.hl2 + (atr * keyValue);
-const lowerBand = current.hl2 - (atr * keyValue);
-
-// شروط إشارة الشراء المحسنة (حساسية أعلى)
-const buyConditions = [
-    // الشرط الأساسي: اختراق النطاق العلوي
-    current.close > upperBand && previous.close <= upperBand,
-    
-    // شرط بديل: قريب من النطاق العلوي مع زخم صاعد
-    current.close > upperBand * 0.95 && 
-    current.close > previous.close && 
-    previous.close > prev2.close,
-    
-    // شرط ثالث: اختراق قوي للنطاق (حساسية عالية)
-    current.close > upperBand * 0.98,
-    
-    // شرط رابع: زخم صاعد قوي
-    current.close > previous.close * 1.002 && 
-    previous.close > prev2.close
-];
-
-const isBuySignal = buyConditions.some(condition => condition);
-
-if (isBuySignal) {
-    const strength = ((current.close - upperBand) / upperBand * 100);
-    const timeframeBonus = timeframe === '1H' ? 15 : 10;
-    
-    console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
-    
-    return {
-        symbol: symbol,
-        price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
-        timeframe: timeframe,
-        strength: strength,
-        score: Math.abs(strength) + timeframeBonus,
-        change24h: await this.get24hChange(symbol)
-    };
-}
-        
-        return null;
-    } catch (error) {
-        return null;
+            const atr = this.calculateATR(candles, 10);
+            const keyValue = 0.8;
+            
+            const current = candles[candles.length - 1];
+            const previous = candles[candles.length - 2];
+            const prev2 = candles[candles.length - 3];
+            
+            const upperBand = current.hl2 + (atr * keyValue);
+            
+            const buyConditions = [
+                current.close > upperBand && previous.close <= upperBand,
+                current.close > upperBand * 0.98 && 
+                current.close > previous.close && 
+                previous.close > prev2.close,
+                current.close > upperBand * 1.01
+            ];
+            
+            const isBuySignal = buyConditions.some(condition => condition);
+            
+            if (isBuySignal) {
+                const strength = ((current.close - upperBand) / upperBand * 100);
+                const timeframeBonus = timeframe === '1H' ? 15 : 10;
+                
+                console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
+                
+                return {
+                    symbol: symbol,
+                    price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
+                    timeframe: timeframe,
+                    strength: strength,
+                    score: Math.abs(strength) + timeframeBonus,
+                    change24h: await this.get24hChange(symbol)
+                };
+            }
+            
+            return null;
+        } catch (error) {
+            return null;
+        }
     }
-}
-
 
     async get24hChange(symbol) {
         try {
@@ -136,81 +130,82 @@ if (isBuySignal) {
         }
     }
 
-   async scanAllMarket() {
-    if (this.isScanning) {
-        console.log('⏳ الفحص جاري بالفعل...');
-        return [];
-    }
-
-    this.isScanning = true;
-    console.log('🔍 بدء فحص السوق (بطيء لتجنب الحجب)...');
-    
-    try {
-        if (this.symbols.length === 0) {
-            await this.fetchTopSymbols();
+    async scanAllMarket() {
+        if (this.isScanning) {
+            console.log('⏳ الفحص جاري بالفعل...');
+            return [];
         }
 
-        const allSignals = [];
-        const timeframes = ['1H', '30m'];
+        this.isScanning = true;
+        console.log('🔍 بدء فحص السوق (60 + 30 دقيقة)...');
         
-        for (const timeframe of timeframes) {
-            console.log(`📊 فحص فريم ${timeframe}...`);
-            let signalsFound = 0;
+        try {
+            if (this.symbols.length === 0) {
+                await this.fetchTopSymbols();
+            }
+
+            const allSignals = [];
+            const timeframes = ['1H', '30m'];
             
-            // تقليل حجم الدفعة وزيادة التأخير
-            const batchSize = 3; // كان 8، الآن 3
-            for (let i = 0; i < Math.min(this.symbols.length, 30); i += batchSize) { // فحص 30 عملة فقط
-                const batch = this.symbols.slice(i, i + batchSize);
+            for (const timeframe of timeframes) {
+                console.log(`📊 فحص فريم ${timeframe}...`);
+                let signalsFound = 0;
                 
-                console.log(`🔄 فحص دفعة ${Math.floor(i/batchSize) + 1}...`);
-                
-                // فحص واحد تلو الآخر بدلاً من Promise.all
-                for (const symbol of batch) {
-                    try {
-                        const result = await this.checkUTBotSignal(symbol, timeframe);
+                const batchSize = 8;
+                for (let i = 0; i < this.symbols.length; i += batchSize) {
+                    const batch = this.symbols.slice(i, i + batchSize);
+                    
+                    const promises = batch.map(async symbol => {
+                        try {
+                            return await this.checkUTBotSignal(symbol, timeframe);
+                        } catch (error) {
+                            return null;
+                        }
+                    });
+                    
+                    const results = await Promise.all(promises);
+                    
+                    results.forEach(result => {
                         if (result) {
                             allSignals.push(result);
                             signalsFound++;
                         }
-                        // تأخير بين كل طلب
-                        await new Promise(resolve => setTimeout(resolve, 500)); // نصف ثانية
-                    } catch (error) {
-                        console.warn(`⚠️ خطأ في ${symbol}:`, error.message);
-                    }
+                    });
+                    
+                    await new Promise(resolve => setTimeout(resolve, 150));
                 }
                 
-                // تأخير أكبر بين الدفعات
-                await new Promise(resolve => setTimeout(resolve, 2000)); // ثانيتين
+                console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
+            }
+
+            const uniqueSignals = new Map();
+            
+            allSignals.forEach(signal => {
+                const key = signal.symbol;
+                if (!uniqueSignals.has(key) || uniqueSignals.get(key).score < signal.score) {
+                    uniqueSignals.set(key, signal);
+                }
+            });
+
+            const finalSignals = Array.from(uniqueSignals.values())
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10);
+
+            console.log(`🎉 تم تحليل وترتيب ${allSignals.length} إشارة وعرض أفضل ${finalSignals.length} عملة`);
+            
+            if (finalSignals.length > 0) {
+                console.log('🎯 أفضل العملات:', finalSignals.map(s => `${s.symbol}(${s.timeframe})`).join(', '));
             }
             
-            console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
+            return finalSignals;
+            
+        } catch (error) {
+            console.error('❌ خطأ عام في فحص السوق:', error);
+            return [];
+        } finally {
+            this.isScanning = false;
         }
-
-        const uniqueSignals = new Map();
-        
-        allSignals.forEach(signal => {
-            const key = signal.symbol;
-            if (!uniqueSignals.has(key) || uniqueSignals.get(key).score < signal.score) {
-                uniqueSignals.set(key, signal);
-            }
-        });
-
-        const finalSignals = Array.from(uniqueSignals.values())
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
-
-        console.log(`🎉 تم تحليل ${allSignals.length} إشارة وعرض أفضل ${finalSignals.length} عملة`);
-        
-        return finalSignals;
-        
-    } catch (error) {
-        console.error('❌ خطأ عام في فحص السوق:', error);
-        return [];
-    } finally {
-        this.isScanning = false;
     }
-}
-
 }
 
 const utScanner = new UTBotScanner();

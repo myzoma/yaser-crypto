@@ -32,18 +32,19 @@
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     border: 1px solid #444;
-    min-height: 60px;
+    max-height: 300px; /* تحديد أقصى ارتفاع */
+    min-height: 60px;  /* تحديد أدنى ارتفاع */
     padding: 10px;
-    overflow: hidden;
+    overflow-y: auto;  /* شريط تمرير عمودي */
+    overflow-x: hidden;
     position: relative;
 }
 
 .ut-bot-content {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column; /* ترتيب عمودي بدلاً من أفقي */
+    gap: 8px;
+    align-items: stretch;
 }
 
 .ut-bot-loading {
@@ -54,44 +55,118 @@
     line-height: 40px;
 }
 
-.buy-signal-item {
-    padding: 8px 12px;
+.buy-signal-item, .sell-signal-item {
+    padding: 12px 15px;
     margin: 4px 0;
-    background: rgba(76, 175, 80, 0.1);
-    border-left: 3px solid #4CAF50;
-    border-radius: 4px;
+    height: 50px; /* ارتفاع ثابت لكل عنصر */
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
     font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
-.buy-signal-item:hover {
-    transform: scale(1.05);
+.buy-signal-item {
+    background: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid #4CAF50;
 }
 
-.buy-signal-item::before {
-    content: "🟢";
-    margin-left: 6px;
-    font-size: 14px;
-}
 .sell-signal-item {
-    border-left-color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+    border-left: 4px solid #f44336;
 }
 
 .buy-signal-item:hover, .sell-signal-item:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
+
+/* إزالة النقطة الخضراء من CSS لأنها تأتي من JavaScript */
+.buy-signal-item::before {
+    display: none; /* إخفاء النقطة من CSS */
+}
+
 .timeframe-indicator {
     background: #2196F3;
     color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    margin-right: 8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.signal-type {
+    margin-right: 10px;
+    font-weight: bold;
+    min-width: 60px;
+}
+
+.signal-symbol {
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 100px;
+}
+
+.signal-price {
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 80px;
+}
+
+.signal-change {
+    font-size: 12px;
+    margin-left: auto;
 }
 
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
+}
+
+/* تخصيص شريط التمرير */
+.ut-bot-ticker::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ut-bot-ticker::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.ut-bot-ticker::-webkit-scrollbar-thumb {
+    background: #4CAF50;
+    border-radius: 3px;
+}
+
+.ut-bot-ticker::-webkit-scrollbar-thumb:hover {
+    background: #45a049;
+}
+
+/* إعدادات مختلفة للأحجام */
+.ut-bot-ticker.compact {
+    max-height: 180px;
+}
+
+.ut-bot-ticker.compact .buy-signal-item,
+.ut-bot-ticker.compact .sell-signal-item {
+    height: 40px;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+.ut-bot-ticker.expanded {
+    max-height: 450px;
+}
+
+.ut-bot-ticker.expanded .buy-signal-item,
+.ut-bot-ticker.expanded .sell-signal-item {
+    height: 65px;
+    padding: 15px 18px;
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {
@@ -104,12 +179,33 @@
         font-size: 16px;
     }
     
-    .buy-signal-item {
-        font-size: 11px;
-        padding: 6px 12px;
+    .ut-bot-ticker {
+        max-height: 200px; /* أصغر في الموبايل */
     }
     
-    .ut-bot-content {
-        justify-content: flex-start;
+    .buy-signal-item, .sell-signal-item {
+        font-size: 11px;
+        padding: 8px 12px;
+        height: 45px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+    
+    .signal-symbol, .signal-price, .signal-change {
+        min-width: auto;
+        margin-right: 5px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .ut-bot-ticker {
+        max-height: 400px; /* أكبر في الشاشات الكبيرة */
+    }
+    
+    .buy-signal-item, .sell-signal-item {
+        height: 60px;
+        padding: 15px 20px;
+        font-size: 14px;
     }
 }

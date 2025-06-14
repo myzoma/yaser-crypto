@@ -103,7 +103,8 @@ class UTBotScanner {
                 
                 return {
                     symbol: symbol,
-                    price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
+                   price: current.close < 0.000001 ? current.close.toFixed(10) : 
+       current.close < 1 ? current.close.toFixed(8) : current.close.toFixed(4),
                     timeframe: timeframe,
                     strength: strength,
                     score: Math.abs(strength) + timeframeBonus,
@@ -118,17 +119,19 @@ class UTBotScanner {
     }
 
     async get24hChange(symbol) {
-        try {
-            const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
-            const result = await response.json();
-            if (result.code === '0' && result.data.length > 0) {
-                return parseFloat(result.data[0].changePercent).toFixed(2);
-            }
-            return '0.00';
-        } catch {
-            return '0.00';
+    try {
+        const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
+        const result = await response.json();
+        if (result.code === '0' && result.data && result.data.length > 0) {
+            const change = parseFloat(result.data[0].changePercent);
+            return isNaN(change) ? '0.00' : change.toFixed(2);
         }
+        return '0.00';
+    } catch {
+        return '0.00';
     }
+}
+
 
     async scanAllMarket() {
         if (this.isScanning) {

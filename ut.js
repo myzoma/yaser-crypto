@@ -122,15 +122,37 @@ class UTBotScanner {
     try {
         const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
         const result = await response.json();
+        
         if (result.code === '0' && result.data && result.data.length > 0) {
-            const change = parseFloat(result.data[0].changePercent);
+            const data = result.data[0];
+            
+            // جرب changePercent أولاً
+            let change = parseFloat(data.changePercent);
+            
+            // إذا كان 0 أو NaN، احسب يدوياً من السعر
+            if (isNaN(change) || change === 0) {
+                const lastPrice = parseFloat(data.last);
+                const openPrice = parseFloat(data.open24h);
+                
+                if (openPrice && openPrice > 0) {
+                    change = ((lastPrice - openPrice) / openPrice) * 100;
+                }
+            }
+            
+            // إذا كان أقل من 0.01، اضربه في 100 (ربما يكون بصيغة عشرية)
+            if (Math.abs(change) < 0.01 && Math.abs(change) > 0) {
+                change = change * 100;
+            }
+            
             return isNaN(change) ? '0.00' : change.toFixed(2);
         }
         return '0.00';
-    } catch {
+    } catch (error) {
+        console.warn(`خطأ في جلب التغيير لـ ${symbol}:`, error);
         return '0.00';
     }
 }
+
 
 
     async scanAllMarket() {

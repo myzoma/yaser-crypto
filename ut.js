@@ -1,41 +1,46 @@
 class UTBotScanner {
     constructor() {
-        this.apiBase = 'https://api.binance.com/api/v3';
+        this.apiBase = 'https://www.okx.com/api/v5';
         this.symbols = [];
         this.isScanning = false;
+        
+        // ضع بياناتك هنا
+        this.apiKey = 'b20c667d-ae40-48a6-93f4-a11a64185068';
+        this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
+        this.passphrase = '212160Nm$#';
+        
+        this.headers = {
+            'OK-ACCESS-KEY': this.apiKey,
+            'OK-ACCESS-PASSPHRASE': this.passphrase,
+            'OK-ACCESS-TIMESTAMP': '',
+            'OK-ACCESS-SIGN': '',
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // دالة لإنشاء التوقيع
+    generateSignature(timestamp, method, requestPath, body = '') {
+        const message = timestamp + method + requestPath + body;
+        return CryptoJS.HmacSHA256(message, this.secretKey).toString(CryptoJS.enc.Base64);
     }
 
     async fetchTopSymbols() {
         try {
-            console.log('📊 جاري جلب قائمة العملات...');
-            const response = await fetch(`${this.apiBase}/ticker/24hr`);
-            const tickers = await response.json();
+            console.log('📊 جاري جلب قائمة العملات من OKX...');
             
-            this.symbols = tickers
-                .filter(ticker => 
-                    ticker.symbol.endsWith('USDT') && 
-                    parseFloat(ticker.volume) > 1000000 &&
-                    parseFloat(ticker.priceChangePercent) !== 0 &&
-                    !ticker.symbol.includes('UP') && 
-                    !ticker.symbol.includes('DOWN') &&
-                    !ticker.symbol.includes('BULL') &&
-                    !ticker.symbol.includes('BEAR') &&
-                    ticker.symbol !== 'USDCUSDT' &&
-                    ticker.symbol !== 'BUSDUSDT' &&
-                    ticker.symbol !== 'TUSDUSDT'
-                )
-                .sort((a, b) => parseFloat(b.volume) - parseFloat(a.volume))
-                .slice(0, 80)
-                .map(ticker => ticker.symbol);
-                
-            console.log(`✅ تم تحميل ${this.symbols.length} عملة للفحص`);
-            return this.symbols;
-        } catch (error) {
-            console.error('❌ خطأ في جلب العملات:', error);
-            return [];
-        }
-    }
-
+            const timestamp = new Date().toISOString();
+            const method = 'GET';
+            const requestPath = '/api/v5/market/tickers?instType=SPOT';
+            
+            this.headers['OK-ACCESS-TIMESTAMP'] = timestamp;
+            this.headers['OK-ACCESS-SIGN'] = this.generateSignature(timestamp, method, requestPath);
+            
+            const response = await fetch(`${this.apiBase}/market/tickers?instType=SPOT`, {
+                method: 'GET',
+                headers: this.headers
+            });
+            
+    
     calculateATR(candles, period = 10) {
         if (candles.length < period + 1) return 0;
         

@@ -136,82 +136,81 @@ if (isBuySignal) {
         }
     }
 
-    async scanAllMarket() {
-        if (this.isScanning) {
-            console.log('⏳ الفحص جاري بالفعل...');
-            return [];
+   async scanAllMarket() {
+    if (this.isScanning) {
+        console.log('⏳ الفحص جاري بالفعل...');
+        return [];
+    }
+
+    this.isScanning = true;
+    console.log('🔍 بدء فحص السوق (بطيء لتجنب الحجب)...');
+    
+    try {
+        if (this.symbols.length === 0) {
+            await this.fetchTopSymbols();
         }
 
-        this.isScanning = true;
-        console.log('🔍 بدء فحص السوق (60 + 30 دقيقة)...');
+        const allSignals = [];
+        const timeframes = ['1H', '30m'];
         
-        try {
-            if (this.symbols.length === 0) {
-                await this.fetchTopSymbols();
-            }
-
-            const allSignals = [];
-            const timeframes = ['1H', '30m'];
+        for (const timeframe of timeframes) {
+            console.log(`📊 فحص فريم ${timeframe}...`);
+            let signalsFound = 0;
             
-            for (const timeframe of timeframes) {
-                console.log(`📊 فحص فريم ${timeframe}...`);
-                let signalsFound = 0;
+            // تقليل حجم الدفعة وزيادة التأخير
+            const batchSize = 3; // كان 8، الآن 3
+            for (let i = 0; i < Math.min(this.symbols.length, 30); i += batchSize) { // فحص 30 عملة فقط
+                const batch = this.symbols.slice(i, i + batchSize);
                 
-                const batchSize = 8;
-                for (let i = 0; i < this.symbols.length; i += batchSize) {
-                    const batch = this.symbols.slice(i, i + batchSize);
-                    
-                    const promises = batch.map(async symbol => {
-                        try {
-                            return await this.checkUTBotSignal(symbol, timeframe);
-                        } catch (error) {
-                            return null;
-                        }
-                    });
-                    
-                    const results = await Promise.all(promises);
-                    
-                    results.forEach(result => {
+                console.log(`🔄 فحص دفعة ${Math.floor(i/batchSize) + 1}...`);
+                
+                // فحص واحد تلو الآخر بدلاً من Promise.all
+                for (const symbol of batch) {
+                    try {
+                        const result = await this.checkUTBotSignal(symbol, timeframe);
                         if (result) {
                             allSignals.push(result);
                             signalsFound++;
                         }
-                    });
-                    
-                    await new Promise(resolve => setTimeout(resolve, 150));
+                        // تأخير بين كل طلب
+                        await new Promise(resolve => setTimeout(resolve, 500)); // نصف ثانية
+                    } catch (error) {
+                        console.warn(`⚠️ خطأ في ${symbol}:`, error.message);
+                    }
                 }
                 
-                console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
-            }
-
-            const uniqueSignals = new Map();
-            
-            allSignals.forEach(signal => {
-                const key = signal.symbol;
-                if (!uniqueSignals.has(key) || uniqueSignals.get(key).score < signal.score) {
-                    uniqueSignals.set(key, signal);
-                }
-            });
-
-            const finalSignals = Array.from(uniqueSignals.values())
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10);
-
-            console.log(`🎉 تم تحليل وترتيب ${allSignals.length} إشارة وعرض أفضل ${finalSignals.length} عملة`);
-            
-            if (finalSignals.length > 0) {
-                console.log('🎯 أفضل العملات:', finalSignals.map(s => `${s.symbol}(${s.timeframe})`).join(', '));
+                // تأخير أكبر بين الدفعات
+                await new Promise(resolve => setTimeout(resolve, 2000)); // ثانيتين
             }
             
-            return finalSignals;
-            
-        } catch (error) {
-            console.error('❌ خطأ عام في فحص السوق:', error);
-            return [];
-        } finally {
-            this.isScanning = false;
+            console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
         }
+
+        const uniqueSignals = new Map();
+        
+        allSignals.forEach(signal => {
+            const key = signal.symbol;
+            if (!uniqueSignals.has(key) || uniqueSignals.get(key).score < signal.score) {
+                uniqueSignals.set(key, signal);
+            }
+        });
+
+        const finalSignals = Array.from(uniqueSignals.values())
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10);
+
+        console.log(`🎉 تم تحليل ${allSignals.length} إشارة وعرض أفضل ${finalSignals.length} عملة`);
+        
+        return finalSignals;
+        
+    } catch (error) {
+        console.error('❌ خطأ عام في فحص السوق:', error);
+        return [];
+    } finally {
+        this.isScanning = false;
     }
+}
+
 }
 
 const utScanner = new UTBotScanner();

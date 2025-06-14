@@ -8,39 +8,37 @@ class UTBotScanner {
         this.apiKey = 'b20c667d-ae40-48a6-93f4-a11a64185068';
         this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
         this.passphrase = '212160Nm$#';
-        
-        this.headers = {
-            'OK-ACCESS-KEY': this.apiKey,
-            'OK-ACCESS-PASSPHRASE': this.passphrase,
-            'OK-ACCESS-TIMESTAMP': '',
-            'OK-ACCESS-SIGN': '',
-            'Content-Type': 'application/json'
-        };
-    }
-
-    // دالة لإنشاء التوقيع
-    generateSignature(timestamp, method, requestPath, body = '') {
-        const message = timestamp + method + requestPath + body;
-        return CryptoJS.HmacSHA256(message, this.secretKey).toString(CryptoJS.enc.Base64);
     }
 
     async fetchTopSymbols() {
         try {
             console.log('📊 جاري جلب قائمة العملات من OKX...');
             
-            const timestamp = new Date().toISOString();
-            const method = 'GET';
-            const requestPath = '/api/v5/market/tickers?instType=SPOT';
+            const response = await fetch(`${this.apiBase}/market/tickers?instType=SPOT`);
+            const result = await response.json();
             
-            this.headers['OK-ACCESS-TIMESTAMP'] = timestamp;
-            this.headers['OK-ACCESS-SIGN'] = this.generateSignature(timestamp, method, requestPath);
-            
-            const response = await fetch(`${this.apiBase}/market/tickers?instType=SPOT`, {
-                method: 'GET',
-                headers: this.headers
-            });
-            
-    
+            if (result.code === '0') {
+                this.symbols = result.data
+                    .filter(ticker => 
+                        ticker.instId.endsWith('-USDT') && 
+                        parseFloat(ticker.vol24h) > 1000000
+                    )
+                    .sort((a, b) => parseFloat(b.vol24h) - parseFloat(a.vol24h))
+                    .slice(0, 80)
+                    .map(ticker => ticker.instId);
+                    
+                console.log(`✅ تم تحميل ${this.symbols.length} عملة من OKX`);
+                return this.symbols;
+            } else {
+                console.error('❌ خطأ من OKX API:', result.msg);
+                return [];
+            }
+        } catch (error) {
+            console.error('❌ خطأ في جلب العملات:', error);
+            return [];
+        }
+    }
+
     calculateATR(candles, period = 10) {
         if (candles.length < period + 1) return 0;
         
@@ -62,12 +60,13 @@ class UTBotScanner {
     async checkUTBotSignal(symbol, timeframe) {
         try {
             const response = await fetch(
-                `${this.apiBase}/klines?symbol=${symbol}&interval=${timeframe}&limit=50`
+                `${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`
             );
             
-            if (!response.ok) return null;
+            const result = await response.json();
+            if (result.code !== '0' || !result.data) return null;
             
-            const klines = await response.json();
+            const klines = result.data;
             if (klines.length < 20) return null;
 
             const candles = klines.map(k => ({
@@ -77,28 +76,20 @@ class UTBotScanner {
                 hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
             }));
 
-            // حساب UT Bot مع حساسية أعلى
             const atr = this.calculateATR(candles, 10);
-            const keyValue = 0.8; // تقليل المضاعف لحساسية أعلى
+            const keyValue = 0.8;
             
             const current = candles[candles.length - 1];
             const previous = candles[candles.length - 2];
             const prev2 = candles[candles.length - 3];
             
             const upperBand = current.hl2 + (atr * keyValue);
-            const lowerBand = current.hl2 - (atr * keyValue);
             
-            // شروط إشارة الشراء المحسنة
             const buyConditions = [
-                // الشرط الأساسي: اختراق النطاق العلوي
                 current.close > upperBand && previous.close <= upperBand,
-                
-                // شرط بديل: قريب من النطاق العلوي مع زخم صاعد
                 current.close > upperBand * 0.98 && 
                 current.close > previous.close && 
                 previous.close > prev2.close,
-                
-                // شرط ثالث: اختراق قوي للنطاق
                 current.close > upperBand * 1.01
             ];
             
@@ -106,7 +97,7 @@ class UTBotScanner {
             
             if (isBuySignal) {
                 const strength = ((current.close - upperBand) / upperBand * 100);
-                const timeframeBonus = timeframe === '1h' ? 15 : 10;
+                const timeframeBonus = timeframe === '1H' ? 15 : 10;
                 
                 console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
                 
@@ -128,9 +119,12 @@ class UTBotScanner {
 
     async get24hChange(symbol) {
         try {
-            const response = await fetch(`${this.apiBase}/ticker/24hr?symbol=${symbol}`);
-            const data = await response.json();
-            return parseFloat(data.priceChangePercent).toFixed(2);
+            const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
+            const result = await response.json();
+            if (result.code === '0' && result.data.length > 0) {
+                return parseFloat(result.data[0].changePercent).toFixed(2);
+            }
+            return '0.00';
         } catch {
             return '0.00';
         }
@@ -143,7 +137,7 @@ class UTBotScanner {
         }
 
         this.isScanning = true;
-        console.log('🔍 بدء فحص السوق بحساسية عالية (60 + 30 دقيقة)...');
+        console.log('🔍 بدء فحص السوق (60 + 30 دقيقة)...');
         
         try {
             if (this.symbols.length === 0) {
@@ -151,7 +145,7 @@ class UTBotScanner {
             }
 
             const allSignals = [];
-            const timeframes = ['1h', '30m'];
+            const timeframes = ['1H', '30m'];
             
             for (const timeframe of timeframes) {
                 console.log(`📊 فحص فريم ${timeframe}...`);
@@ -184,7 +178,6 @@ class UTBotScanner {
                 console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
             }
 
-            // معالجة النتائج
             const uniqueSignals = new Map();
             
             allSignals.forEach(signal => {
@@ -202,8 +195,6 @@ class UTBotScanner {
             
             if (finalSignals.length > 0) {
                 console.log('🎯 أفضل العملات:', finalSignals.map(s => `${s.symbol}(${s.timeframe})`).join(', '));
-            } else {
-                console.log('⚠️ لم يتم العثور على إشارات - جرب تقليل الحساسية أكثر');
             }
             
             return finalSignals;
@@ -228,40 +219,25 @@ async function loadUTBotSignals() {
     }
     
     try {
-        container.innerHTML = '<div class="ut-bot-loading">🔍 جاري فحص السوق بحساسية عالية...</div>';
+        container.innerHTML = '<div class="ut-bot-loading">🔍 جاري فحص السوق...</div>';
         
         const signals = await utScanner.scanAllMarket();
         
         if (signals.length === 0) {
-            // إضافة عملات وهمية للاختبار
-            const testSignals = [
-                { symbol: 'BTCUSDT', price: '43250.50', timeframe: '1h', change24h: '+2.45' },
-                { symbol: 'ETHUSDT', price: '2580.75', timeframe: '30m', change24h: '+1.80' },
-                { symbol: 'BNBUSDT', price: '315.20', timeframe: '1h', change24h: '+3.20' }
-            ];
-            
-            const testHTML = testSignals.map(signal => `
-                <div class="buy-signal-item" title="إشارة اختبار">
-                    <span class="timeframe-indicator">${signal.timeframe}</span>
-                    ${signal.symbol.replace('USDT', '/USDT')} - $${signal.price} (${signal.change24h}%)
-                </div>
-            `).join('');
-            
-            container.innerHTML = testHTML;
-            console.log('🧪 عرض إشارات اختبار لأن لا توجد إشارات حقيقية');
+            container.innerHTML = '<div class="ut-bot-loading">لا توجد إشارات شراء حالياً 📊</div>';
             return;
         }
 
         const signalsHTML = signals.map(signal => `
             <div class="buy-signal-item" title="قوة الإشارة: ${signal.strength.toFixed(2)}%">
                 <span class="timeframe-indicator">${signal.timeframe}</span>
-                ${signal.symbol.replace('USDT', '/USDT')} - $${signal.price} (${signal.change24h}%)
+                ${signal.symbol.replace('-USDT', '/USDT')} - $${signal.price} (${signal.change24h}%)
             </div>
         `).join('');
         
         container.innerHTML = signalsHTML;
         
-        console.log(`🎉 تم عرض ${signals.length} إشارة حقيقية في الشريط`);
+        console.log(`🎉 تم عرض ${signals.length} إشارة في الشريط`);
         
     } catch (error) {
         console.error('❌ خطأ في تحديث الإشارات:', error);
@@ -269,14 +245,12 @@ async function loadUTBotSignals() {
     }
 }
 
-// تشغيل فوري عند تحميل الصفحة
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadUTBotSignals);
 } else {
     loadUTBotSignals();
 }
 
-// تحديث كل 12 دقيقة
 setInterval(loadUTBotSignals, 720000);
 
-console.log('🚀 UT Bot Scanner محدث - حساسية عالية + إشارات اختبار');
+console.log('🚀 UT Bot Scanner - OKX API');

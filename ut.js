@@ -76,32 +76,45 @@ class UTBotScanner {
             hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
         }));
 
-        // استخدام نفس إعدادات المؤشر الأصلي
-        const atr = this.calculateATR(candles, 14); // atrPeriods = 14
-        const keyValue = 2.0; // Key_value = 2
-        
-        const current = candles[candles.length - 1];
-        const previous = candles[candles.length - 2];
-        
-        // حساب UT Bot بالطريقة الأصلية
-        const upperBand = current.hl2 + (atr * keyValue);
-        
-        // إشارة شراء: اختراق النطاق العلوي (نفس منطق المؤشر الأصلي)
-        if (current.close > upperBand && previous.close <= upperBand) {
-            const strength = ((current.close - upperBand) / upperBand * 100);
-            const timeframeBonus = timeframe === '1H' ? 15 : 10;
-            
-            console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
-            
-            return {
-                symbol: symbol,
-                price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
-                timeframe: timeframe,
-                strength: strength,
-                score: Math.abs(strength) + timeframeBonus,
-                change24h: await this.get24hChange(symbol)
-            };
-        }
+       // حساب UT Bot بالطريقة الأصلية
+const upperBand = current.hl2 + (atr * keyValue);
+const lowerBand = current.hl2 - (atr * keyValue);
+
+// شروط إشارة الشراء المحسنة (حساسية أعلى)
+const buyConditions = [
+    // الشرط الأساسي: اختراق النطاق العلوي
+    current.close > upperBand && previous.close <= upperBand,
+    
+    // شرط بديل: قريب من النطاق العلوي مع زخم صاعد
+    current.close > upperBand * 0.95 && 
+    current.close > previous.close && 
+    previous.close > prev2.close,
+    
+    // شرط ثالث: اختراق قوي للنطاق (حساسية عالية)
+    current.close > upperBand * 0.98,
+    
+    // شرط رابع: زخم صاعد قوي
+    current.close > previous.close * 1.002 && 
+    previous.close > prev2.close
+];
+
+const isBuySignal = buyConditions.some(condition => condition);
+
+if (isBuySignal) {
+    const strength = ((current.close - upperBand) / upperBand * 100);
+    const timeframeBonus = timeframe === '1H' ? 15 : 10;
+    
+    console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
+    
+    return {
+        symbol: symbol,
+        price: current.close < 1 ? current.close.toFixed(6) : current.close.toFixed(4),
+        timeframe: timeframe,
+        strength: strength,
+        score: Math.abs(strength) + timeframeBonus,
+        change24h: await this.get24hChange(symbol)
+    };
+}
         
         return null;
     } catch (error) {

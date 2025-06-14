@@ -20,7 +20,7 @@ class UTBotScanner {
             if (result.code === '0') {
                 this.symbols = result.data
                     .filter(ticker => 
-                        ticker.instId.endsWith('-USDT') && 
+                        ticker.instId.endsWith('-USDT') &&
                         parseFloat(ticker.vol24h) > 1000000
                     )
                     .sort((a, b) => parseFloat(b.vol24h) - parseFloat(a.vol24h))
@@ -84,7 +84,9 @@ class UTBotScanner {
             const prev2 = candles[candles.length - 3];
             
             const upperBand = current.hl2 + (atr * keyValue);
+            const lowerBand = current.hl2 - (atr * keyValue);
             
+            // شروط إشارة الشراء
             const buyConditions = [
                 current.close > upperBand && previous.close <= upperBand,
                 current.close > upperBand * 0.98 && 
@@ -93,7 +95,17 @@ class UTBotScanner {
                 current.close > upperBand * 1.01
             ];
             
+            // شروط إشارة البيع
+            const sellConditions = [
+                current.close < lowerBand && previous.close >= lowerBand,
+                current.close < lowerBand * 1.02 && 
+                current.close < previous.close && 
+                previous.close < prev2.close,
+                current.close < lowerBand * 0.99
+            ];
+            
             const isBuySignal = buyConditions.some(condition => condition);
+            const isSellSignal = sellConditions.some(condition => condition);
             
             if (isBuySignal) {
                 const strength = ((current.close - upperBand) / upperBand * 100);
@@ -103,12 +115,31 @@ class UTBotScanner {
                 
                 return {
                     symbol: symbol,
-                   price: current.close < 0.000001 ? current.close.toFixed(10) : 
-       current.close < 1 ? current.close.toFixed(8) : current.close.toFixed(4),
+                    price: current.close < 0.000001 ? current.close.toFixed(10) :
+                           current.close < 1 ? current.close.toFixed(8) : current.close.toFixed(4),
                     timeframe: timeframe,
                     strength: strength,
                     score: Math.abs(strength) + timeframeBonus,
-                    change24h: await this.get24hChange(symbol)
+                    change24h: await this.get24hChange(symbol),
+                    type: 'BUY'
+                };
+            }
+            
+            if (isSellSignal) {
+                const strength = ((lowerBand - current.close) / lowerBand * 100);
+                const timeframeBonus = timeframe === '1H' ? 15 : 10;
+                
+                console.log(`🔴 إشارة بيع: ${symbol} (${timeframe}) - السعر: ${current.close}`);
+                
+                return {
+                    symbol: symbol,
+                    price: current.close < 0.000001 ? current.close.toFixed(10) :
+                           current.close < 1 ? current.close.toFixed(8) : current.close.toFixed(4),
+                    timeframe: timeframe,
+                    strength: strength,
+                    score: Math.abs(strength) + timeframeBonus,
+                    change24h: await this.get24hChange(symbol),
+                    type: 'SELL'
                 };
             }
             
@@ -119,41 +150,39 @@ class UTBotScanner {
     }
 
     async get24hChange(symbol) {
-    try {
-        const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
-        const result = await response.json();
-        
-        if (result.code === '0' && result.data && result.data.length > 0) {
-            const data = result.data[0];
+        try {
+            const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
+            const result = await response.json();
             
-            // جرب changePercent أولاً
-            let change = parseFloat(data.changePercent);
-            
-            // إذا كان 0 أو NaN، احسب يدوياً من السعر
-            if (isNaN(change) || change === 0) {
-                const lastPrice = parseFloat(data.last);
-                const openPrice = parseFloat(data.open24h);
+            if (result.code === '0' && result.data && result.data.length > 0) {
+                const data = result.data[0];
                 
-                if (openPrice && openPrice > 0) {
-                    change = ((lastPrice - openPrice) / openPrice) * 100;
+                // جرب changePercent أولاً
+                let change = parseFloat(data.changePercent);
+                
+                // إذا كان 0 أو NaN، احسب يدوياً من السعر
+                if (isNaN(change) || change === 0) {
+                    const lastPrice = parseFloat(data.last);
+                    const openPrice = parseFloat(data.open24h);
+                    
+                    if (openPrice && openPrice > 0) {
+                        change = ((lastPrice - openPrice) / openPrice) * 100;
+                    }
                 }
+                
+                // إذا كان أقل من 0.01، اضربه في 100 (ربما يكون بصيغة عشرية)
+                if (Math.abs(change) < 0.01 && Math.abs(change) > 0) {
+                    change = change * 100;
+                }
+                
+                return isNaN(change) ? '0.00' : change.toFixed(2);
             }
-            
-            // إذا كان أقل من 0.01، اضربه في 100 (ربما يكون بصيغة عشرية)
-            if (Math.abs(change) < 0.01 && Math.abs(change) > 0) {
-                change = change * 100;
-            }
-            
-            return isNaN(change) ? '0.00' : change.toFixed(2);
+            return '0.00';
+        } catch (error) {
+            console.warn(`خطأ في جلب التغيير لـ ${symbol}:`, error);
+            return '0.00';
         }
-        return '0.00';
-    } catch (error) {
-        console.warn(`خطأ في جلب التغيير لـ ${symbol}:`, error);
-        return '0.00';
     }
-}
-
-
 
     async scanAllMarket() {
         if (this.isScanning) {
@@ -203,27 +232,46 @@ class UTBotScanner {
                 console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
             }
 
-            const uniqueSignals = new Map();
+            // فصل إشارات الشراء والبيع
+            const buySignals = allSignals.filter(signal => signal.type === 'BUY');
+            const sellSignals = allSignals.filter(signal => signal.type === 'SELL');
+
+            // إزالة التكرارات وترتيب كل نوع
+            const uniqueBuySignals = new Map();
+            const uniqueSellSignals = new Map();
             
-            allSignals.forEach(signal => {
+            buySignals.forEach(signal => {
                 const key = signal.symbol;
-                if (!uniqueSignals.has(key) || uniqueSignals.get(key).score < signal.score) {
-                    uniqueSignals.set(key, signal);
+                if (!uniqueBuySignals.has(key) || uniqueBuySignals.get(key).score < signal.score) {
+                    uniqueBuySignals.set(key, signal);
                 }
             });
 
-            const finalSignals = Array.from(uniqueSignals.values())
+            sellSignals.forEach(signal => {
+                const key = signal.symbol;
+                if (!uniqueSellSignals.has(key) || uniqueSellSignals.get(key).score < signal.score) {
+                    uniqueSellSignals.set(key, signal);
+                }
+            });
+
+            const finalBuySignals = Array.from(uniqueBuySignals.values())
                 .sort((a, b) => b.score - a.score)
                 .slice(0, 3);
 
-            console.log(`🎉 تم تحليل وترتيب ${allSignals.length} إشارة وعرض أفضل ${finalSignals.length} عملة`);
+            const finalSellSignals = Array.from(uniqueSellSignals.values())
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
+
+            const finalSignals = [...finalBuySignals, ...finalSellSignals];
+
+            console.log(`🎉 تم تحليل ${allSignals.length} إشارة: ${buySignals.length} شراء، ${sellSignals.length} بيع`);
             
             if (finalSignals.length > 0) {
-                console.log('🎯 أفضل العملات:', finalSignals.map(s => `${s.symbol}(${s.timeframe})`).join(', '));
+                console.log('🎯 أفضل الإشارات:', finalSignals.map(s => `${s.symbol}(${s.timeframe}-${s.type})`).join(', '));
             }
             
             return finalSignals;
-            
+                
         } catch (error) {
             console.error('❌ خطأ عام في فحص السوق:', error);
             return [];
@@ -249,21 +297,27 @@ async function loadUTBotSignals() {
         const signals = await utScanner.scanAllMarket();
         
         if (signals.length === 0) {
-            container.innerHTML = '<div class="ut-bot-loading">لا توجد إشارات شراء حالياً 📊</div>';
+            container.innerHTML = '<div class="ut-bot-loading">لا توجد إشارات حالياً 📊</div>';
             return;
         }
 
-        const signalsHTML = signals.map(signal => `
-    <div class="buy-signal-item" title="قوة الإشارة: ${signal.strength.toFixed(2)}%">
-        <span class="timeframe-indicator">${signal.timeframe}</span>
-        <strong>${signal.symbol.replace('-USDT', '/USDT')}</strong> - 
-        <span style="color: #4CAF50; font-weight: bold;">$${signal.price}</span>
-        <span style="color: ${parseFloat(signal.change24h) >= 0 ? '#4CAF50' : '#f44336'}; margin-left: 5px;">
-            (${signal.change24h}%)
-        </span>
-    </div>
-`).join('');
-
+        const signalsHTML = signals.map(signal => {
+            const signalColor = signal.type === 'BUY' ? '#4CAF50' : '#f44336';
+            const signalIcon = signal.type === 'BUY' ? '🟢' : '🔴';
+            const signalText = signal.type === 'BUY' ? 'شراء' : 'بيع';
+            
+            return `
+                <div class="${signal.type.toLowerCase()}-signal-item" title="قوة الإشارة: ${signal.strength.toFixed(2)}%">
+                    <span class="timeframe-indicator">${signal.timeframe}</span>
+                    <span style="color: ${signalColor};">${signalIcon} ${signalText}</span>
+                    <strong>${signal.symbol.replace('-USDT', '/USDT')}</strong> - 
+                    <span style="color: ${signalColor}; font-weight: bold;">$${signal.price}</span>
+                    <span style="color: ${parseFloat(signal.change24h) >= 0 ? '#4CAF50' : '#f44336'}; margin-left: 5px;">
+                        (${signal.change24h}%)
+                    </span>
+                </div>
+            `;
+        }).join('');
         
         container.innerHTML = signalsHTML;
         
@@ -282,5 +336,4 @@ if (document.readyState === 'loading') {
 }
 
 setInterval(loadUTBotSignals, 720000);
-
-console.log('🚀 UT Bot Scanner - OKX API');
+console.log('🚀 UT Bot Scanner - OKX API مع إشارات الشراء والبيع');

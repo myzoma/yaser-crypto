@@ -5,9 +5,9 @@ class UTBotScanner {
         this.isScanning = false;
         this.volumeCache = new Map();
         
-        this.apiKey = '';
-        this.secretKey = '';
-        this.passphrase = '';
+        this.apiKey = 'b20c667d-ae40-48a6-93f4-a11a64185068';
+        this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
+        this.passphrase = '212160Nm$#';
         
         this.targetSettings = {
             baseATRMultiplier: 3.0,

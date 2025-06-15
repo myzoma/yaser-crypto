@@ -16,1050 +16,254 @@
     --teal-color: #009688;
 }
 
-/* إعدادات عامة */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Cairo', 'Tahoma', Arial, sans-serif;
-    background: var(--bg-dark);
-    color: var(--text-light);
-    line-height: 1.6;
-    min-height: 100vh;
-}
-
-/* Header */
-.main-header {
-    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-card) 100%);
-    border-bottom: 2px solid var(--primary-color);
-    padding: 25px 0;
-    box-shadow: 0 4px 20px rgba(0, 204, 255, 0.15);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.header-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 20px;
-}
-
-.logo-section {
-    flex: 1;
-    min-width: 300px;
-}
-
-.logo-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 8px;
-    text-shadow: 0 2px 15px rgba(0, 204, 255, 0.4);
-}
-
-.logo-subtitle {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-bottom: 15px;
-}
-
-.features-tags {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.feature-tag {
-    background: rgba(0, 204, 255, 0.1);
-    color: var(--primary-color);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    border: 1px solid rgba(0, 204, 255, 0.3);
-}
-
-.header-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 20px;
-    min-width: 600px;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.stat-icon {
-    font-size: 1.5rem;
-}
-
-.stat-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.stat-label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 2px;
-}
-
-.stat-value {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--secondary-color);
-}
-
-.scan-status {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-    padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-.status-indicator.ready { background: var(--success-color); }
-.status-indicator.scanning { background: var(--warning-color); }
-.status-indicator.error { background: var(--danger-color); }
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* Main Content */
-.main-content {
-    padding: 30px 0;
-    min-height: calc(100vh - 200px);
-}
-
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* Control Panel */
-.control-panel {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+/* تنسيق بطاقات UT Bot */
+.ut-bot-cards-container {
+    background: var(--bg-card);
+    border-radius: 16px;
+    margin: 20px 0;
     padding: 20px;
-    background: var(--bg-card);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 204, 255, 0.1);
+    border: 1px solid rgba(0, 204, 255, 0.2);
 }
 
-.scan-btn {
-    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.scan-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 204, 255, 0.3);
-}
-
-.scan-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.auto-scan-info {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-/* Signals Section */
-.signals-section {
-    margin-bottom: 40px;
-}
-
-.section-title {
-    font-size: 1.8rem;
-    color: var(--text-light);
-    margin-bottom: 25px;
-    text-align: center;
-    font-weight: 600;
-}
-
-/* Signals Grid */
-.signals-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 25px;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Signal Cards - تكملة */
-.buy-signal-item,
-.sell-signal-item {
-    background: var(--bg-card);
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    transition: all 0.4s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.buy-signal-item::before,
-.sell-signal-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 5px;
-    height: 100%;
-    transition: all 0.3s ease;
-}
-
-.buy-signal-item::before {
-    background: linear-gradient(180deg, var(--success-color), var(--teal-color));
-}
-
-.sell-signal-item::before {
-    background: linear-gradient(180deg, var(--danger-color), var(--accent-color));
-}
-
-.buy-signal-item:hover,
-.sell-signal-item:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-}
-
-.buy-signal-item:hover::before,
-.sell-signal-item:hover::before {
-    width: 10px;
-}
-
-/* Signal Header */
-.signal-header {
+.ut-bot-header {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid var(--primary-color);
 }
 
-.timeframe-indicator {
-    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-    color: white;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+.ut-bot-icon {
+    font-size: 28px;
+    animation: pulse 2s infinite;
 }
 
-.signal-header strong {
-    font-size: 1.3rem;
-    color: var(--text-light);
-    font-weight: 700;
-}
-
-.signal-header span[style*="color: #4CAF50"],
-.signal-header span[style*="color: #f44336"] {
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* Targets Info */
-.targets-info {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
-    border-radius: 10px;
-    margin: 15px 0;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 0.9rem;
-}
-
-.targets-info span {
-    display: inline-block;
-    margin: 3px 8px;
-    font-weight: 500;
-}
-
-.targets-info span[style*="font-weight: bold"] {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: 600;
-}
-
-/* Hybrid Info */
-.hybrid-info {
-    background: rgba(0, 204, 255, 0.08);
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 204, 255, 0.2);
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.hybrid-info span {
-    margin: 0 10px;
-    font-weight: 500;
-}
-
-/* Loading State */
-.ut-bot-loading {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 80px 20px;
-    background: var(--bg-card);
-    border-radius: 15px;
-    border: 2px dashed var(--primary-color);
-    color: var(--text-muted);
-    font-size: 1.2rem;
-    font-weight: 500;
-}
-
-/* Footer */
-.main-footer {
-    background: var(--bg-darker);
-    padding: 30px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 50px;
-}
-
-.footer-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-    text-align: center;
-}
-
-.footer-content p {
-    font-size: 1.1rem;
+.ut-bot-title {
     color: var(--primary-color);
-    margin-bottom: 15px;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(0, 204, 255, 0.3);
 }
 
-.footer-features {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.buy-signal-item,
-.sell-signal-item {
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-.stat-item {
-    animation: slideInRight 0.5s ease forwards;
-}
-
-.stat-item:nth-child(2) { animation-delay: 0.1s; }
-.stat-item:nth-child(3) { animation-delay: 0.2s; }
-.stat-item:nth-child(4) { animation-delay: 0.3s; }
-
-/* تحسينات للنصوص العربية */
-.signal-header,
-.targets-info,
-.hybrid-info {
-    text-align: right;
-    direction: rtl;
-}
-
-/* تحسين عرض الأسعار */
-.signal-header span[style*="font-weight: bold"] {
-    font-family: 'Courier New', monospace;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-
-/* تحسين نسب المخاطرة */
-.targets-info span[style*="color: #4CAF50"] {
-    background: rgba(76, 175, 80, 0.1);
-    border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-.targets-info span[style*="color: #f44336"] {
-    background: rgba(244, 67, 54, 0.1);
-    border: 1px solid rgba(244, 67, 54, 0.3);
-}
-
-.targets-info span[style*="color: #FF9800"] {
-    background: rgba(255, 152, 0, 0.1);
-    border: 1px solid rgba(255, 152, 0, 0.3);
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .signals-grid {
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 20px;
-    }
-    
-    .header-stats {
-        min-width: auto;
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-    
-    .logo-section {
-        min-width: auto;
-    }
-    
-    .logo-title {
-        font-size: 2rem;
-    }
-    
-    .header-stats {
-        grid-template-columns: 1fr;
-        min-width: 100%;
-        gap: 15px;
-    }
-    
-    .signals-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .control-panel {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .footer-features {
-        flex-direction: column;
-        gap: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 0 15px;
-    }
-    
-    .buy-signal-item,
-    .sell-signal-item {
-        padding: 20px;
-    }
-    
-    .logo-title {
-        font-size: 1.7rem;
-    }
-    
-    .signal-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .targets-info,
-    .hybrid-info {
-        font-size: 0.8rem;
-        padding: 12px;
-    }
-    
-    .stat-item {
-        padding: 12px;
-    }
-    
-    .features-tags {
-        justify-content: center;
-    }
-}
-
-/* تحسينات إضافية للأداء */
-.buy-signal-item,
-.sell-signal-item {
-    will-change: transform;
-    backface-visibility: hidden;
-}
-
-/* تحسين التباين للقراءة */
-.signal-header strong {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.targets-info span,
-.hybrid-info span {
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
-}
-
-/* تأثيرات إضافية للتفاعل */
-.scan-btn:active {
-    transform: translateY(0);
-}
-
-.timeframe-indicator {
-    box-shadow: 0 2px 8px rgba(0, 204, 255, 0.3);
-}
-
-/* تحسين عرض الحالة */
-.scan-status span {
-    font-weight: 500;
-    color: var(--text-light);
-}
-
-/* تحسين التمرير */
-html {
-    scroll-behavior: smooth;
-}
-
-/* تحسين الفوكس للوصولية */
-.scan-btn:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-/* تحسين عرض البيانات الرقمية */
-.stat-value,
-.signal-header span[style*="$"] {
-    font-variant-numeric: tabular-nums;
-}
-/* إضافة الأنماط المحدثة */
-.signals-grid {
+.ut-bot-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    margin-top: 30px;
-    padding: 0 20px;
+    min-height: 200px;
 }
 
-.ut-bot-loading {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 20px;
-    background: var(--bg-card);
-    border-radius: 15px;
-    border: 2px dashed var(--primary-color);
-    color: var(--text-light);
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(0, 204, 255, 0.3);
-    border-top: 4px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.error-message,
-.no-signals {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 50px 20px;
-    background: var(--bg-card);
-    border-radius: 15px;
-    color: var(--text-light);
-}
-
-.error-message {
-    border: 2px solid var(--danger-color);
-}
-
-.no-signals {
-    border: 2px dashed var(--warning-color);
-}
-
-.error-message i,
-.no-signals i {
-    font-size: 3rem;
-    margin-bottom: 20px;
-}
-
-.error-message i {
-    color: var(--danger-color);
-}
-
-.no-signals i {
-    color: var(--warning-color);
-}
-
-.retry-btn {
-    background: linear-gradient(135deg, var(--danger-color), #e53935);
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
-}
-
-.retry-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
-}
-
-.buy-signal-item,
-.sell-signal-item {
-    background: var(--bg-card);
-    border-radius: 15px;
+.ut-bot-card {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-card) 100%);
+    border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 204, 255, 0.3);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
-.buy-signal-item {
-    border-left: 4px solid var(--success-color);
-}
-
-.sell-signal-item {
-    border-left: 4px solid var(--danger-color);
-}
-
-.buy-signal-item:hover,
-.sell-signal-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-}
-
-.signal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.timeframe-indicator {
-    background: linear-gradient(135deg, var(--primary-color), #0099cc);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 8px rgba(0, 204, 255, 0.3);
-}
-
-.signal-header strong {
-    font-size: 1.4rem;
-    color: var(--text-light);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.signal-price {
-    text-align: center;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    margin: 15px 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.signal-price span {
-    color: var(--text-light);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.targets-info {
-    margin: 20px 0;
-}
-
-.targets-info div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.targets-info div:last-child {
-    border-bottom: none;
-}
-
-.targets-info span:first-child {
-    flex: 1;
-    color: var(--text-light);
-}
-
-.targets-info span:not(:first-child) {
-    margin-left: 10px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.hybrid-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.hybrid-info span {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-muted);
-}
-
-.hybrid-info strong {
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-/* تحسين الاستجابة */
-@media (max-width: 768px) {
-    .signals-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        padding: 0 15px;
-    }
-    
-    .signal-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .signal-header strong {
-        font-size: 1.2rem;
-    }
-    
-    .hybrid-info {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .hybrid-info span {
-        font-size: 0.8rem;
-        padding: 6px;
-    }
-    
-    .targets-info div {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    
-    .ut-bot-loading,
-    .error-message,
-    .no-signals {
-        padding: 40px 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    .signals-grid {
-        padding: 0 10px;
-    }
-    
-    .buy-signal-item,
-    .sell-signal-item {
-        padding: 15px;
-    }
-    
-    .signal-price {
-        padding: 12px;
-    }
-    
-    .signal-price span {
-        font-size: 1.1rem;
-    }
-    
-    .timeframe-indicator {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-    }
-}
-
-/* تحسين الانيميشن */
-.buy-signal-item,
-.sell-signal-item {
-    opacity: 0;
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-.buy-signal-item:nth-child(1),
-.sell-signal-item:nth-child(1) { 
-    animation-delay: 0.1s; 
-}
-
-.buy-signal-item:nth-child(2),
-.sell-signal-item:nth-child(2) { 
-    animation-delay: 0.2s; 
-}
-
-.buy-signal-item:nth-child(3),
-.sell-signal-item:nth-child(3) { 
-    animation-delay: 0.3s; 
-}
-
-.buy-signal-item:nth-child(4),
-.sell-signal-item:nth-child(4) { 
-    animation-delay: 0.4s; 
-}
-
-.buy-signal-item:nth-child(5),
-.sell-signal-item:nth-child(5) { 
-    animation-delay: 0.5s; 
-}
-
-.buy-signal-item:nth-child(6),
-.sell-signal-item:nth-child(6) { 
-    animation-delay: 0.6s; 
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* تحسين زر الفحص المعطل */
-.scan-btn:disabled {
-    background: linear-gradient(135deg, #666, #555);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-    opacity: 0.7;
-}
-
-.scan-btn:disabled:hover {
-    transform: none;
-    box-shadow: none;
-}
-
-/* تحسين الفوكس للوصولية */
-.scan-btn:focus,
-.retry-btn:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-/* تحسين الطباعة */
-@media print {
-    .control-panel,
-    .scan-btn,
-    .retry-btn {
-        display: none;
-    }
-    
-    .buy-signal-item,
-    .sell-signal-item {
-        break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #ccc;
-        margin-bottom: 20px;
-    }
-    
-    .signals-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-}
-
-/* تحسين للوضع المظلم */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: #0a0a0a;
-        --bg-card: #1a1a1a;
-        --text-light: #ffffff;
-        --text-muted: #cccccc;
-    }
-}
-
-/* تحسين للحركة المقللة */
-@media (prefers-reduced-motion: reduce) {
-    .buy-signal-item,
-    .sell-signal-item {
-        animation: none;
-        opacity: 1;
-    }
-    
-    .loading-spinner {
-        animation: none;
-    }
-    
-    * {
-        transition: none !important;
-    }
-}
-
-/* تحسين التباين العالي */
-@media (prefers-contrast: high) {
-    .buy-signal-item,
-    .sell-signal-item {
-        border: 2px solid var(--primary-color);
-    }
-    
-    .timeframe-indicator {
-        border: 1px solid white;
-    }
-}
-
-/* تأثيرات إضافية */
-.buy-signal-item::before,
-.sell-signal-item::before {
+.ut-bot-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
 }
 
-.buy-signal-item:hover::before,
-.sell-signal-item:hover::before {
-    opacity: 1;
+.ut-bot-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 204, 255, 0.2);
+    border-color: var(--primary-color);
 }
 
-/* تحسين النصوص */
-.signal-header strong {
-    background: linear-gradient(135deg, var(--text-light), var(--primary-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.ut-bot-card.buy-card::before {
+    background: linear-gradient(90deg, var(--success-color), var(--teal-color));
 }
 
-/* تحسين الأيقونات */
-.hybrid-info span i {
-    margin-right: 5px;
-    color: var(--primary-color);
+.ut-bot-card.sell-card::before {
+    background: linear-gradient(90deg, var(--danger-color), var(--accent-color));
 }
 
-/* تحسين الحالات الفارغة */
-.ut-bot-loading h3,
-.error-message h3,
-.no-signals h3 {
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 15px;
+}
+
+.signal-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.signal-type.buy {
+    color: var(--success-color);
+}
+
+.signal-type.sell {
+    color: var(--danger-color);
+}
+
+.timeframe-badge {
+    background: var(--primary-color);
+    color: var(--bg-dark);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 600;
 }
 
-.ut-bot-loading p,
-.error-message p,
-.no-signals p {
-    margin-bottom: 20px;
-    line-height: 1.6;
+.symbol-info {
+    margin-bottom: 15px;
 }
 
-/* تحسين الألوان للإشارات */
-.buy-signal-item {
-    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(76, 175, 80, 0.05) 100%);
+.symbol-name {
+    color: var(--text-light);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
 }
 
-.sell-signal-item {
-    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(244, 67, 54, 0.05) 100%);
+.symbol-price {
+    color: var(--secondary-color);
+    font-size: 16px;
+    font-weight: 600;
 }
 
-/* تحسين الظلال */
-.buy-signal-item,
-.sell-signal-item {
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.price-change {
+    font-size: 14px;
+    margin-right: 8px;
 }
 
-.buy-signal-item:hover,
-.sell-signal-item:hover {
-    box-shadow: 
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+.price-change.positive {
+    color: var(--success-color);
 }
 
+.price-change.negative {
+    color: var(--danger-color);
+}
+
+.targets-section {
+    margin-bottom: 15px;
+}
+
+.target-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.target-label {
+    color: var(--text-muted);
+}
+
+.target-value {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.target-value.profit {
+    color: var(--success-color);
+}
+
+.target-value.stop {
+    color: var(--danger-color);
+}
+
+.target-value.ratio {
+    color: var(--secondary-color);
+}
+
+.indicators-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 12px;
+}
+
+.indicator-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.indicator-label {
+    color: var(--text-muted);
+}
+
+.indicator-value {
+    color: var(--info-color);
+    font-weight: 500;
+}
+
+.ut-bot-loading {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.ut-bot-loading::before {
+    content: "⚡";
+    font-size: 32px;
+    margin-bottom: 10px;
+    animation: flash 1.5s infinite;
+}
+
+/* الأنيميشن */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes flash {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* تجاوب مع الشاشات */
+@media (max-width: 1200px) {
+    .ut-bot-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .ut-bot-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .ut-bot-card {
+        padding: 15px;
+    }
+    
+    .ut-bot-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ut-bot-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}

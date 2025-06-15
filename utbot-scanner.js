@@ -93,23 +93,12 @@ class UTBotScanner {
 // إضافة بعد دالة fetchTopSymbols
 async fetchBinanceSymbols() {
     try {
-        const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(binanceUrl);
+        // استخدام API مباشر
+        const response = await fetch('https://api1.binance.com/api/v3/ticker/24hr');
+        const tickers = await response.json();
         
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        
-        // التحقق من وجود البيانات
-        if (!data.contents) {
-            console.error('❌ لا توجد بيانات من Binance');
-            return [];
-        }
-        
-        const tickers = JSON.parse(data.contents);
-        
-        // التحقق من أن tickers هو array
         if (!Array.isArray(tickers)) {
-            console.error('❌ البيانات ليست array:', typeof tickers);
+            console.error('❌ البيانات ليست array');
             return [];
         }
         
@@ -127,27 +116,29 @@ async fetchBinanceSymbols() {
     }
 }
 
-
 async fetchOKXSymbols() {
     try {
-        const okxUrl = 'https://www.okx.com/api/v5/market/tickers?instType=SPOT';
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(okxUrl);
-        
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        
-        if (!data.contents) {
-            console.error('❌ لا توجد بيانات من OKX');
-            return [];
-        }
-        
-        const result = JSON.parse(data.contents);
+        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT');
+        const result = await response.json();
         
         if (!result.data || !Array.isArray(result.data)) {
-            console.error('❌ بيانات OKX غير صحيحة');
             return [];
         }
         
+        return result.data
+            .filter(ticker => 
+                ticker.instId.endsWith('-USDT') &&
+                parseFloat(ticker.volCcy24h) > 5000000
+            )
+            .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
+            .slice(0, 25)
+            .map(ticker => ticker.instId.replace('-', ''));
+    } catch (error) {
+        console.error('❌ خطأ OKX:', error);
+        return [];
+    }
+}
+
         return result.data
             .filter(ticker => 
                 ticker.instId.endsWith('-USDT') &&

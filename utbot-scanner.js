@@ -1,4 +1,5 @@
 class UTBotScanner {
+    constructor() {
    this.dataSources = {
         binance: {
             base: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api1.binance.com/api/v3'),

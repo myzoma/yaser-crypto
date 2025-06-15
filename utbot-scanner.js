@@ -7,8 +7,8 @@ class UTBotScanner {
         direct: 'https://api1.binance.com/api/v3'
     },
     okx: {
-        base: 'https://corsproxy.io/?https://www.okx.com/api/v5',
-        direct: 'https://www.okx.com/api/v5',
+       base: 'https://corsproxy.io/?https://www.okx.com/api/v5',
+    direct: 'https://www.okx.com/api/v5',
         apiKey: 'b20c667d-ae40-48a6-93f4-a11a64185068',
         secretKey: 'BD7C76F71D1A4E01B4C7E1A23B620365',
         passphrase: '212160Nm$#'

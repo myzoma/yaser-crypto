@@ -3,15 +3,17 @@ class UTBotScanner {
         this.apiBase = 'https://www.okx.com/api/v5';
         this.symbols = [];
         this.isScanning = false;
+        this.volumeCache = new Map(); // لحفظ متوسط الحجم
         
         this.apiKey = 'b20c667d-ae40-48a6-93f4-a11a64185068';
         this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
         this.passphrase = '212160Nm$#';
         
         this.targetSettings = {
-            profitMultiplier: 2.5,
-            stopMultiplier: 1.5,
-            atrPeriod: 10
+            baseATRMultiplier: 2.5,
+            baseStopMultiplier: 1.5,
+            atrPeriod: 14,
+            volumePeriod: 20
         };
     }
 
@@ -44,7 +46,7 @@ class UTBotScanner {
         }
     }
 
-    calculateATR(candles, period = 10) {
+    calculateATR(candles, period = 14) {
         if (candles.length < period + 1) return 0;
         
         let atrSum = 0;
@@ -62,20 +64,130 @@ class UTBotScanner {
         return atrSum / period;
     }
 
-    calculateTargets(currentPrice, atr, signalType) {
-        const targets = {};
+    calculateRSI(candles, period = 14) {
+        if (candles.length < period + 1) return 50;
         
-        if (signalType === 'BUY') {
-            targets.profitTarget = currentPrice + (atr * this.targetSettings.profitMultiplier);
-            targets.stopLoss = currentPrice - (atr * this.targetSettings.stopMultiplier);
-            targets.riskReward = this.targetSettings.profitMultiplier / this.targetSettings.stopMultiplier;
-        } else if (signalType === 'SELL') {
-            targets.profitTarget = currentPrice - (atr * this.targetSettings.profitMultiplier);
-            targets.stopLoss = currentPrice + (atr * this.targetSettings.stopMultiplier);
-            targets.riskReward = this.targetSettings.profitMultiplier / this.targetSettings.stopMultiplier;
+        let gains = 0;
+        let losses = 0;
+        
+        for (let i = candles.length - period; i < candles.length; i++) {
+            const change = candles[i].close - candles[i - 1].close;
+            if (change > 0) {
+                gains += change;
+            } else {
+                losses += Math.abs(change);
+            }
         }
         
-        return targets;
+        const avgGain = gains / period;
+        const avgLoss = losses / period;
+        
+        if (avgLoss === 0) return 100;
+        
+        const rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
+    }
+
+    calculateAverageVolume(candles, period = 20) {
+        if (candles.length < period) return 0;
+        
+        let volumeSum = 0;
+        for (let i = candles.length - period; i < candles.length; i++) {
+            volumeSum += candles[i].volume;
+        }
+        return volumeSum / period;
+    }
+
+    // 🔥 الطريقة الهجينة الذكية لحساب الأهداف
+    calculateHybridTargets(currentPrice, upperBand, lowerBand, atr, rsi, currentVolume, avgVolume, signalType) {
+        // 1️⃣ الأساس: ATR (علمي ودقيق)
+        let baseTargetMultiplier = this.targetSettings.baseATRMultiplier;
+        let baseStopMultiplier = this.targetSettings.baseStopMultiplier;
+        
+        // 2️⃣ تعديل حسب قوة إشارة UT Bot
+        const bandDistance = Math.abs(upperBand - lowerBand);
+        const signalStrength = signalType === 'BUY' 
+            ? Math.abs(currentPrice - upperBand) / bandDistance
+            : Math.abs(currentPrice - lowerBand) / bandDistance;
+        
+        if (signalStrength > 0.8) {
+            // إشارة قوية جداً
+            baseTargetMultiplier *= 1.4;
+            baseStopMultiplier *= 0.7;
+            console.log(`🔥 إشارة قوية جداً: ${(signalStrength * 100).toFixed(1)}%`);
+        } else if (signalStrength > 0.5) {
+            // إشارة قوية
+            baseTargetMultiplier *= 1.2;
+            baseStopMultiplier *= 0.8;
+            console.log(`💪 إشارة قوية: ${(signalStrength * 100).toFixed(1)}%`);
+        } else if (signalStrength < 0.2) {
+            // إشارة ضعيفة
+            baseTargetMultiplier *= 0.8;
+            baseStopMultiplier *= 1.2;
+            console.log(`⚠️ إشارة ضعيفة: ${(signalStrength * 100).toFixed(1)}%`);
+        }
+        
+        // 3️⃣ تعديل حسب RSI (مناطق التشبع)
+        if (rsi > 75) {
+            // منطقة تشبع شرائي - خطر انعكاس
+            baseTargetMultiplier *= 0.7;
+            baseStopMultiplier *= 1.3;
+            console.log(`📈 RSI مرتفع: ${rsi.toFixed(1)} - أهداف محافظة`);
+        } else if (rsi < 25) {
+            // منطقة تشبع بيعي - خطر انعكاس
+            baseTargetMultiplier *= 0.7;
+            baseStopMultiplier *= 1.3;
+            console.log(`📉 RSI منخفض: ${rsi.toFixed(1)} - أهداف محافظة`);
+        } else if (rsi > 45 && rsi < 55) {
+            // منطقة متوازنة - إشارة قوية
+            baseTargetMultiplier *= 1.1;
+            console.log(`⚖️ RSI متوازن: ${rsi.toFixed(1)} - إشارة صحية`);
+        }
+        
+        // 4️⃣ تعديل حسب الحجم (قوة الحركة)
+        const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
+        if (volumeRatio > 2.5) {
+            // حجم عالي جداً - حركة قوية متوقعة
+            baseTargetMultiplier *= 1.3;
+            baseStopMultiplier *= 0.9;
+            console.log(`🚀 حجم عالي جداً: ${volumeRatio.toFixed(1)}x - حركة قوية`);
+        } else if (volumeRatio > 1.5) {
+            // حجم جيد
+            baseTargetMultiplier *= 1.1;
+            console.log(`📊 حجم جيد: ${volumeRatio.toFixed(1)}x`);
+        } else if (volumeRatio < 0.5) {
+            // حجم ضعيف - حذر
+            baseTargetMultiplier *= 0.8;
+            baseStopMultiplier *= 1.1;
+            console.log(`⚠️ حجم ضعيف: ${volumeRatio.toFixed(1)}x - حذر`);
+        }
+        
+        // 5️⃣ حساب الأهداف النهائية
+        let profitTarget, stopLoss;
+        
+        if (signalType === 'BUY') {
+            profitTarget = currentPrice + (atr * baseTargetMultiplier);
+            stopLoss = currentPrice - (atr * baseStopMultiplier);
+        } else {
+            profitTarget = currentPrice - (atr * baseTargetMultiplier);
+            stopLoss = currentPrice + (atr * baseStopMultiplier);
+        }
+        
+        // 6️⃣ حساب نسبة المخاطرة/العائد
+        const riskAmount = Math.abs(currentPrice - stopLoss);
+        const rewardAmount = Math.abs(profitTarget - currentPrice);
+        const riskReward = riskAmount > 0 ? rewardAmount / riskAmount : 0;
+        
+        console.log(`🎯 الأهداف الهجينة: هدف ${this.formatPrice(profitTarget)} | ستوب ${this.formatPrice(stopLoss)} | نسبة ${riskReward.toFixed(2)}:1`);
+        
+        return {
+            profitTarget: profitTarget,
+            stopLoss: stopLoss,
+            riskReward: riskReward,
+            signalStrength: signalStrength,
+            volumeRatio: volumeRatio,
+            rsi: rsi
+        };
     }
 
     formatPrice(price) {
@@ -88,24 +200,28 @@ class UTBotScanner {
 
     async checkUTBotSignal(symbol, timeframe) {
         try {
-            const response = await fetch(`${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`);
+            const response = await fetch(`${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=100`);
             const result = await response.json();
             
             if (result.code !== '0' || !result.data) return null;
             
             const klines = result.data;
-            if (klines.length < 20) return null;
+            if (klines.length < 50) return null;
 
             const candles = klines.map(k => ({
                 high: parseFloat(k[2]),
                 low: parseFloat(k[3]),
                 close: parseFloat(k[4]),
+                volume: parseFloat(k[5]),
                 hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
             }));
 
             const atr = this.calculateATR(candles, this.targetSettings.atrPeriod);
-            const keyValue = 0.8;
+            const rsi = this.calculateRSI(candles);
+            const avgVolume = this.calculateAverageVolume(candles, this.targetSettings.volumePeriod);
+            const currentVolume = candles[candles.length - 1].volume;
             
+            const keyValue = 0.8;
             const current = candles[candles.length - 1];
             const previous = candles[candles.length - 2];
             const prev2 = candles[candles.length - 3];
@@ -128,46 +244,40 @@ class UTBotScanner {
             const isBuySignal = buyConditions.some(condition => condition);
             const isSellSignal = sellConditions.some(condition => condition);
             
-            if (isBuySignal) {
-                const strength = ((current.close - upperBand) / upperBand * 100);
+            if (isBuySignal || isSellSignal) {
+                const signalType = isBuySignal ? 'BUY' : 'SELL';
+                
+                // 🔥 استخدام الطريقة الهجينة الذكية
+                const hybridTargets = this.calculateHybridTargets(
+                    current.close, upperBand, lowerBand, atr, rsi, 
+                    currentVolume, avgVolume, signalType
+                );
+                
+                const baseStrength = signalType === 'BUY' 
+                    ? ((current.close - upperBand) / upperBand * 100)
+                    : ((lowerBand - current.close) / lowerBand * 100);
+                
                 const timeframeBonus = timeframe === '1H' ? 15 : 10;
-                const targets = this.calculateTargets(current.close, atr, 'BUY');
+                const finalScore = Math.abs(baseStrength) + timeframeBonus + (hybridTargets.signalStrength * 20);
+                
+                console.log(`${signalType === 'BUY' ? '🟢' : '🔴'} إشارة ${signalType === 'BUY' ? 'شراء' : 'بيع'} هجينة: ${symbol}`);
                 
                 return {
                     symbol: symbol,
                     price: this.formatPrice(current.close),
                     timeframe: timeframe,
-                    strength: strength,
-                    score: Math.abs(strength) + timeframeBonus,
+                    strength: baseStrength,
+                    score: finalScore,
                     change24h: await this.get24hChange(symbol),
-                    type: 'BUY',
+                    type: signalType,
                     targets: {
-                        profitTarget: this.formatPrice(targets.profitTarget),
-                        stopLoss: this.formatPrice(targets.stopLoss),
-                        riskReward: targets.riskReward.toFixed(2),
-                        atrValue: this.formatPrice(atr)
-                    }
-                };
-            }
-            
-            if (isSellSignal) {
-                const strength = ((lowerBand - current.close) / lowerBand * 100);
-                const timeframeBonus = timeframe === '1H' ? 15 : 10;
-                const targets = this.calculateTargets(current.close, atr, 'SELL');
-                
-                return {
-                    symbol: symbol,
-                    price: this.formatPrice(current.close),
-                    timeframe: timeframe,
-                    strength: strength,
-                    score: Math.abs(strength) + timeframeBonus,
-                    change24h: await this.get24hChange(symbol),
-                    type: 'SELL',
-                    targets: {
-                        profitTarget: this.formatPrice(targets.profitTarget),
-                        stopLoss: this.formatPrice(targets.stopLoss),
-                        riskReward: targets.riskReward.toFixed(2),
-                        atrValue: this.formatPrice(atr)
+                        profitTarget: this.formatPrice(hybridTargets.profitTarget),
+                        stopLoss: this.formatPrice(hybridTargets.stopLoss),
+                        riskReward: hybridTargets.riskReward.toFixed(2),
+                        atrValue: this.formatPrice(atr),
+                        rsi: hybridTargets.rsi.toFixed(1),
+                        volumeRatio: hybridTargets.volumeRatio.toFixed(1),
+                        signalStrength: (hybridTargets.signalStrength * 100).toFixed(1)
                     }
                 };
             }
@@ -178,7 +288,7 @@ class UTBotScanner {
         }
     }
 
-    async get24hChange(symbol) {
+        async get24hChange(symbol) {
         try {
             const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
             const result = await response.json();
@@ -206,12 +316,12 @@ class UTBotScanner {
 
     async scanAllMarket() {
         if (this.isScanning) {
-            console.log('⏳ الفحص جاري بالفعل...');
+            console.log('⏳ الفحص الهجين جاري بالفعل...');
             return [];
         }
 
         this.isScanning = true;
-        console.log('🔍 بدء فحص السوق مع حساب الأهداف...');
+        console.log('🔥 بدء الفحص الهجين الذكي للسوق...');
         
         try {
             if (this.symbols.length === 0) {
@@ -222,10 +332,10 @@ class UTBotScanner {
             const timeframes = ['1H', '30m'];
             
             for (const timeframe of timeframes) {
-                console.log(`📊 فحص فريم ${timeframe}...`);
+                console.log(`📊 فحص هجين لفريم ${timeframe}...`);
                 let signalsFound = 0;
                 
-                const batchSize = 8;
+                const batchSize = 6; // تقليل الحمل للحسابات المعقدة
                 for (let i = 0; i < this.symbols.length; i += batchSize) {
                     const batch = this.symbols.slice(i, i + batchSize);
                     
@@ -246,12 +356,13 @@ class UTBotScanner {
                         }
                     });
                     
-                    await new Promise(resolve => setTimeout(resolve, 150));
+                    await new Promise(resolve => setTimeout(resolve, 200)); // راحة أكثر
                 }
                 
-                console.log(`📈 فريم ${timeframe}: ${signalsFound} إشارة`);
+                console.log(`🎯 فريم ${timeframe}: ${signalsFound} إشارة هجينة`);
             }
 
+            // فلترة الإشارات المكررة واختيار الأقوى
             const uniqueSignals = new Map();
             
             allSignals.forEach(signal => {
@@ -261,14 +372,27 @@ class UTBotScanner {
                 }
             });
 
+            // ترتيب حسب النتيجة المركبة وأخذ أفضل 3
             const finalSignals = Array.from(uniqueSignals.values())
                 .sort((a, b) => b.score - a.score)
                 .slice(0, 3);
 
+            const buyCount = finalSignals.filter(s => s.type === 'BUY').length;
+            const sellCount = finalSignals.filter(s => s.type === 'SELL').length;
+
+            console.log(`🎉 الفحص الهجين اكتمل: ${allSignals.length} إشارة تم تحليلها`);
+            console.log(`🏆 أفضل 3 إشارات هجينة: ${buyCount} شراء، ${sellCount} بيع`);
+            
+            if (finalSignals.length > 0) {
+                finalSignals.forEach(signal => {
+                    console.log(`🎯 ${signal.symbol}: نسبة ${signal.targets.riskReward}:1 | RSI: ${signal.targets.rsi} | حجم: ${signal.targets.volumeRatio}x`);
+                });
+            }
+            
             return finalSignals;
             
         } catch (error) {
-            console.error('❌ خطأ عام في فحص السوق:', error);
+            console.error('❌ خطأ في الفحص الهجين:', error);
             return [];
         } finally {
             this.isScanning = false;
@@ -287,12 +411,12 @@ async function loadUTBotSignals() {
     }
     
     try {
-        container.innerHTML = '<div class="ut-bot-loading">🔍 جاري فحص السوق وحساب الأهداف...</div>';
+        container.innerHTML = '<div class="ut-bot-loading">🔥 جاري الفحص الهجين الذكي للسوق...</div>';
         
         const signals = await utScanner.scanAllMarket();
         
         if (signals.length === 0) {
-            container.innerHTML = '<div class="ut-bot-loading">لا توجد إشارات حالياً 📊</div>';
+            container.innerHTML = '<div class="ut-bot-loading">لا توجد إشارات هجينة حالياً 📊</div>';
             return;
         }
 
@@ -301,8 +425,12 @@ async function loadUTBotSignals() {
             const signalIcon = signal.type === 'BUY' ? '🟢' : '🔴';
             const signalText = signal.type === 'BUY' ? 'شراء' : 'بيع';
             
+            // تحديد لون نسبة المخاطرة
+            const riskRewardColor = parseFloat(signal.targets.riskReward) >= 2.0 ? '#4CAF50' : 
+                                   parseFloat(signal.targets.riskReward) >= 1.5 ? '#FF9800' : '#f44336';
+            
             return `
-                <div class="${signal.type.toLowerCase()}-signal-item">
+                <div class="${signal.type.toLowerCase()}-signal-item" style="border-left: 3px solid ${signalColor};">
                     <div class="signal-header">
                         <span class="timeframe-indicator">${signal.timeframe}</span>
                         <span style="color: ${signalColor};">${signalIcon} ${signalText}</span>
@@ -315,7 +443,11 @@ async function loadUTBotSignals() {
                     <div class="targets-info" style="margin-top: 5px; font-size: 12px; color: #666;">
                         🎯 <span style="color: #4CAF50;">هدف: $${signal.targets.profitTarget}</span> | 
                         🛑 <span style="color: #f44336;">ستوب: $${signal.targets.stopLoss}</span> | 
-                        📊 <span style="color: #2196F3;">نسبة: ${signal.targets.riskReward}:1</span>
+                        📊 <span style="color: ${riskRewardColor}; font-weight: bold;">نسبة: ${signal.targets.riskReward}:1</span>
+                    </div>
+                    <div class="hybrid-info" style="margin-top: 3px; font-size: 11px; color: #999;">
+                        📈 RSI: ${signal.targets.rsi} | 📊 حجم: ${signal.targets.volumeRatio}x | 
+                        💪 قوة: ${signal.targets.signalStrength}% | ATR: ${signal.targets.atrValue}
                     </div>
                 </div>
             `;
@@ -323,31 +455,59 @@ async function loadUTBotSignals() {
         
         container.innerHTML = signalsHTML;
         
+        console.log(`🎉 تم عرض ${signals.length} إشارة هجينة ذكية في الشريط`);
+        
     } catch (error) {
-        console.error('❌ خطأ في تحديث الإشارات:', error);
-        container.innerHTML = '<div class="ut-bot-loading">❌ خطأ في تحميل البيانات</div>';
+        console.error('❌ خطأ في تحديث الإشارات الهجينة:', error);
+        container.innerHTML = '<div class="ut-bot-loading">❌ خطأ في تحميل البيانات الهجينة</div>';
     }
 }
 
-function updateTargetSettings(profitMultiplier, stopMultiplier, atrPeriod) {
-    utScanner.targetSettings.profitMultiplier = profitMultiplier || 2.5;
-    utScanner.targetSettings.stopMultiplier = stopMultiplier || 1.5;
-    utScanner.targetSettings.atrPeriod = atrPeriod || 10;
-    console.log('🔧 تم تحديث إعدادات الأهداف:', utScanner.targetSettings);
+// دوال إضافية للتحكم في الإعدادات
+function updateHybridSettings(baseATR, baseStop, atrPeriod, volumePeriod) {
+    utScanner.targetSettings.baseATRMultiplier = baseATR || 2.5;
+    utScanner.targetSettings.baseStopMultiplier = baseStop || 1.5;
+    utScanner.targetSettings.atrPeriod = atrPeriod || 14;
+    utScanner.targetSettings.volumePeriod = volumePeriod || 20;
+    
+    console.log('🔧 تم تحديث إعدادات النظام الهجين:', utScanner.targetSettings);
 }
 
+// دالة لاختبار إشارة واحدة
+async function testHybridSignal(symbol, timeframe = '1H') {
+    try {
+        console.log(`🧪 اختبار الإشارة الهجينة لـ ${symbol}...`);
+        const signal = await utScanner.checkUTBotSignal(symbol, timeframe);
+        if (signal) {
+            console.log('🎯 نتيجة الاختبار:', signal);
+            return signal;
+        } else {
+            console.log('❌ لا توجد إشارة حالياً');
+            return null;
+        }
+    } catch (error) {
+        console.error(`❌ خطأ في اختبار ${symbol}:`, error);
+        return null;
+    }
+}
+
+// بدء التشغيل
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadUTBotSignals);
 } else {
     loadUTBotSignals();
 }
 
+// تحديث كل 12 دقيقة
 setInterval(loadUTBotSignals, 720000);
 
-console.log('🚀 UT Bot Scanner مع حساب الأهداف - جاهز للعمل!');
-console.log('🎯 الميزات الجديدة:');
-console.log('   ✅ حساب أهداف الربح تلقائياً');
-console.log('   ✅ حساب وقف الخسارة تلقائياً');
-console.log('   ✅ نسبة المخاطرة/العائد');
-console.log('   ✅ قيمة ATR لكل إشارة');
-console.log('🔧 لتغيير الإعدادات: updateTargetSettings(profitMultiplier, stopMultiplier, atrPeriod)');
+console.log('🚀🔥 UT Bot Scanner الهجين الذكي - جاهز للعمل!');
+console.log('🎯 الميزات الهجينة الجديدة:');
+console.log('   ✅ حساب ATR علمي دقيق');
+console.log('   ✅ تحليل قوة إشارة UT Bot');
+console.log('   ✅ مؤشر RSI للتشبع');
+console.log('   ✅ تحليل الحجم والسيولة');
+console.log('   ✅ أهداف ديناميكية ذكية');
+console.log('   ✅ نسب مخاطرة محسوبة بدقة');
+console.log('🔧 للتحكم: updateHybridSettings(baseATR, baseStop, atrPeriod, volumePeriod)');
+console.log('🧪 للاختبار: testHybridSignal("BTC-USDT", "1H")');

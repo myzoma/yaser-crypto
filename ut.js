@@ -9,9 +9,9 @@ class UTBotScanner {
         this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
         this.passphrase = '212160Nm$#';
         
-        this.targetSettings = {
-            baseATRMultiplier: 2.5,
-            baseStopMultiplier: 1.5,
+       this.targetSettings = {
+    baseATRMultiplier: 3.0,    // كان 2.5
+    baseStopMultiplier: 1.4,   // كان 1.5
             atrPeriod: 14,
             volumePeriod: 20
         };
@@ -147,11 +147,16 @@ class UTBotScanner {
     } else if (volumeRatio > 1.5) {
         baseTargetMultiplier *= 1.1;
         console.log(`📊 حجم جيد: ${volumeRatio.toFixed(1)}x`);
-    } else if (volumeRatio < 0.5) {
-        baseTargetMultiplier *= 0.8;
-        baseStopMultiplier *= 1.1;
-        console.log(`⚠️ حجم ضعيف: ${volumeRatio.toFixed(1)}x - حذر`);
-    }
+   } else if (volumeRatio < 1.0) {
+    baseTargetMultiplier *= 0.7;
+    baseStopMultiplier *= 1.2;
+    console.log(`⚠️ حجم ضعيف: ${volumeRatio.toFixed(1)}x - تقليل المخاطرة`);
+} else if (volumeRatio < 0.5) {
+    baseTargetMultiplier *= 0.6;
+    baseStopMultiplier *= 1.3;
+    console.log(`❌ حجم ضعيف جداً: ${volumeRatio.toFixed(1)}x - حذر شديد`);
+}
+
     
     // 5️⃣ حساب الأهداف النهائية - مُصحح! 🔧
     let profitTarget, stopLoss;
@@ -246,7 +251,14 @@ class UTBotScanner {
             
             if (isBuySignal || isSellSignal) {
                 const signalType = isBuySignal ? 'BUY' : 'SELL';
-                
+              
+   // 🔥 إضافة فلتر الحجم - بدون تكرار
+    const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
+    if (volumeRatio < 0.8) {
+        console.log(`⚠️ ${symbol}: حجم ضعيف ${volumeRatio.toFixed(1)}x - تم تجاهل الإشارة`);
+        return null;
+    }
+
                 // 🔥 استخدام الطريقة الهجينة الذكية
                 const hybridTargets = this.calculateHybridTargets(
                     current.close, upperBand, lowerBand, atr, rsi, 

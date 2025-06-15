@@ -94,11 +94,24 @@ class UTBotScanner {
 async fetchBinanceSymbols() {
     try {
         const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
-        const proxyUrl = this.dataSources.binance.base.replace(encodeURIComponent('https://api1.binance.com/api/v3'), '') + encodeURIComponent(binanceUrl);
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(binanceUrl);
         
         const response = await fetch(proxyUrl);
         const data = await response.json();
+        
+        // التحقق من وجود البيانات
+        if (!data.contents) {
+            console.error('❌ لا توجد بيانات من Binance');
+            return [];
+        }
+        
         const tickers = JSON.parse(data.contents);
+        
+        // التحقق من أن tickers هو array
+        if (!Array.isArray(tickers)) {
+            console.error('❌ البيانات ليست array:', typeof tickers);
+            return [];
+        }
         
         return tickers
             .filter(ticker => 
@@ -114,14 +127,26 @@ async fetchBinanceSymbols() {
     }
 }
 
+
 async fetchOKXSymbols() {
     try {
         const okxUrl = 'https://www.okx.com/api/v5/market/tickers?instType=SPOT';
-        const proxyUrl = this.dataSources.okx.base.replace(encodeURIComponent('https://www.okx.com/api/v5'), '') + encodeURIComponent(okxUrl);
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(okxUrl);
         
         const response = await fetch(proxyUrl);
         const data = await response.json();
+        
+        if (!data.contents) {
+            console.error('❌ لا توجد بيانات من OKX');
+            return [];
+        }
+        
         const result = JSON.parse(data.contents);
+        
+        if (!result.data || !Array.isArray(result.data)) {
+            console.error('❌ بيانات OKX غير صحيحة');
+            return [];
+        }
         
         return result.data
             .filter(ticker => 
@@ -136,6 +161,7 @@ async fetchOKXSymbols() {
         return [];
     }
 }
+
 
 
     async fetchKlines(symbol, interval, limit = 100) {

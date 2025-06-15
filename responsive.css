@@ -1,0 +1,321 @@
+/* تحسينات لإمكانية الوصول */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .loading-spinner {
+        animation: none !important;
+    }
+    
+    .pulse-animation {
+        animation: none !important;
+    }
+    
+    .fade-in {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+    
+    .slide-in {
+        animation: none !important;
+        transform: none !important;
+    }
+}
+
+/* وضع التباين العالي */
+@media (prefers-contrast: high) {
+    .signal-card,
+    .stat-card,
+    .feature-card {
+        border: 2px solid #000 !important;
+    }
+    
+    .signal-type.buy {
+        background: #000 !important;
+        color: #fff !important;
+    }
+    
+    .signal-type.sell {
+        background: #fff !important;
+        color: #000 !important;
+        border: 2px solid #000 !important;
+    }
+    
+    .action-btn,
+    .signal-btn,
+    .refresh-btn {
+        border: 2px solid #000 !important;
+    }
+    
+    .tab-btn.active {
+        background: #000 !important;
+        color: #fff !important;
+    }
+}
+
+/* الوضع الداكن المفضل */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #1a1a1a;
+        --bg-tertiary: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-muted: #808080;
+        --border-color: #333333;
+        --accent-primary: #4a9eff;
+        --accent-secondary: #6c5ce7;
+        --success-color: #00b894;
+        --danger-color: #e17055;
+        --warning-color: #fdcb6e;
+        --info-color: #74b9ff;
+    }
+    
+    .main-header {
+        background: rgba(10, 10, 10, 0.95);
+        border-bottom-color: var(--border-color);
+    }
+    
+    .signal-card,
+    .stat-card,
+    .feature-card,
+    .control-panel {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+    }
+    
+    .signal-card:hover,
+    .stat-card:hover,
+    .feature-card:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .loading-container,
+    .empty-state {
+        background: var(--bg-secondary);
+    }
+    
+    .shortcuts-content {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+    }
+    
+    .footer {
+        background: var(--bg-secondary);
+        border-top-color: var(--border-color);
+    }
+}
+
+/* تحسينات للشاشات عالية الدقة */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .signal-card,
+    .stat-card,
+    .feature-card {
+        border-width: 0.5px;
+    }
+    
+    .signal-type {
+        border-width: 0.5px;
+    }
+    
+    .action-btn,
+    .signal-btn,
+    .refresh-btn,
+    .tab-btn {
+        border-width: 0.5px;
+    }
+}
+
+/* تحسينات للوحات اللمس */
+@media (hover: none) and (pointer: coarse) {
+    .action-btn,
+    .signal-btn,
+    .refresh-btn,
+    .tab-btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0.75rem 1rem;
+    }
+    
+    .signal-card,
+    .stat-card {
+        padding: 1.25rem;
+    }
+    
+    .tab-btn {
+        padding: 0.875rem 1.25rem;
+    }
+    
+    /* إزالة تأثيرات الهوفر */
+    .signal-card:hover,
+    .stat-card:hover,
+    .feature-card:hover,
+    .action-btn:hover,
+    .signal-btn:hover,
+    .refresh-btn:hover,
+    .tab-btn:hover {
+        transform: none;
+        box-shadow: var(--shadow-md);
+    }
+}
+
+/* تحسينات للشاشات الطويلة */
+@media (max-aspect-ratio: 1/2) {
+    .signals-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .analytics-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* تحسينات للشاشات العريضة */
+@media (min-aspect-ratio: 3/1) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    .signals-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* تحسينات للشاشات المنحنية والقابلة للطي */
+@media (display-mode: fullscreen) {
+    .main-header {
+        padding-top: env(safe-area-inset-top);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+    
+    .container {
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+    }
+    
+    .footer {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* تحسينات لوضع المناظر الطبيعية على الهواتف */
+@media (max-height: 500px) and (orientation: landscape) {
+    .main-header {
+        padding: 0.5rem 0;
+    }
+    
+    .control-panel {
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .signal-card,
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    .loading-container,
+    .empty-state {
+        padding: 1rem;
+    }
+    
+    .section-header {
+        margin: 1rem 0;
+    }
+}
+
+/* تحسينات للشاشات فائقة العرض */
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1800px;
+    }
+    
+    .signals-grid {
+        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+        gap: 2.5rem;
+    }
+    
+    .signal-card {
+        padding: 2.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2rem;
+    }
+    
+    .stat-card {
+        padding: 2rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+    }
+    
+    .feature-card {
+        padding: 2rem;
+    }
+}
+
+/* تحسينات للطباعة الملونة */
+@media print and (color) {
+    .signal-type.buy {
+        background: #e8f5e8 !important;
+        color: #2d5a2d !important;
+    }
+    
+    .signal-type.sell {
+        background: #ffeaea !important;
+        color: #5a2d2d !important;
+    }
+    
+    .stat-card.positive {
+        border-left: 4px solid #00b894 !important;
+    }
+    
+    .stat-card.negative {
+        border-left: 4px solid #e17055 !important;
+    }
+}
+
+/* نهاية ملف CSS */
+
+/* تعليقات للمطورين */
+/*
+هذا الملف يحتوي على:
+1. تصميم متجاوب شامل لجميع أحجام الشاشات
+2. تحسينات لإمكانية الوصول
+3. دعم للوضع الداكن
+4. تحسينات للشاشات عالية الدقة
+5. دعم للوحات اللمس
+6. تحسينات للطباعة
+7. دعم للشاشات المنحنية والقابلة للطي
+8. تحسينات للأداء والتجربة
+
+للتطوير المستقبلي:
+- إضافة المزيد من متغيرات CSS
+- تحسين الرسوم المتحركة
+- إضافة المزيد من الثيمات
+- تحسين الأداء أكثر
+*/

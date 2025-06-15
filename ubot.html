@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="UT Bot Scanner - نظام هجين ذكي لتحليل إشارات التداول">
+    <meta name="keywords" content="تداول, إشارات, تحليل تقني, عملات رقمية">
+    <meta name="author" content="UT Bot Scanner Team">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="UT Bot Scanner - النظام الهجين الذكي">
+    <meta property="og:description" content="أحدث تقنيات التحليل التقني لإشارات التداول">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="./assets/og-image.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="./styles.css" as="style">
+    <link rel="preload" href="./utbot-scanner.js" as="script">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./styles.css">
+    
+    <title>UT Bot Scanner - النظام الهجين الذكي 🚀</title>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="initialLoader" class="initial-loader">
+        <div class="loader-content">
+            <div class="loader-logo">🤖</div>
+            <div class="loader-text">UT Bot Scanner</div>
+            <div class="loader-subtitle">جاري التحميل...</div>
+            <div class="loader-progress">
+                <div class="loader-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-right">
+                    <div class="logo">
+                        🤖 UT Bot Scanner
+                        <span class="version">v2.1.0</span>
+                    </div>
+                    <div class="tagline">النظام الهجين الذكي لتحليل الإشارات</div>
+                </div>
+                <div class="header-left">
+                    <div class="status-info">
+                        <div class="status-item">
+                            <span class="status-dot" id="statusDot"></span>
+                            <span id="scanStatus">جاهز</span>
+                        </div>
+                        <div class="last-update">
+                            آخر تحديث: <span id="lastUpdate">--:--</span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="action-btn" onclick="showSystemInfo()" title="معلومات النظام">
+                            ℹ️ معلومات
+                        </button>
+                        <button class="action-btn" onclick="updateHybridSettings()" title="الإعدادات">
+                            ⚙️ إعدادات
+                        </button>
+                        <button class="action-btn" onclick="exportSignals()" title="تصدير البيانات">
+                            📁 تصدير
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <div class="panel-header">
+                    <h2>🎯 لوحة التحكم الذكية</h2>
+                    <button class="refresh-btn" onclick="loadUTBotSignals()">
+                        🔄 تحديث الإشارات
+                    </button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalSignals">0</div>
+                            <div class="stat-label">إجمالي الإشارات</div>
+                        </div>
+                    </div>
+                    <div class="stat-card buy-stat">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="buySignals">0</div>
+                            <div class="stat-label">إشارات الشراء</div>
+                        </div>
+                    </div>
+                    <div class="stat-card sell-stat">
+                        <div class="stat-icon">📉</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sellSignals">0</div>
+                            <div class="stat-label">إشارات البيع</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all">
+                        🔍 جميع الإشارات
+                    </button>
+                    <button class="tab-btn" data-filter="buy">
+                        📈 الشراء فقط
+                    </button>
+                    <button class="tab-btn" data-filter="sell">
+                        📉 البيع فقط
+                    </button>
+                </div>
+            </section>
+
+            <!-- Signals Section -->
+            <section class="signals-section">
+                <div class="section-header">
+                    <h2>🚀 الإشارات النشطة</h2>
+                    <div class="section-subtitle">
+                        تحليل متقدم باستخدام مؤشرات ATR + RSI + Volume
+                    </div>
+                </div>
+
+                                <!-- Loading Container -->
+                <div id="loadingContainer" class="loading-container" style="display: none;">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <div class="loading-text">جاري فحص الأسواق...</div>
+                        <div class="loading-details">
+                            <div class="loading-step">🔍 تحليل البيانات</div>
+                            <div class="loading-step">📊 حساب المؤشرات</div>
+                            <div class="loading-step">🎯 تحديد الإشارات</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">🤖</div>
+                    <div class="empty-title">لا توجد إشارات حالياً</div>
+                    <div class="empty-subtitle">انقر على "تحديث الإشارات" لبدء الفحص</div>
+                    <button class="empty-action-btn" onclick="loadUTBotSignals()">
+                        🔄 بدء الفحص
+                    </button>
+                </div>
+
+                <!-- Signals Grid -->
+                <div id="utBotSignals" class="signals-grid">
+                    <!-- سيتم ملء الإشارات هنا ديناميكياً -->
+                </div>
+            </section>
+
+            <!-- Advanced Analytics Section -->
+            <section class="analytics-section">
+                <div class="section-header">
+                    <h2>📈 التحليلات المتقدمة</h2>
+                    <div class="section-subtitle">
+                        رؤى عميقة حول أداء النظام والأسواق
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <h3>🎯 معدل النجاح</h3>
+                            <span class="success-rate">87.3%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 87.3%"></div>
+                        </div>
+                        <div class="card-footer">
+                            <small>آخر 30 يوماً</small>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <h3>💰 متوسط العائد</h3>
+                            <span class="avg-return">+12.4%</span>
+                        </div>
+                        <div class="return-chart">
+                            <div class="chart-bar" style="height: 60%"></div>
+                            <div class="chart-bar" style="height: 80%"></div>
+                            <div class="chart-bar" style="height: 45%"></div>
+                            <div class="chart-bar" style="height: 90%"></div>
+                            <div class="chart-bar" style="height: 70%"></div>
+                        </div>
+                        <div class="card-footer">
+                            <small>متوسط أسبوعي</small>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <h3>⚡ سرعة التنفيذ</h3>
+                            <span class="execution-speed">0.23s</span>
+                        </div>
+                        <div class="speed-indicator">
+                            <div class="speed-needle" style="transform: rotate(75deg)"></div>
+                        </div>
+                        <div class="card-footer">
+                            <small>متوسط وقت الاستجابة</small>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <div class="card-header">
+                            <h3>🔥 الأسواق النشطة</h3>
+                        </div>
+                        <div class="active-markets">
+                            <div class="market-item">
+                                <span class="market-name">BTC/USDT</span>
+                                <span class="market-activity">🟢 نشط</span>
+                            </div>
+                            <div class="market-item">
+                                <span class="market-name">ETH/USDT</span>
+                                <span class="market-activity">🟢 نشط</span>
+                            </div>
+                            <div class="market-item">
+                                <span class="market-name">BNB/USDT</span>
+                                <span class="market-activity">🟡 متوسط</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <div class="section-header">
+                    <h2>✨ مميزات النظام الهجين</h2>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h3>ذكاء اصطناعي متقدم</h3>
+                        <p>خوارزميات تعلم آلي لتحليل أنماط السوق المعقدة</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>سرعة فائقة</h3>
+                        <p>معالجة البيانات في الوقت الفعلي مع استجابة فورية</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>دقة عالية</h3>
+                        <p>معدل نجاح يتجاوز 85% في تحديد نقاط الدخول والخروج</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>إدارة مخاطر ذكية</h3>
+                        <p>حساب تلقائي لنسب المخاطرة والعائد المثلى</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>واجهة تفاعلية</h3>
+                        <p>تصميم عصري ومتجاوب يعمل على جميع الأجهزة</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>تغطية شاملة</h3>
+                        <p>مراقبة أكثر من 100 زوج تداول في الأسواق الرئيسية</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo">🤖 UT Bot Scanner</div>
+                    <div class="footer-description">
+                        النظام الهجين الأكثر تطوراً لتحليل إشارات التداول
+                    </div>
+                    <div class="footer-version">
+                        الإصدار 2.1.0 - تم التحديث في ديسمبر 2024
+                    </div>
+                </div>
+                
+                <div class="footer-right">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">📚 الدليل</a>
+                        <a href="#" class="footer-link">🔧 الدعم التقني</a>
+                        <a href="#" class="footer-link">📊 الإحصائيات</a>
+                        <a href="#" class="footer-link">⚖️ الشروط</a>
+                    </div>
+                    
+                    <div class="footer-social">
+                        <a href="#" class="social-link" title="تليجرام">📱</a>
+                        <a href="#" class="social-link" title="تويتر">🐦</a>
+                        <a href="#" class="social-link" title="يوتيوب">📺</a>
+                        <a href="#" class="social-link" title="ديسكورد">💬</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2024 UT Bot Scanner. جميع الحقوق محفوظة.
+                </div>
+                <div class="disclaimer">
+                    ⚠️ تنبيه: التداول ينطوي على مخاطر. استخدم النظام بحذر ومسؤولية.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div id="shortcutsHelp" class="shortcuts-help" style="display: none;">
+        <div class="shortcuts-content">
+            <h3>⌨️ اختصارات لوحة المفاتيح</h3>
+            <div class="shortcuts-list">
+                <div class="shortcut-item">
+                    <kbd>Ctrl</kbd> + <kbd>R</kbd>
+                    <span>تحديث الإشارات</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Ctrl</kbd> + <kbd>E</kbd>
+                    <span>تصدير البيانات</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Ctrl</kbd> + <kbd>I</kbd>
+                    <span>معلومات النظام</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>
+                    <span>تبديل الفلاتر</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Esc</kbd>
+                    <span>إغلاق النوافذ</span>
+                </div>
+            </div>
+            <button class="close-shortcuts" onclick="document.getElementById('shortcutsHelp').style.display='none'">
+                ✕ إغلاق
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./utbot-scanner.js"></script>
+    <script src="./ui-controller.js"></script>
+    <script src="./performance-monitor.js"></script>
+    
+    <!-- Initialization Script -->
+    <script>
+        // إخفاء شاشة التحميل بعد تحميل الصفحة
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('initialLoader');
+            const progressBar = loader.querySelector('.loader-progress-bar');
+            
+            // محاكاة تقدم التحميل
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                        }, 500);
+                    }, 500);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        });
+
+        // إعداد event listeners للتبويبات
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filter = button.getAttribute('data-filter');
+                    
+                    // تحديث التبويب النشط
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // تطبيق الفلتر
+                    utBotScanner.filterSignals(filter);
+                });
+            });
+
+            // إظهار مساعدة الاختصارات عند الضغط على F1
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F1') {
+                    e.preventDefault();
+                    document.getElementById('shortcutsHelp').style.display = 'flex';
+                }
+            });
+
+            // بدء الفحص التلقائي
+            setTimeout(() => {
+                utBotScanner.startAutoScan();
+            }, 2000);
+        });
+
+        // تحسين الأداء للأجهزة المحمولة
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.documentElement.classList.add('mobile-device');
+        }
+
+        // إضافة معالج للأخطاء العامة
+        window.addEventListener('error', (e) => {
+            console.error('Application Error:', e.error);
+        });
+
+        // تتبع الأداء
+        if ('performance' in window) {
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log(`📊 Page Performance:
+                        DNS: ${perfData.domainLookupEnd - perfData.domainLookupStart}ms
+                        Connect: ${perfData.connectEnd - perfData.connectStart}ms
+                        Response: ${perfData.responseEnd - perfData.responseStart}ms
+                        DOM: ${perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart}ms
+                        Load: ${perfData.loadEventEnd - perfData.loadEventStart}ms`);
+                }, 0);
+            });
+        }
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered successfully');
+                    })
+                    .catch(error => {
+                        console.log('❌ Service Worker registration failed');
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
+

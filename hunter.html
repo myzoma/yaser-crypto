@@ -1,130 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UT Bot Scanner - مراقب إشارات التداول</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <!-- Header -->
-    <header class="main-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo-section">
-                    <h1 class="logo">🔥 UT Bot Scanner</h1>
-                    <p class="tagline">مراقب إشارات التداول الهجين الذكي</p>
-                </div>
-                <div class="header-stats">
-                    <div class="stat-item">
-                        <span class="stat-number" id="totalSignals">0</span>
-                        <span class="stat-label">إشارة نشطة</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="buySignals">0</span>
-                        <span class="stat-label">إشارات شراء</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="sellSignals">0</span>
-                        <span class="stat-label">إشارات بيع</span>
-                    </div>
-                </div>
-                <div class="refresh-section">
-                    <button class="refresh-btn" onclick="loadUTBotSignals()">
-                        <span class="refresh-icon">🔄</span>
-                        تحديث البيانات
-                    </button>
-                    <div class="last-update">
-                        آخر تحديث: <span id="lastUpdate">--</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <div class="panel-header">
-                    <h2>🎯 لوحة التحكم</h2>
-                    <div class="status-indicator">
-                        <span class="status-dot" id="statusDot"></span>
-                        <span id="scanStatus">جاهز للفحص</span>
-                    </div>
-                </div>
-                <div class="panel-actions">
-                    <button class="action-btn primary" onclick="loadUTBotSignals()">
-                        🚀 بدء الفحص الهجين
-                    </button>
-                    <button class="action-btn secondary" onclick="updateHybridSettings()">
-                        ⚙️ إعدادات متقدمة
-                    </button>
-                    <button class="action-btn info" onclick="showSystemInfo()">
-                        📊 معلومات النظام
-                    </button>
-                </div>
-            </div>
-
-            <!-- Loading State -->
-            <div class="loading-container" id="loadingContainer" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p class="loading-text">🔥 جاري الفحص الهجين الذكي للسوق...</p>
-                <div class="loading-details">
-                    <span id="loadingStep">تحميل قائمة العملات...</span>
-                </div>
-            </div>
-
-            <!-- Signals Grid -->
-            <div class="signals-section">
-                <div class="section-header">
-                    <h2>📈 الإشارات النشطة</h2>
-                    <div class="filter-tabs">
-                        <button class="tab-btn active" data-filter="all">الكل</button>
-                        <button class="tab-btn" data-filter="buy">شراء</button>
-                        <button class="tab-btn" data-filter="sell">بيع</button>
-                    </div>
-                </div>
-                
-                <div class="signals-grid" id="utBotSignals">
-                    <!-- البيانات ستظهر هنا -->
-                </div>
-            </div>
-
-            <!-- Empty State -->
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <div class="empty-icon">📊</div>
-                <h3>لا توجد إشارات حالياً</h3>
-                <p>سيتم البحث عن إشارات جديدة كل 12 دقيقة</p>
-                <button class="retry-btn" onclick="loadUTBotSignals()">🔄 إعادة المحاولة</button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-info">
-                    <p>🎯 نظام التداول الهجين الذكي - تحليل متقدم للعملات الرقمية</p>
-                    <div class="features-list">
-                        <span class="feature">✅ تحليل ATR علمي دقيق</span>
-                        <span class="feature">✅ مؤشر RSI للتشبع</span>
-                        <span class="feature">✅ تحليل الحجم والسيولة</span>
-                        <span class="feature">✅ أهداف ديناميكية ذكية</span>
-                        <span class="feature">✅ نسب مخاطرة محسوبة</span>
-                    </div>
-                </div>
-                <div class="footer-disclaimer">
-                    <p><strong>⚠️ تنبيه مهم:</strong> هذه الإشارات للأغراض التعليمية فقط. التداول ينطوي على مخاطر مالية.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script src="utbot-scanner.js"></script>
-    <script src="ui-controller.js"></script>
-</body>
-</html>

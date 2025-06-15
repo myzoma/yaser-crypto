@@ -14,18 +14,6 @@ class UTBotScanner {
         passphrase: '212160Nm$#'
     }
 };
-
-            okx: {
-                base: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.okx.com/api/v5'),
-                direct: 'https://www.okx.com/api/v5',
-                // ضع مفاتيح OKX هنا
-                apiKey: 'BD7C76F71D1A4E01B4C7E1A23B620365',
-                secretKey: 'BD7C76F71D1A4E01B4C7E1A23B620365',
-                passphrase: '212160Nm$#'
-            }
-        };
-        
-        // باقي الكود الموجود في constructor
         this.symbols = [];
         this.isScanning = false;
         this.requestDelay = 200;

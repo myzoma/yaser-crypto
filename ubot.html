@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UT Bot Scanner - إشارات التداول الذكية</title>
+    <title>UT Bot Scanner - نظام الإشارات الهجين الذكي</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
@@ -14,17 +17,46 @@
                 <div class="logo-section">
                     <h1 class="logo-title">🔥 UT Bot Scanner</h1>
                     <p class="logo-subtitle">نظام الإشارات الهجين الذكي</p>
+                    <div class="features-tags">
+                        <span class="feature-tag">ATR علمي</span>
+                        <span class="feature-tag">RSI ذكي</span>
+                        <span class="feature-tag">تحليل الحجم</span>
+                    </div>
                 </div>
                 <div class="header-stats">
                     <div class="stat-item">
-                        <span class="stat-label">الإشارات النشطة</span>
-                        <span class="stat-value" id="activeSignals">0</span>
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <span class="stat-label">الإشارات النشطة</span>
+                            <span class="stat-value" id="activeSignals">0</span>
+                        </div>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">آخر تحديث</span>
-                        <span class="stat-value" id="lastUpdate">--:--</span>
+                        <div class="stat-icon">🟢</div>
+                        <div class="stat-content">
+                            <span class="stat-label">إشارات الشراء</span>
+                            <span class="stat-value" id="buySignals">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🔴</div>
+                        <div class="stat-content">
+                            <span class="stat-label">إشارات البيع</span>
+                            <span class="stat-value" id="sellSignals">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-content">
+                            <span class="stat-label">آخر تحديث</span>
+                            <span class="stat-value" id="lastUpdate">--:--</span>
+                        </div>
                     </div>
                 </div>
+            </div>
+            <div class="scan-status" id="scanStatus">
+                <div class="status-indicator ready"></div>
+                <span>جاهز للفحص</span>
             </div>
         </div>
     </header>
@@ -32,13 +64,102 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <button class="scan-btn" id="manualScanBtn" onclick="manualScan()">
+                    🔍 فحص يدوي
+                </button>
+                <div class="auto-scan-info">
+                    <span>التحديث التلقائي كل 12 دقيقة</span>
+                </div>
+            </div>
+
             <!-- Signals Grid -->
-            <div class="signals-grid" id="utBotSignals">
-                <!-- البطاقات ستظهر هنا -->
+            <div class="signals-section">
+                <h2 class="section-title">🎯 أفضل الإشارات الهجينة</h2>
+                <div class="signals-grid" id="utBotSignals">
+                    <!-- البطاقات ستظهر هنا -->
+                </div>
             </div>
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>🚀 UT Bot Scanner الهجين الذكي - تحليل متقدم للعملات الرقمية</p>
+            <div class="footer-features">
+                <span>✅ حساب ATR علمي دقيق</span>
+                <span>✅ تحليل قوة إشارة UT Bot</span>
+                <span>✅ مؤشر RSI للتشبع</span>
+                <span>✅ تحليل الحجم والسيولة</span>
+            </div>
+        </div>
+    </footer>
+
     <script src="utbot-scanner.js"></script>
+    <script>
+        // دالة الفحص اليدوي
+        async function manualScan() {
+            const btn = document.getElementById('manualScanBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '⏳ جاري الفحص...';
+            btn.disabled = true;
+            
+            try {
+                await loadUTBotSignals();
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // تحديث حالة الفحص
+        function updateScanStatus(status, message) {
+            const statusElement = document.getElementById('scanStatus');
+            const indicator = statusElement.querySelector('.status-indicator');
+            const text = statusElement.querySelector('span');
+            
+            indicator.className = `status-indicator ${status}`;
+            text.textContent = message;
+        }
+
+        // تحديث الإحصائيات في الهيدر
+        function updateHeaderStats(signals) {
+            const buyCount = signals.filter(s => s.type === 'BUY').length;
+            const sellCount = signals.filter(s => s.type === 'SELL').length;
+            const now = new Date();
+            
+            document.getElementById('activeSignals').textContent = signals.length;
+            document.getElementById('buySignals').textContent = buyCount;
+            document.getElementById('sellSignals').textContent = sellCount;
+            document.getElementById('lastUpdate').textContent = 
+                now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // تعديل دالة loadUTBotSignals الأصلية
+        const originalLoadFunction = loadUTBotSignals;
+        loadUTBotSignals = async function() {
+            updateScanStatus('scanning', 'جاري الفحص...');
+            
+            try {
+                await originalLoadFunction();
+                
+                // الحصول على الإشارات من DOM لتحديث الإحصائيات
+                const signalElements = document.querySelectorAll('.buy-signal-item, .sell-signal-item');
+                const signals = Array.from(signalElements).map(el => ({
+                    type: el.classList.contains('buy-signal-item') ? 'BUY' : 'SELL'
+                }));
+                
+                updateHeaderStats(signals);
+                updateScanStatus('ready', 'جاهز للفحص');
+                
+            } catch (error) {
+                updateScanStatus('error', 'خطأ في الفحص');
+                console.error('خطأ في الفحص:', error);
+            }
+        };
+    </script>
 </body>
 </html>

@@ -9,12 +9,15 @@ class UTBotScanner {
         this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
         this.passphrase = '212160Nm$#';
         
-       this.targetSettings = {
-    baseATRMultiplier: 3.0,    // كان 2.5
-    baseStopMultiplier: 1.4,   // كان 1.5
-            atrPeriod: 14,
-            volumePeriod: 20
-        };
+      this.targetSettings = {
+    baseATRMultiplier: 3.0,      // زيادة للنسب الأفضل
+    baseStopMultiplier: 1.4,     // تحسين النسبة
+    atrPeriod: 14,
+    volumePeriod: 20,
+    minVolumeRatio: 0.8,         // 🔥 فلتر حجم جديد
+    minRiskReward: 1.8           // 🔥 فلتر نسبة جديد
+};
+
     }
 
     async fetchTopSymbols() {
@@ -249,18 +252,18 @@ class UTBotScanner {
             const isBuySignal = buyConditions.some(condition => condition);
             const isSellSignal = sellConditions.some(condition => condition);
             
-            if (isBuySignal || isSellSignal) {
-                const signalType = isBuySignal ? 'BUY' : 'SELL';
-              
-   // 🔥 إضافة فلتر الحجم - بدون تكرار
+           if (isBuySignal || isSellSignal) {
+    const signalType = isBuySignal ? 'BUY' : 'SELL';
+    
+    // 🔥 فلتر الحجم القوي - جديد
     const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
     if (volumeRatio < 0.8) {
         console.log(`⚠️ ${symbol}: حجم ضعيف ${volumeRatio.toFixed(1)}x - تم تجاهل الإشارة`);
         return null;
     }
-
-                // 🔥 استخدام الطريقة الهجينة الذكية
-                const hybridTargets = this.calculateHybridTargets(
+    
+    // 🔥 استخدام الطريقة الهجينة الذكية
+    const hybridTargets = this.calculateHybridTargets(
                     current.close, upperBand, lowerBand, atr, rsi, 
                     currentVolume, avgVolume, signalType
                 );
@@ -271,7 +274,15 @@ class UTBotScanner {
                 
                 const timeframeBonus = timeframe === '1H' ? 15 : 10;
                 const finalScore = Math.abs(baseStrength) + timeframeBonus + (hybridTargets.signalStrength * 20);
-                
+               
+// 🎯 فلتر جودة إضافي
+if (hybridTargets.riskReward < 1.8) {
+    console.log(`⚠️ ${symbol}: نسبة مخاطرة ضعيفة ${hybridTargets.riskReward.toFixed(2)}:1 - تم تجاهل الإشارة`);
+    return null;
+}
+
+console.log(`${signalType === 'BUY' ? '🟢' : '🔴'} إشارة`);
+
                 console.log(`${signalType === 'BUY' ? '🟢' : '🔴'} إشارة ${signalType === 'BUY' ? 'شراء' : 'بيع'} هجينة: ${symbol}`);
                 
                 return {

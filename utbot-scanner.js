@@ -1,599 +1,695 @@
-class UTBotScanner {
+class YaserCrypto {
     constructor() {
-        // إضافة مصادر متعددة
-        this.dataSources = {
-    binance: {
-        base: 'https://corsproxy.io/?https://api1.binance.com/api/v3',
-        direct: 'https://api1.binance.com/api/v3'
-    },
-    okx: {
-       base: 'https://corsproxy.io/?https://www.okx.com/api/v5',
-    direct: 'https://www.okx.com/api/v5',
-        apiKey: 'b20c667d-ae40-48a6-93f4-a11a64185068',
-        secretKey: 'BD7C76F71D1A4E01B4C7E1A23B620365',
-        passphrase: '212160Nm$#'
-    }
-};
-        this.symbols = [];
-        this.isScanning = false;
-        this.requestDelay = 200;
-        this.maxConcurrent = 5;
-        
-        this.targetSettings = {
-            baseATRMultiplier: 3.0,
-            baseStopMultiplier: 1.4,
-            atrPeriod: 14,
-            volumePeriod: 20,
-            minVolumeRatio: 0.8,
-            minRiskReward: 1.8
+        this.coins = [];
+        this.config = {
+            okxApiUrl: "https://www.okx.com/api/v5",
+            binanceApiUrl: "https://api1.binance.com/api/v3",
+            requestDelay: 0,
+            maxCoins: 12,
+            minChange: 1,
+            maxChange: 15,
+            minVolume: 100000,
+            dataSources: ['okx', 'binance']
         };
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.init());
-        } else {
-            this.init();
-        }
+        this.requestDelay = 0;
+        this.init();
     }
 
-
-    init() {
-        console.log('🚀 تهيئة UT Bot Scanner...');
-        this.updateStatus('جاري التهيئة...', '#ff9800');
-        this.startAutoScan();
-    }
-
-    updateStatus(message, color = '#4CAF50') {
-        const statusElement = document.querySelector('.scan-status span');
-        if (statusElement) {
-            statusElement.textContent = message;
-            statusElement.style.color = color;
-        }
-    }
-
-    // تأخير بين الطلبات لتجنب Rate Limit
-    async delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-   async fetchTopSymbols() {
-    try {
-        console.log('📊 جاري جلب قائمة العملات من مصادر متعددة...');
-        this.updateStatus('جلب قائمة العملات...', '#ff9800');
-        
-        const [binanceSymbols, okxSymbols] = await Promise.allSettled([
-            this.fetchBinanceSymbols(),
-            this.fetchOKXSymbols()
-        ]);
-        
-        let allSymbols = [];
-        
-        if (binanceSymbols.status === 'fulfilled') {
-            allSymbols.push(...binanceSymbols.value);
-        }
-        
-        if (okxSymbols.status === 'fulfilled') {
-            allSymbols.push(...okxSymbols.value);
-        }
-        
-        // إزالة المكررات وترتيب حسب الحجم
-        const uniqueSymbols = [...new Set(allSymbols)];
-        this.symbols = uniqueSymbols.slice(0, 50);
-        
-        console.log(`✅ تم تحميل ${this.symbols.length} عملة من مصادر متعددة`);
-        return this.symbols;
-    } catch (error) {
-        console.error('❌ خطأ في جلب العملات:', error);
-        this.updateStatus('خطأ في جلب البيانات', '#f44336');
-        return [];
-    }
-}
-// إضافة بعد دالة fetchTopSymbols
-async fetchBinanceSymbols() {
-    try {
-        // استخدام API مباشر
-        const response = await fetch('https://api1.binance.com/api/v3/ticker/24hr');
-        const tickers = await response.json();
-        
-        if (!Array.isArray(tickers)) {
-            console.error('❌ البيانات ليست array');
-            return [];
-        }
-        
-        return tickers
-            .filter(ticker => 
-                ticker.symbol.endsWith('USDT') &&
-                parseFloat(ticker.quoteVolume) > 10000000
-            )
-            .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-            .slice(0, 25)
-            .map(ticker => ticker.symbol);
-    } catch (error) {
-        console.error('❌ خطأ Binance:', error);
-        return [];
-    }
-}
-
-async fetchOKXSymbols() {
-    try {
-        const okxUrl = 'https://www.okx.com/api/v5/market/tickers?instType=SPOT';
-        const proxyUrl = 'https://corsproxy.io/?' + okxUrl;
-        
-        const response = await fetch(proxyUrl);
-        const result = await response.json();
-        
-        if (!result.data || !Array.isArray(result.data)) {
-            console.error('❌ بيانات OKX غير صحيحة');
-            return [];
-        }
-        
-        return result.data
-            .filter(ticker => 
-                ticker.instId.endsWith('-USDT') &&
-                parseFloat(ticker.volCcy24h) > 5000000
-            )
-            .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
-            .slice(0, 25)
-            .map(ticker => ticker.instId.replace('-', ''));
-    } catch (error) {
-        console.error('❌ خطأ OKX:', error);
-        return [];
-    }
-}
-
-
-        return result.data
-            .filter(ticker => 
-                ticker.instId.endsWith('-USDT') &&
-                parseFloat(ticker.volCcy24h) > 5000000
-            )
-            .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
-            .slice(0, 25)
-            .map(ticker => ticker.instId.replace('-', ''));
-    } catch (error) {
-        console.error('❌ خطأ OKX:', error);
-        return [];
-    }
-}
-
-
-
-    async fetchKlines(symbol, interval, limit = 100) {
-    // جرب Binance أولاً
-    const binanceData = await this.fetchBinanceKlines(symbol, interval, limit);
-    if (binanceData) return binanceData;
-    
-    // إذا فشل، جرب OKX
-    const okxData = await this.fetchOKXKlines(symbol, interval, limit);
-    return okxData;
-}
-
-async fetchBinanceKlines(symbol, interval, limit) {
-    try {
-        await this.delay(this.requestDelay);
-        const response = await fetch(
-            `${this.dataSources.binance.base}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
-        );
-        
-        if (!response.ok) return null;
-        
-        const klines = await response.json();
-        return klines.map(k => ({
-            high: parseFloat(k[2]),
-            low: parseFloat(k[3]),
-            close: parseFloat(k[4]),
-            volume: parseFloat(k[5]),
-            hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
-        }));
-    } catch (error) {
-        return null;
-    }
-}
-
-async fetchOKXKlines(symbol, interval, limit) {
-    try {
-        await this.delay(this.requestDelay);
-        const okxSymbol = symbol.replace('USDT', '-USDT');
-        const okxInterval = this.convertIntervalToOKX(interval);
-        
-        const url = `${this.dataSources.okx.base}/market/candles?instId=${okxSymbol}&bar=${okxInterval}&limit=${limit}`;
-        const response = await fetch(url);
-        
-        if (!response.ok) return null;
-        
-        const data = await response.json();
-        const result = JSON.parse(data.contents);
-        
-        return result.data.map(k => ({
-            high: parseFloat(k[2]),
-            low: parseFloat(k[3]),
-            close: parseFloat(k[4]),
-            volume: parseFloat(k[5]),
-            hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
-        }));
-    } catch (error) {
-        return null;
-    }
-}
-
-convertIntervalToOKX(binanceInterval) {
-    const mapping = {
-        '1h': '1H',
-        '4h': '4H',
-        '1d': '1D'
-    };
-    return mapping[binanceInterval] || '1H';
-}
-
-
-    calculateATR(candles, period = 14) {
-        if (candles.length < period + 1) return 0;
-        
-        let atrSum = 0;
-        for (let i = 1; i <= period; i++) {
-            const current = candles[candles.length - i];
-            const previous = candles[candles.length - i - 1];
-            
-            const tr = Math.max(
-                current.high - current.low,
-                Math.abs(current.high - previous.close),
-                Math.abs(current.low - previous.close)
-            );
-            atrSum += tr;
-        }
-        return atrSum / period;
-    }
-
-    calculateRSI(candles, period = 14) {
-        if (candles.length < period + 1) return 50;
-        
-        let gains = 0;
-        let losses = 0;
-        
-        for (let i = candles.length - period; i < candles.length; i++) {
-            const change = candles[i].close - candles[i - 1].close;
-            if (change > 0) {
-                gains += change;
-            } else {
-                losses += Math.abs(change);
-            }
-        }
-        
-        const avgGain = gains / period;
-        const avgLoss = losses / period;
-        
-        if (avgLoss === 0) return 100;
-        
-        const rs = avgGain / avgLoss;
-        return 100 - (100 / (1 + rs));
-    }
-
-    calculateAverageVolume(candles, period = 20) {
-        if (candles.length < period) return 0;
-        
-        let volumeSum = 0;
-        for (let i = candles.length - period; i < candles.length; i++) {
-            volumeSum += candles[i].volume;
-        }
-        return volumeSum / period;
-    }
-
-    formatPrice(price) {
-        if (price < 0.000001) return price.toFixed(10);
-        if (price < 0.001) return price.toFixed(8);
-        if (price < 1) return price.toFixed(6);
-        if (price < 100) return price.toFixed(4);
-        return price.toFixed(2);
-    }
-
-    async checkUTBotSignal(symbol, interval) {
-        try {
-            const candles = await this.fetchKlines(symbol, interval);
-            if (!candles || candles.length < 50) return null;
-
-            const atr = this.calculateATR(candles);
-            const rsi = this.calculateRSI(candles);
-            const avgVolume = this.calculateAverageVolume(candles);
-            const currentVolume = candles[candles.length - 1].volume;
-            
-            const keyValue = 0.8;
-            const current = candles[candles.length - 1];
-            const previous = candles[candles.length - 2];
-            
-            const upperBand = current.hl2 + (atr * keyValue);
-            const lowerBand = current.hl2 - (atr * keyValue);
-            
-            const isBuySignal = current.close > upperBand && previous.close <= upperBand;
-            const isSellSignal = current.close < lowerBand && previous.close >= lowerBand;
-            
-            if (isBuySignal || isSellSignal) {
-                const signalType = isBuySignal ? 'BUY' : 'SELL';
-                const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
-                
-                if (volumeRatio < 0.8) return null;
-
-                const profitTarget = signalType === 'BUY' 
-                    ? current.close + (atr * 3.0)
-                    : current.close - (atr * 3.0);
-                
-                const stopLoss = signalType === 'BUY'
-                    ? current.close - (atr * 1.4)
-                    : current.close + (atr * 1.4);
-
-                const riskAmount = Math.abs(current.close - stopLoss);
-                const rewardAmount = Math.abs(current.close - profitTarget);
-                const riskReward = riskAmount > 0 ? rewardAmount / riskAmount : 0;
-
-                if (riskReward < 1.8) return null;
-
-                return {
-                    symbol: symbol,
-                    price: this.formatPrice(current.close),
-                    timeframe: interval,
-                    signalType: signalType,
-                    profitTarget: this.formatPrice(profitTarget),
-                    stopLoss: this.formatPrice(stopLoss),
-                    riskReward: riskReward,
-                    rsi: rsi,
-                    atr: atr,
-                    volumeRatio: volumeRatio,
-                    timestamp: Date.now()
-                };
-            }
-            
-            return null;
-        } catch (error) {
-            console.error(`❌ خطأ في فحص ${symbol}:`, error);
-            return null;
-        }
-    }
-
-    async loadUTBotSignals() {
-        if (this.isScanning) {
-            console.log('⏳ الفحص جاري بالفعل...');
-            return;
-        }
-
-        this.isScanning = true;
+    async init() {
         this.showLoading();
-        
-        try {
-            console.log('🔍 بدء فحص إشارات UT Bot...');
-            this.updateStatus('جاري الفحص...', '#ff9800');
-            
-            if (this.symbols.length === 0) {
-                await this.fetchTopSymbols();
-            }
-
-            const intervals = ['1h', '4h'];
-            const allSignals = [];
-            
-            for (const interval of intervals) {
-                console.log(`📊 فحص الإطار الزمني ${interval}...`);
-                
-                             // معالجة متسلسلة لتجنب Rate Limit
-                for (let i = 0; i < this.symbols.length; i += this.maxConcurrent) {
-                    const batch = this.symbols.slice(i, i + this.maxConcurrent);
-                    const promises = batch.map(symbol => this.checkUTBotSignal(symbol, interval));
-                    
-                    const results = await Promise.allSettled(promises);
-                    const signals = results
-                        .filter(result => result.status === 'fulfilled' && result.value)
-                        .map(result => result.value);
-                    
-                    allSignals.push(...signals);
-                    
-                    // تأخير بين المجموعات
-                    if (i + this.maxConcurrent < this.symbols.length) {
-                        await this.delay(1000);
-                    }
-                }
-                
-                console.log(`✅ ${interval}: وُجد ${allSignals.filter(s => s.timeframe === interval).length} إشارة`);
-            }
-
-            // ترتيب الإشارات حسب نسبة المخاطرة والحجم
-            const sortedSignals = allSignals
-                .sort((a, b) => (b.riskReward * b.volumeRatio) - (a.riskReward * a.volumeRatio))
-                .slice(0, 6); // أفضل 6 إشارات
-
-            console.log(`🎯 إجمالي الإشارات المختارة: ${sortedSignals.length}`);
-            
-            this.displaySignals(sortedSignals);
-            this.updateStats(sortedSignals);
-            this.updateStatus('نشط', '#4CAF50');
-            
-        } catch (error) {
-            console.error('❌ خطأ في تحميل الإشارات:', error);
-            this.showError('حدث خطأ في تحميل الإشارات');
-            this.updateStatus('خطأ', '#f44336');
-        } finally {
-            this.isScanning = false;
-            this.hideLoading();
-        }
+        await this.fetchData();
+        this.analyzeCoins();
+        this.renderCoins();
     }
 
     showLoading() {
-        const container = document.getElementById('signals-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="ut-bot-loading">
-                    <div class="loading-spinner"></div>
-                    <h3>🔍 جاري فحص الأسواق...</h3>
-                    <p>البحث عن أفضل الإشارات الهجينة</p>
-                </div>
-            `;
-        }
-
-        // تعطيل زر الفحص
-        const scanBtn = document.getElementById('manual-scan-btn');
-        if (scanBtn) {
-            scanBtn.disabled = true;
-            scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الفحص...';
+        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
+        // إظهار شريط التحميل
+        const loader = document.getElementById('pageLoader');
+        if (loader) {
+            loader.style.opacity = "1";
+            loader.style.display = "flex";
         }
     }
 
-    hideLoading() {
-        // تفعيل زر الفحص
-        const scanBtn = document.getElementById('manual-scan-btn');
-        if (scanBtn) {
-            scanBtn.disabled = false;
-            scanBtn.innerHTML = '<i class="fas fa-search"></i> فحص يدوي';
+    hideLoader() {
+        const loader = document.getElementById('pageLoader');
+        if(loader){
+            loader.style.opacity = "0";
+            setTimeout(()=>loader.style.display="none", 400);
         }
     }
 
     showError(message) {
-        const container = document.getElementById('signals-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>خطأ في التحميل</h3>
-                    <p>${message}</p>
-                    <button onclick="utbotScanner.loadUTBotSignals()" class="retry-btn">
-                        <i class="fas fa-redo"></i> إعادة المحاولة
-                    </button>
-                </div>
-            `;
-        }
+        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
+        this.hideLoader(); // إخفاء الشريط في حالة الخطأ أيضًا
     }
 
-    displaySignals(signals) {
-        const container = document.getElementById('signals-container');
-        if (!container) {
-            console.error('❌ لم يتم العثور على حاوي الإشارات');
-            return;
-        }
-
-        if (signals.length === 0) {
-            container.innerHTML = `
-                <div class="no-signals">
-                    <i class="fas fa-search"></i>
-                    <h3>لا توجد إشارات حالياً</h3>
-                    <p>لم يتم العثور على إشارات تتوافق مع المعايير المحددة</p>
-                    <small>سيتم البحث مرة أخرى خلال 15 دقيقة</small>
-                </div>
-            `;
-            return;
-        }
-
-        const signalsHTML = signals.map(signal => {
-            const signalClass = signal.signalType === 'BUY' ? 'buy-signal-item' : 'sell-signal-item';
-            const signalColor = signal.signalType === 'BUY' ? '#4CAF50' : '#f44336';
-            const signalIcon = signal.signalType === 'BUY' ? 'fa-arrow-up' : 'fa-arrow-down';
+    async fetchData() {
+        try {
+            console.log('🚀 بدء عملية جلب البيانات من مصادر متعددة...');
             
-            // حساب نسبة الربح/الخسارة المتوقعة
-            const profitPercent = signal.signalType === 'BUY' 
-                ? ((parseFloat(signal.profitTarget) - parseFloat(signal.price)) / parseFloat(signal.price) * 100)
-                : ((parseFloat(signal.price) - parseFloat(signal.profitTarget)) / parseFloat(signal.price) * 100);
+            // جلب البيانات من كلا المصدرين بشكل متوازي
+            const [okxSymbols, binanceSymbols] = await Promise.allSettled([
+                this.fetchTopGainersFromOKX(),
+                this.fetchTopGainersFromBinance()
+            ]);
+
+            let candidateSymbols = [];
             
-            const lossPercent = signal.signalType === 'BUY'
-                ? ((parseFloat(signal.price) - parseFloat(signal.stopLoss)) / parseFloat(signal.price) * 100)
-                : ((parseFloat(signal.stopLoss) - parseFloat(signal.price)) / parseFloat(signal.price) * 100);
+            // دمج النتائج من OKX
+            if (okxSymbols.status === 'fulfilled' && okxSymbols.value) {
+                console.log(`📊 OKX: ${okxSymbols.value.length} عملة`);
+                candidateSymbols = candidateSymbols.concat(
+                    okxSymbols.value.map(symbol => ({ symbol, source: 'okx' }))
+                );
+            } else {
+                console.warn('⚠️ فشل في جلب البيانات من OKX:', okxSymbols.reason);
+            }
 
-            return `
-                <div class="${signalClass}">
-                    <div class="signal-header">
-                        <div class="timeframe-indicator">${signal.timeframe.toUpperCase()}</div>
-                        <strong>${signal.symbol}</strong>
-                        <span style="color: ${signalColor}; font-weight: bold;">
-                            <i class="fas ${signalIcon}"></i> ${signal.signalType}
-                        </span>
-                    </div>
-                    
-                    <div class="signal-price">
-                        <span style="font-weight: bold; font-size: 1.2em;">السعر: $${signal.price}</span>
-                    </div>
-                    
-                    <div class="targets-info">
-                        <div style="margin-bottom: 8px;">
-                            <span style="font-weight: bold;">🎯 الهدف:</span>
-                            <span style="color: #4CAF50; font-weight: bold;">$${signal.profitTarget}</span>
-                            <span style="color: #4CAF50;">(+${profitPercent.toFixed(2)}%)</span>
-                        </div>
-                        <div style="margin-bottom: 8px;">
-                            <span style="font-weight: bold;">🛑 الستوب:</span>
-                            <span style="color: #f44336; font-weight: bold;">$${signal.stopLoss}</span>
-                            <span style="color: #f44336;">(-${lossPercent.toFixed(2)}%)</span>
-                        </div>
-                        <div>
-                            <span style="font-weight: bold;">⚖️ نسبة المخاطرة:</span>
-                            <span style="color: #FF9800; font-weight: bold;">${signal.riskReward.toFixed(2)}:1</span>
-                        </div>
-                    </div>
-                    
-                    <div class="hybrid-info">
-                        <span>📊 RSI: <strong>${signal.rsi.toFixed(1)}</strong></span>
-                        <span>📈 حجم: <strong>${signal.volumeRatio.toFixed(1)}x</strong></span>
-                        <span>⚡ ATR: <strong>${signal.atr.toFixed(6)}</strong></span>
-                        <span>⏰ ${new Date(signal.timestamp).toLocaleTimeString('ar-SA', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
+            // دمج النتائج من Binance
+            if (binanceSymbols.status === 'fulfilled' && binanceSymbols.value) {
+                console.log(`📊 Binance: ${binanceSymbols.value.length} عملة`);
+                candidateSymbols = candidateSymbols.concat(
+                    binanceSymbols.value.map(symbol => ({ symbol, source: 'binance' }))
+                );
+            } else {
+                console.warn('⚠️ فشل في جلب البيانات من Binance:', binanceSymbols.reason);
+            }
 
-        container.innerHTML = signalsHTML;
-    }
+            if (candidateSymbols.length === 0) {
+                throw new Error('لم يتم العثور على عملات مرشحة من أي مصدر');
+            }
 
-    updateStats(signals) {
-        const totalSignals = signals.length;
-        const buySignals = signals.filter(s => s.signalType === 'BUY').length;
-        const sellSignals = signals.filter(s => s.signalType === 'SELL').length;
-        
-        // تحديث العناصر في الهيدر
-        const activeSignalsElement = document.getElementById('active-signals');
-        const buySignalsElement = document.getElementById('buy-signals');
-        const sellSignalsElement = document.getElementById('sell-signals');
-        const lastUpdateElement = document.getElementById('last-update');
-        
-        if (activeSignalsElement) activeSignalsElement.textContent = totalSignals;
-        if (buySignalsElement) buySignalsElement.textContent = buySignals;
-        if (sellSignalsElement) sellSignalsElement.textContent = sellSignals;
-        if (lastUpdateElement) {
-            const now = new Date();
-            lastUpdateElement.textContent = now.toLocaleTimeString('ar-SA', {
-                hour: '2-digit',
-                minute: '2-digit'
+            // إزالة التكرارات وإعطاء أولوية للعملات الموجودة في كلا المصدرين
+            const uniqueSymbols = this.mergeDuplicateSymbols(candidateSymbols);
+            console.log(`📋 سيتم تحليل ${uniqueSymbols.length} عملة فريدة`);
+
+            const results = [];
+            for (let i = 0; i < uniqueSymbols.length; i++) {
+                const { symbol, source, priority } = uniqueSymbols[i];
+                
+                try {
+                    console.log(`🔄 تحليل ${symbol} من ${source}... (${i + 1}/${uniqueSymbols.length})`);
+                    
+                    const coin = await this.fetchCoinData(symbol, source);
+                    if (coin && typeof coin.change24h === 'number' && !isNaN(coin.change24h)) {
+                        coin.priority = priority;
+                        coin.dataSource = source;
+                        results.push(coin);
+                        console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}% (${source})`);
+                    } else {
+                        console.warn(`⚠️ بيانات غير صالحة لـ ${symbol}`);
+                    }
+
+                    if (i < uniqueSymbols.length - 1) {
+                        await this.delay(this.requestDelay);
+                    }
+
+                } catch (error) {
+                    console.warn(`❌ فشل في تحليل ${symbol}:`, error.message);
+                    continue;
+                }
+            }
+
+            if (results.length === 0) {
+                throw new Error('فشل في الحصول على بيانات صالحة لأي عملة');
+            }
+
+            // 1- تحليل كل العملات المرشحة
+            this.analyzeCoinsList(results);
+
+            // 2- ترتيب النتائج بالنقاط وأخذ أفضل maxCoins فقط
+            const sortedResults = results.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score; // النقاط أولاً
+                }
+                if (b.priority !== a.priority) {
+                    return b.priority - a.priority; // ثم الأولوية
+                }
+                return b.change24h - a.change24h; // ثم التغيير اليومي
             });
+
+            this.coins = sortedResults.slice(0, this.config.maxCoins);
+
+            // 3- إعادة الترتيب التسلسلي 1 → n
+            this.coins.forEach((coin, idx) => {
+                coin.rank = idx + 1;
+            });
+
+            console.log(`🎉 تم تحليل وترتيب ${this.coins.length} عملة بنجاح وعرض أفضلها فقط`);
+
+        } catch (error) {
+            console.error('💥 خطأ في fetchData:', error);
+            this.showError(`خطأ في جلب البيانات: ${error.message}`);
+            throw error;
         }
-        
-        console.log(`📊 الإحصائيات: ${totalSignals} إشارة (${buySignals} شراء، ${sellSignals} بيع)`);
     }
 
-    startAutoScan() {
-        console.log('🔄 بدء الفحص التلقائي...');
-        
-        // فحص فوري عند البدء
-        setTimeout(() => {
-            this.loadUTBotSignals();
-        }, 2000);
-        
-        // فحص كل 15 دقيقة (900000 مللي ثانية) - زيادة الفترة لتجنب Rate Limit
-        setInterval(() => {
-            console.log('🔄 فحص تلقائي مجدول...');
-            this.loadUTBotSignals();
-        }, 900000);
-        
-        // إعداد زر الفحص اليدوي
-        const manualScanBtn = document.getElementById('manual-scan-btn');
-        if (manualScanBtn) {
-            manualScanBtn.addEventListener('click', () => {
-                if (!this.isScanning) {
-                    console.log('👆 فحص يدوي بواسطة المستخدم');
-                    this.loadUTBotSignals();
+    // دالة تحليل قائمة كاملة من العملات (حتى يمكن ترتيبها بالنقاط)
+    analyzeCoinsList(coinsList) {
+        coinsList.forEach((coin, index) => {
+            // حساب النقاط بناءً على المؤشرات الفنية
+            let score = 0;
+            const indicators = coin.technicalIndicators;
+            
+            // نقاط RSI
+            if (indicators.rsi >= 30 && indicators.rsi <= 70) {
+                score += 20;
+            } else if (indicators.rsi < 30) {
+                score += 30;
+            }
+            // نقاط MACD
+            if (indicators.macd > indicators.macdSignal) {
+                score += 25;
+            }
+            // نقاط MFI
+            if (indicators.mfi >= 20 && indicators.mfi <= 80) {
+                score += 15;
+            }
+            // نقاط CVD
+            if (indicators.cvd.trend === 'bullish') {
+                score += 20;
+                if (indicators.cvd.strength === 'strong') {
+                    score += 10;
+                }
+            }
+            // نقاط التغيير اليومي
+            if (coin.change24h > 0) {
+                score += Math.min(coin.change24h * 2, 30);
+            }
+            // نقاط الأولوية
+            if (coin.priority === 3) {
+                score += 15;
+            }
+            coin.score = Math.round(score);
+
+            // تحديد الشروط
+            coin.conditions = {
+                rsiGood: indicators.rsi >= 30 && indicators.rsi <= 70,
+                macdBullish: indicators.macd > indicators.macdSignal,
+                mfiHealthy: indicators.mfi >= 20 && indicators.mfi <= 80,
+                cvdBullish: indicators.cvd.trend === 'bullish',
+                priceAboveEMA: coin.price > indicators.ema20,
+                volumeGood: coin.volume > this.config.minVolume,
+                changePositive: coin.change24h > 0,
+                multiSource: coin.priority === 3
+            };
+
+            // أهداف فيبوناتشي
+            coin.targets = {
+                target1: indicators.fibonacci.level236,
+                target2: indicators.fibonacci.level382,
+                target3: indicators.fibonacci.level500,
+                stopLoss: indicators.parabolicSAR
+            };
+        });
+    }
+
+    // الدالة القديمة لتحليل العملات (ستخدم فقط للعرض النهائي)
+    analyzeCoins() {
+        // لا تحتاج فعل أي شيء هنا لأن التحليل تم مسبقاً في analyzeCoinsList
+        // فقط إعادة الترتيب (احتياط)
+        this.coins.sort((a, b) => b.score - a.score);
+        this.coins.forEach((coin, idx) => {
+            coin.rank = idx + 1;
+        });
+    }
+
+    // باقي الدوال كما هي...
+    mergeDuplicateSymbols(candidateSymbols) {
+        const symbolMap = new Map();
+        candidateSymbols.forEach(({ symbol, source }) => {
+            if (symbolMap.has(symbol)) {
+                symbolMap.get(symbol).priority = 3;
+                symbolMap.get(symbol).sources.push(source);
+            } else {
+                symbolMap.set(symbol, {
+                    symbol,
+                    source,
+                    sources: [source],
+                    priority: 1
+                });
+            }
+        });
+        return Array.from(symbolMap.values());
+    }
+
+    async fetchTopGainersFromOKX() {
+        try {
+            console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
+            const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
                 }
             });
+            if (!response.ok) {
+                throw new Error(`فشل في جلب البيانات: ${response.status}`);
+            }
+            const data = await response.json();
+            if (!data.data || data.data.length === 0) {
+                throw new Error('لا توجد بيانات من OKX API');
+            }
+            const usdtPairs = data.data
+                .filter(ticker => {
+                    if (!ticker.instId || !ticker.instId.endsWith('-USDT')) return false;
+                    const currentPrice = parseFloat(ticker.last);
+                    const openPrice = parseFloat(ticker.open24h);
+                    const volume = parseFloat(ticker.vol24h);
+                    if (!currentPrice || !openPrice || currentPrice <= 0 || openPrice <= 0) return false;
+                    const change24h = ((currentPrice - openPrice) / openPrice) * 100;
+                    const validChange = change24h > 0.5 && change24h < 25;
+                    const validVolume = volume > 10000;
+                    return validChange && validVolume;
+                })
+                .map(ticker => ticker.instId.replace('-USDT', ''))
+                .slice(0, 12);
+            return usdtPairs;
+        } catch (error) {
+            console.error('❌ خطأ في fetchTopGainersFromOKX:', error);
+            throw error;
         }
+    }
+
+    async fetchTopGainersFromBinance() {
+        try {
+            console.log('جاري جلب قائمة أعلى الرابحون من Binance...');
+            const response = await fetch('https://api1.binance.com/api/v3/ticker/24hr', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`فشل في جلب البيانات من Binance: ${response.status}`);
+            }
+            const data = await response.json();
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error('لا توجد بيانات من Binance API');
+            }
+            const usdtPairs = data
+                .filter(ticker => {
+                    if (!ticker.symbol || !ticker.symbol.endsWith('USDT')) return false;
+                    const change24h = parseFloat(ticker.priceChangePercent);
+                    const volume = parseFloat(ticker.quoteVolume);
+                    const price = parseFloat(ticker.lastPrice);
+                    if (isNaN(change24h) || isNaN(volume) || isNaN(price) || price <= 0) return false;
+                    const validChange = change24h > 0.5 && change24h < 25;
+                    const validVolume = volume > 10000;
+                    return validChange && validVolume;
+                })
+                .map(ticker => ticker.symbol.replace('USDT', ''))
+                .slice(0, 12);
+            return usdtPairs;
+        } catch (error) {
+            console.error('❌ خطأ في fetchTopGainersFromBinance:', error);
+            throw error;
+        }
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async fetchCoinData(symbol, source = 'okx') {
+        try {
+            if (source === 'binance') {
+                return await this.fetchCoinDataFromBinance(symbol);
+            } else {
+                return await this.fetchCoinDataFromOKX(symbol);
+            }
+        } catch (error) {
+            console.error(`خطأ في جلب بيانات ${symbol} من ${source}:`, error);
+            throw error;
+        }
+    }
+
+    async fetchCoinDataFromOKX(symbol) {
+        try {
+            const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
+            const candlesUrl = `https://www.okx.com/api/v5/market/candles?instId=${symbol}-USDT&bar=1H&limit=100`;
+            const tickerResponse = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!tickerResponse.ok) {
+                throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+            }
+            const tickerData = await tickerResponse.json();
+            if (!tickerData.data || tickerData.data.length === 0) {
+                throw new Error(`لا توجد بيانات لـ ${symbol}`);
+            }
+            await this.delay(100);
+            const candlesResponse = await fetch(candlesUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            let historicalData = [];
+            if (candlesResponse.ok) {
+                const candlesData = await candlesResponse.json();
+                if (candlesData.data && candlesData.data.length > 0) {
+                    historicalData = candlesData.data.map(candle => ({
+                        timestamp: parseInt(candle[0]),
+                        open: parseFloat(candle[1]),
+                        high: parseFloat(candle[2]),
+                        low: parseFloat(candle[3]),
+                        close: parseFloat(candle[4]),
+                        volume: parseFloat(candle[5]),
+                        volumeQuote: parseFloat(candle[6])
+                    }));
+                }
+            }
+            const ticker = tickerData.data[0];
+            const currentPrice = parseFloat(ticker.last);
+            const openPrice24h = parseFloat(ticker.open24h);
+            const change24h = parseFloat(ticker.changePercent) || (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
+            const coin = {
+                symbol: symbol,
+                name: symbol,
+                price: currentPrice,
+                change24h: change24h,
+                volume: parseFloat(ticker.vol24h) || 0,
+                high24h: parseFloat(ticker.high24h) || currentPrice,
+                low24h: parseFloat(ticker.low24h) || currentPrice,
+                historicalData: historicalData,
+                technicalIndicators: {},
+                score: 0,
+                rank: 0,
+                conditions: {},
+                targets: {},
+                dataSource: 'okx'
+            };
+            this.calculateTechnicalIndicators(coin);
+            return coin;
+        } catch (error) {
+            console.error(`خطأ في جلب بيانات ${symbol} من OKX:`, error);
+            throw error;
+        }
+    }
+
+    async fetchCoinDataFromBinance(symbol) {
+        try {
+            const tickerUrl = `https://api1.binance.com/api/v3/ticker/24hr?symbol=${symbol}USDT`;
+            const klinesUrl = `https://api1.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=1h&limit=100`;
+            const tickerResponse = await fetch(tickerUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            if (!tickerResponse.ok) {
+                throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
+            }
+            const tickerData = await tickerResponse.json();
+            await this.delay(100);
+            const klinesResponse = await fetch(klinesUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            let historicalData = [];
+            if (klinesResponse.ok) {
+                const klinesData = await klinesResponse.json();
+                if (Array.isArray(klinesData) && klinesData.length > 0) {
+                    historicalData = klinesData.map(kline => ({
+                        timestamp: kline[0],
+                        open: parseFloat(kline[1]),
+                        high: parseFloat(kline[2]),
+                        low: parseFloat(kline[3]),
+                        close: parseFloat(kline[4]),
+                        volume: parseFloat(kline[5]),
+                        volumeQuote: parseFloat(kline[7])
+                    }));
+                }
+            }
+            const currentPrice = parseFloat(tickerData.lastPrice);
+            const change24h = parseFloat(tickerData.priceChangePercent);
+            const coin = {
+                symbol: symbol,
+                name: symbol,
+                price: currentPrice,
+                change24h: change24h,
+                volume: parseFloat(tickerData.quoteVolume) || 0,
+                high24h: parseFloat(tickerData.highPrice) || currentPrice,
+                low24h: parseFloat(tickerData.lowPrice) || currentPrice,
+                historicalData: historicalData,
+                technicalIndicators: {},
+                score: 0,
+                rank: 0,
+                conditions: {},
+                targets: {},
+                dataSource: 'binance'
+            };
+            this.calculateTechnicalIndicators(coin);
+            return coin;
+        } catch (error) {
+            console.error(`خطأ في جلب بيانات ${symbol} من Binance:`, error);
+            throw error;
+        }
+    }
+
+    calculateTechnicalIndicators(coin) {
+        const historicalData = coin.historicalData || [];
+        if (historicalData.length >= 14) {
+            coin.technicalIndicators.rsi = this.calculateRSI(historicalData);
+        } else {
+            coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
+            if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
+            if (coin.technicalIndicators.rsi < 0) coin.technicalIndicators.rsi = 0;
+        }
+        if (historicalData.length >= 26) {
+            const macdData = this.calculateMACD(historicalData);
+            coin.technicalIndicators.macd = macdData.macd;
+            coin.technicalIndicators.macdSignal = macdData.signal;
+        } else {
+            coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
+            coin.technicalIndicators.macdSignal = 0;
+        }
+        if (historicalData.length >= 14) {
+            coin.technicalIndicators.mfi = this.calculateMFI(historicalData);
+        } else {
+            coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
+        }
+        coin.technicalIndicators.cvd = this.calculateCVD(historicalData, coin);
+        if (historicalData.length >= 2) {
+            coin.technicalIndicators.parabolicSAR = this.calculateParabolicSAR(historicalData);
+        } else {
+            coin.technicalIndicators.parabolicSAR = coin.price * 0.98;
+        }
+        const currentPrice = coin.price;
+        if (historicalData.length >= 50) {
+            coin.technicalIndicators.ema20 = this.calculateEMA(historicalData, 20);
+            coin.technicalIndicators.ema50 = this.calculateEMA(historicalData, 50);
+        } else {
+            coin.technicalIndicators.ema20 = currentPrice;
+            coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
+        }
+        const low24h = currentPrice * (1 - (coin.change24h / 100));
+        const high24h = currentPrice;
+        const range = high24h - low24h;
+        coin.technicalIndicators.fibonacci = {
+            level0: high24h,
+            level236: high24h + (range * 0.236),
+            level382: high24h + (range * 0.382),
+            level500: high24h + (range * 0.500),
+            level618: high24h + (range * 0.618),
+            level786: low24h + (range * 0.214),
+            level1000: low24h
+        };
+    }
+
+    calculateRSI(historicalData, period = 14) {
+        if (historicalData.length < period + 1) return 50;
+        let gains = 0, losses = 0;
+        for (let i = 1; i <= period; i++) {
+            const change = historicalData[i].close - historicalData[i - 1].close;
+            if (change > 0) gains += change;
+            else losses += Math.abs(change);
+        }
+        let avgGain = gains / period, avgLoss = losses / period;
+        for (let i = period + 1; i < historicalData.length; i++) {
+            const change = historicalData[i].close - historicalData[i - 1].close;
+            const gain = change > 0 ? change : 0;
+            const loss = change < 0 ? Math.abs(change) : 0;
+            avgGain = ((avgGain * (period - 1)) + gain) / period;
+            avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+        }
+        if (avgLoss === 0) return 100;
+        const rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
+    }
+
+    calculateMACD(historicalData, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+        if (historicalData.length < slowPeriod) return { macd: 0, signal: 0 };
+        const prices = historicalData.map(d => d.close);
+        const ema12 = this.calculateEMAFromPrices(prices, fastPeriod);
+        const ema26 = this.calculateEMAFromPrices(prices, slowPeriod);
+        const macdLine = ema12 - ema26;
+        const signalLine = macdLine * 0.1;
+        return { macd: macdLine, signal: signalLine };
+    }
+
+    calculateMFI(historicalData, period = 14) {
+        if (historicalData.length < period + 1) return 50;
+        let positiveFlow = 0, negativeFlow = 0;
+        for (let i = 1; i <= period; i++) {
+            const current = historicalData[i], previous = historicalData[i - 1];
+            const typicalPrice = (current.high + current.low + current.close) / 3;
+            const previousTypicalPrice = (previous.high + previous.low + previous.close) / 3;
+            const moneyFlow = typicalPrice * current.volume;
+            if (typicalPrice > previousTypicalPrice) positiveFlow += moneyFlow;
+            else if (typicalPrice < previousTypicalPrice) negativeFlow += moneyFlow;
+        }
+        if (negativeFlow === 0) return 100;
+        const moneyFlowRatio = positiveFlow / negativeFlow;
+        return 100 - (100 / (1 + moneyFlowRatio));
+    }
+
+    calculateCVD(historicalData, coin) {
+        if (!historicalData || historicalData.length === 0) {
+            const volumeDirection = coin.change24h > 0 ? 1 : -1;
+            return {
+                value: coin.volume * volumeDirection,
+                trend: coin.change24h > 0 ? 'bullish' : 'bearish',
+                strength: Math.abs(coin.change24h) > 5 ? 'strong' : 'weak'
+            };
+        }
+        let cvd = 0, previousCvd = 0;
+        for (let i = 1; i < historicalData.length; i++) {
+            const current = historicalData[i], previous = historicalData[i - 1];
+            let volumeDirection;
+            if (current.close > previous.close) volumeDirection = 1;
+            else if (current.close < previous.close) volumeDirection = -1;
+            else volumeDirection = 0;
+            cvd += current.volume * volumeDirection;
+        }
+        const trend = cvd > previousCvd ? 'bullish' : 'bearish';
+        const strength = Math.abs(cvd) > (coin.volume * 10) ? 'strong' : 'weak';
+        return { value: cvd, trend, strength };
+    }
+
+    calculateParabolicSAR(historicalData) {
+        if (historicalData.length < 2) return historicalData[0]?.close || 0;
+        const current = historicalData[historicalData.length - 1];
+        const previous = historicalData[historicalData.length - 2];
+        const af = 0.02;
+        const trend = current.close > previous.close ? 'up' : 'down';
+        if (trend === 'up') {
+            return current.low - (current.high - current.low) * af;
+        } else {
+            return current.high + (current.high - current.low) * af;
+        }
+    }
+
+    calculateEMA(historicalData, period) {
+        if (historicalData.length < period) {
+            return historicalData[historicalData.length - 1]?.close || 0;
+        }
+        const prices = historicalData.map(d => d.close);
+        return this.calculateEMAFromPrices(prices, period);
+    }
+
+    calculateEMAFromPrices(prices, period) {
+        if (prices.length < period) {
+            return prices[prices.length - 1] || 0;
+        }
+        const multiplier = 2 / (period + 1);
+        let ema = prices.slice(0, period).reduce((sum, price) => sum + price, 0) / period;
+        for (let i = period; i < prices.length; i++) {
+            ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
+        }
+        return ema;
+    }
+
+     renderCoins() {
+        const coinsGrid = document.getElementById('coinsGrid');
+        if (!coinsGrid) {
+            console.error('عنصر coinsGrid غير موجود');
+            this.hideLoader();
+            return;
+        }
+        if (this.coins.length === 0) {
+            coinsGrid.innerHTML = '<div class="no-data">لا توجد عملات للعرض</div>';
+            this.hideLoader();
+            return;
+        }
+        let html = '';
+        this.coins.forEach(coin => {
+            let rankIcon = '', rankClass = '';
+            if (coin.rank === 1) {
+                rankIcon = '🥇';
+                rankClass = 'first-place';
+            } else if (coin.rank === 2) {
+                rankIcon = '🥈';
+                rankClass = 'second-place';
+            } else if (coin.rank === 3) {
+                rankIcon = '🥉';
+                rankClass = 'third-place';
+            } else {
+                rankIcon = `#${coin.rank}`;
+                rankClass = 'other-place';
+            }
+            const sourceIcon = coin.dataSource === 'binance' ? '🟡' : '🔵';
+            const priorityBadge = coin.priority === 3 ? '<span class="multi-source">⭐</span>' : '';
+            let scoreClass = '';
+            if (coin.score >= 90) scoreClass = 'score-excellent';
+            else if (coin.score >= 80) scoreClass = 'score-very-good';
+            else if (coin.score >= 70) scoreClass = 'score-good';
+            else if (coin.score >= 60) scoreClass = 'score-average';
+            else scoreClass = 'score-poor';
+            html += `
+                <div class="coin-card ${rankClass}" onclick="window.location.href='coin.html?symbol=${coin.symbol}'">
+                    <div class="rank-badge">
+                        <span class="rank-icon">${rankIcon}</span>
+                    </div>
+                    <div class="coin-header">
+                        <div class="coin-symbol">
+                            ${sourceIcon} ${coin.symbol} ${priorityBadge}
+                        </div>
+                        <div class="coin-score ${scoreClass}">
+                            ${coin.score}
+                        </div>
+                    </div>
+                    <div class="coin-price">
+                        $${coin.price.toFixed(6)}
+                    </div>
+                    <div class="coin-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
+                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
+                    </div>
+                    <div class="coin-volume">
+                        الحجم: ${this.formatNumber(coin.volume)}
+                    </div>
+                </div>
+            `;
+        });
+        localStorage.setItem('yaserCryptoCoins', JSON.stringify(this.coins));
+        coinsGrid.innerHTML = html;
+        this.hideLoader();
+        console.log('✅ تم عرض البطاقات بنجاح');
+    }
+    formatNumber(num) {
+        if (num >= 1000000000) {
+            return (num / 1000000000).toFixed(1) + 'B';
+        } else if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toFixed(0);
     }
 }
 
-// إنشاء مثيل عام للاستخدام
-const utbotScanner = new UTBotScanner();
-
-// تصدير للاستخدام في ملفات أخرى
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = UTBotScanner;
-}
-
+// تشغيل التطبيق عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة مع مصادر متعددة');
+    window.yaserCryptoInstance = new YaserCrypto();
+ 
+});

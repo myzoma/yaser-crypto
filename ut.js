@@ -4,12 +4,10 @@ class UTBotScanner {
         this.symbols = [];
         this.isScanning = false;
         
-        // ضع بياناتك هنا
         this.apiKey = 'b20c667d-ae40-48a6-93f4-a11a64185068';
         this.secretKey = 'BD7C76F71D1A4E01B4C7E1A23B620365';
         this.passphrase = '212160Nm$#';
         
-        // إعدادات الأهداف
         this.targetSettings = {
             profitMultiplier: 2.5,
             stopMultiplier: 1.5,
@@ -90,11 +88,9 @@ class UTBotScanner {
 
     async checkUTBotSignal(symbol, timeframe) {
         try {
-            const response = await fetch(
-                `${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`
-            );
-            
+            const response = await fetch(`${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=50`);
             const result = await response.json();
+            
             if (result.code !== '0' || !result.data) return null;
             
             const klines = result.data;
@@ -119,17 +115,13 @@ class UTBotScanner {
             
             const buyConditions = [
                 current.close > upperBand && previous.close <= upperBand,
-                current.close > upperBand * 0.98 && 
-                current.close > previous.close && 
-                previous.close > prev2.close,
+                current.close > upperBand * 0.98 && current.close > previous.close && previous.close > prev2.close,
                 current.close > upperBand * 1.01
             ];
             
             const sellConditions = [
                 current.close < lowerBand && previous.close >= lowerBand,
-                current.close < lowerBand * 1.02 && 
-                current.close < previous.close && 
-                previous.close < prev2.close,
+                current.close < lowerBand * 1.02 && current.close < previous.close && previous.close < prev2.close,
                 current.close < lowerBand * 0.99
             ];
             
@@ -140,9 +132,6 @@ class UTBotScanner {
                 const strength = ((current.close - upperBand) / upperBand * 100);
                 const timeframeBonus = timeframe === '1H' ? 15 : 10;
                 const targets = this.calculateTargets(current.close, atr, 'BUY');
-                
-                console.log(`🟢 إشارة شراء: ${symbol} (${timeframe}) - السعر: ${current.close}`);
-                console.log(`🎯 هدف الربح: ${this.formatPrice(targets.profitTarget)} | وقف الخسارة: ${this.formatPrice(targets.stopLoss)}`);
                 
                 return {
                     symbol: symbol,
@@ -165,9 +154,6 @@ class UTBotScanner {
                 const strength = ((lowerBand - current.close) / lowerBand * 100);
                 const timeframeBonus = timeframe === '1H' ? 15 : 10;
                 const targets = this.calculateTargets(current.close, atr, 'SELL');
-                
-                console.log(`🔴 إشارة بيع: ${symbol} (${timeframe}) - السعر: ${current.close}`);
-                console.log(`🎯 هدف الربح: ${this.formatPrice(targets.profitTarget)} | وقف الخسارة: ${this.formatPrice(targets.stopLoss)}`);
                 
                 return {
                     symbol: symbol,
@@ -210,15 +196,10 @@ class UTBotScanner {
                     }
                 }
                 
-                if (Math.abs(change) < 0.01 && Math.abs(change) > 0) {
-                    change = change * 100;
-                }
-                
                 return isNaN(change) ? '0.00' : change.toFixed(2);
             }
             return '0.00';
         } catch (error) {
-            console.warn(`خطأ في جلب التغيير لـ ${symbol}:`, error);
             return '0.00';
         }
     }
@@ -284,19 +265,6 @@ class UTBotScanner {
                 .sort((a, b) => b.score - a.score)
                 .slice(0, 3);
 
-            const buyCount = finalSignals.filter(s => s.type === 'BUY').length;
-            const sellCount = finalSignals.filter(s => s.type === 'SELL').length;
-
-            console.log(`🎉 تم تحليل ${allSignals.length} إشارة وعرض أفضل 3 عملات: ${buyCount} شراء، ${sellCount} بيع`);
-            
-            if (finalSignals.length > 0) {
-                console.log('🎯 أفضل 3 عملات مع الأهداف:', 
-                    finalSignals.map(s => 
-                        `${s.symbol}(${s.timeframe}-${s.type}) Target: ${s.targets.profitTarget}`
-                    ).join(', ')
-                );
-            }
-            
             return finalSignals;
             
         } catch (error) {
@@ -328,19 +296,19 @@ async function loadUTBotSignals() {
             return;
         }
 
-                const signalsHTML = signals.map(signal => {
+        const signalsHTML = signals.map(signal => {
             const signalColor = signal.type === 'BUY' ? '#4CAF50' : '#f44336';
             const signalIcon = signal.type === 'BUY' ? '🟢' : '🔴';
             const signalText = signal.type === 'BUY' ? 'شراء' : 'بيع';
             
             return `
-                <div class="${signal.type.toLowerCase()}-signal-item" title="قوة الإشارة: ${signal.strength.toFixed(2)}%">
+                <div class="${signal.type.toLowerCase()}-signal-item">
                     <div class="signal-header">
                         <span class="timeframe-indicator">${signal.timeframe}</span>
                         <span style="color: ${signalColor};">${signalIcon} ${signalText}</span>
                         <strong>${signal.symbol.replace('-USDT', '/USDT')}</strong>
                         <span style="color: ${signalColor}; font-weight: bold;">$${signal.price}</span>
-                        <span style="color: ${parseFloat(signal.change24h) >= 0 ? '#4CAF50' : '#f44336'}; margin-left: 5px;">
+                        <span style="color: ${parseFloat(signal.change24h) >= 0 ? '#4CAF50' : '#f44336'};">
                             (${signal.change24h}%)
                         </span>
                     </div>
@@ -349,16 +317,11 @@ async function loadUTBotSignals() {
                         🛑 <span style="color: #f44336;">ستوب: $${signal.targets.stopLoss}</span> | 
                         📊 <span style="color: #2196F3;">نسبة: ${signal.targets.riskReward}:1</span>
                     </div>
-                    <div class="atr-info" style="margin-top: 3px; font-size: 11px; color: #999;">
-                        ATR: ${signal.targets.atrValue} | قوة: ${signal.strength.toFixed(1)}%
-                    </div>
                 </div>
             `;
         }).join('');
         
         container.innerHTML = signalsHTML;
-        
-        console.log(`🎉 تم عرض ${signals.length} إشارة مع الأهداف في الشريط`);
         
     } catch (error) {
         console.error('❌ خطأ في تحديث الإشارات:', error);
@@ -366,38 +329,19 @@ async function loadUTBotSignals() {
     }
 }
 
-// دالة إضافية لتحديث إعدادات الأهداف
 function updateTargetSettings(profitMultiplier, stopMultiplier, atrPeriod) {
     utScanner.targetSettings.profitMultiplier = profitMultiplier || 2.5;
     utScanner.targetSettings.stopMultiplier = stopMultiplier || 1.5;
     utScanner.targetSettings.atrPeriod = atrPeriod || 10;
-    
     console.log('🔧 تم تحديث إعدادات الأهداف:', utScanner.targetSettings);
 }
 
-// دالة لحساب الأهداف لعملة محددة
-async function calculateTargetsForSymbol(symbol, timeframe = '1H') {
-    try {
-        const signal = await utScanner.checkUTBotSignal(symbol, timeframe);
-        if (signal && signal.targets) {
-            console.log(`🎯 أهداف ${symbol}:`, signal.targets);
-            return signal.targets;
-        }
-        return null;
-    } catch (error) {
-        console.error(`❌ خطأ في حساب أهداف ${symbol}:`, error);
-        return null;
-    }
-}
-
-// بدء التشغيل
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadUTBotSignals);
 } else {
     loadUTBotSignals();
 }
 
-// تحديث كل 12 دقيقة
 setInterval(loadUTBotSignals, 720000);
 
 console.log('🚀 UT Bot Scanner مع حساب الأهداف - جاهز للعمل!');

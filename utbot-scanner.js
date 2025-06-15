@@ -1,7 +1,7 @@
 class UTBotScanner {
     constructor() {
         // استخدام Binance بدلاً من OKX لتجنب حد الطلبات
-       this.apiBase = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.binance.com/api/v3');
+       this.apiBase = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api1.binance.com/api/v3');
         this.symbols = [];
         this.isScanning = false;
         this.requestDelay = 200; // تأخير بين الطلبات

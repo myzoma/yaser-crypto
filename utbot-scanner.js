@@ -50,8 +50,6 @@ class UTBotScanner {
            const response = await fetch(this.apiBase + encodeURIComponent('/ticker/24hr'));
 const data = await response.json();
 const tickers = JSON.parse(data.contents);
-            const tickers = await response.json();
-            
             this.symbols = tickers
                 .filter(ticker => 
                     ticker.symbol.endsWith('USDT') &&

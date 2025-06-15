@@ -42,38 +42,37 @@ class UTBotScanner {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async fetchTopSymbols() {
-        try {
-             const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
+   async fetchTopSymbols() {
+    try {
+        console.log('📊 جاري جلب قائمة العملات من Binance...');
+        this.updateStatus('جلب قائمة العملات...', '#ff9800');
+        
+        const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
         const proxyUrl = this.apiBase + encodeURIComponent(binanceUrl);
         
         const response = await fetch(proxyUrl);
         const data = await response.json();
         const tickers = JSON.parse(data.contents);
-            console.log('📊 جاري جلب قائمة العملات من Binance...');
-            this.updateStatus('جلب قائمة العملات...', '#ff9800');
+        
+        this.symbols = tickers
+            .filter(ticker => 
+                ticker.symbol.endsWith('USDT') &&
+                parseFloat(ticker.quoteVolume) > 10000000 &&
+                parseFloat(ticker.count) > 10000
+            )
+            .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+            .slice(0, 30)
+            .map(ticker => ticker.symbol);
             
-           const response = await fetch(this.apiBase + encodeURIComponent('/ticker/24hr'));
-const data = await response.json();
-const tickers = JSON.parse(data.contents);
-            this.symbols = tickers
-                .filter(ticker => 
-                    ticker.symbol.endsWith('USDT') &&
-                    parseFloat(ticker.quoteVolume) > 10000000 &&
-                    parseFloat(ticker.count) > 10000
-                )
-                .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-                .slice(0, 30) // تقليل العدد لتجنب Rate Limit
-                .map(ticker => ticker.symbol);
-            
-            console.log(`✅ تم تحميل ${this.symbols.length} عملة من Binance`);
-            return this.symbols;
-        } catch (error) {
-            console.error('❌ خطأ في جلب العملات:', error);
-            this.updateStatus('خطأ في جلب البيانات', '#f44336');
-            return [];
-        }
+        console.log(`✅ تم تحميل ${this.symbols.length} عملة من Binance`);
+        return this.symbols;
+    } catch (error) {
+        console.error('❌ خطأ في جلب العملات:', error);
+        this.updateStatus('خطأ في جلب البيانات', '#f44336');
+        return [];
     }
+}
+
 
     async fetchKlines(symbol, interval, limit = 100) {
         try {

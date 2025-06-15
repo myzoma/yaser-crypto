@@ -44,6 +44,12 @@ class UTBotScanner {
 
     async fetchTopSymbols() {
         try {
+             const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
+        const proxyUrl = this.apiBase + encodeURIComponent(binanceUrl);
+        
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const tickers = JSON.parse(data.contents);
             console.log('📊 جاري جلب قائمة العملات من Binance...');
             this.updateStatus('جلب قائمة العملات...', '#ff9800');
             

@@ -99,100 +99,100 @@ class UTBotScanner {
     }
 
     // 🔥 الطريقة الهجينة الذكية لحساب الأهداف
-    calculateHybridTargets(currentPrice, upperBand, lowerBand, atr, rsi, currentVolume, avgVolume, signalType) {
-        // 1️⃣ الأساس: ATR (علمي ودقيق)
-        let baseTargetMultiplier = this.targetSettings.baseATRMultiplier;
-        let baseStopMultiplier = this.targetSettings.baseStopMultiplier;
-        
-        // 2️⃣ تعديل حسب قوة إشارة UT Bot
-        const bandDistance = Math.abs(upperBand - lowerBand);
-        const signalStrength = signalType === 'BUY' 
-            ? Math.abs(currentPrice - upperBand) / bandDistance
-            : Math.abs(currentPrice - lowerBand) / bandDistance;
-        
-        if (signalStrength > 0.8) {
-            // إشارة قوية جداً
-            baseTargetMultiplier *= 1.4;
-            baseStopMultiplier *= 0.7;
-            console.log(`🔥 إشارة قوية جداً: ${(signalStrength * 100).toFixed(1)}%`);
-        } else if (signalStrength > 0.5) {
-            // إشارة قوية
-            baseTargetMultiplier *= 1.2;
-            baseStopMultiplier *= 0.8;
-            console.log(`💪 إشارة قوية: ${(signalStrength * 100).toFixed(1)}%`);
-        } else if (signalStrength < 0.2) {
-            // إشارة ضعيفة
-            baseTargetMultiplier *= 0.8;
-            baseStopMultiplier *= 1.2;
-            console.log(`⚠️ إشارة ضعيفة: ${(signalStrength * 100).toFixed(1)}%`);
-        }
-        
-        // 3️⃣ تعديل حسب RSI (مناطق التشبع)
-        if (rsi > 75) {
-            // منطقة تشبع شرائي - خطر انعكاس
-            baseTargetMultiplier *= 0.7;
-            baseStopMultiplier *= 1.3;
-            console.log(`📈 RSI مرتفع: ${rsi.toFixed(1)} - أهداف محافظة`);
-        } else if (rsi < 25) {
-            // منطقة تشبع بيعي - خطر انعكاس
-            baseTargetMultiplier *= 0.7;
-            baseStopMultiplier *= 1.3;
-            console.log(`📉 RSI منخفض: ${rsi.toFixed(1)} - أهداف محافظة`);
-        } else if (rsi > 45 && rsi < 55) {
-            // منطقة متوازنة - إشارة قوية
-            baseTargetMultiplier *= 1.1;
-            console.log(`⚖️ RSI متوازن: ${rsi.toFixed(1)} - إشارة صحية`);
-        }
-        
-        // 4️⃣ تعديل حسب الحجم (قوة الحركة)
-        const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
-        if (volumeRatio > 2.5) {
-            // حجم عالي جداً - حركة قوية متوقعة
-            baseTargetMultiplier *= 1.3;
-            baseStopMultiplier *= 0.9;
-            console.log(`🚀 حجم عالي جداً: ${volumeRatio.toFixed(1)}x - حركة قوية`);
-        } else if (volumeRatio > 1.5) {
-            // حجم جيد
-            baseTargetMultiplier *= 1.1;
-            console.log(`📊 حجم جيد: ${volumeRatio.toFixed(1)}x`);
-        } else if (volumeRatio < 0.5) {
-            // حجم ضعيف - حذر
-            baseTargetMultiplier *= 0.8;
-            baseStopMultiplier *= 1.1;
-            console.log(`⚠️ حجم ضعيف: ${volumeRatio.toFixed(1)}x - حذر`);
-        }
-        
-        // 5️⃣ حساب الأهداف النهائية
-        let profitTarget, stopLoss;
-        
-        if (signalType === 'BUY') {
-            profitTarget = currentPrice + (atr * baseTargetMultiplier);
-            stopLoss = currentPrice - (atr * baseStopMultiplier);
-        } else {
-            profitTarget = currentPrice - (atr * baseTargetMultiplier);
-            stopLoss = currentPrice + (atr * baseStopMultiplier);
-        }
-        
-        // 6️⃣ حساب نسبة المخاطرة/العائد
-        const riskAmount = Math.abs(currentPrice - stopLoss);
-        const rewardAmount = Math.abs(profitTarget - currentPrice);
-        const riskReward = riskAmount > 0 ? rewardAmount / riskAmount : 0;
-        
-        console.log(`🎯 الأهداف الهجينة: هدف ${this.formatPrice(profitTarget)} | ستوب ${this.formatPrice(stopLoss)} | نسبة ${riskReward.toFixed(2)}:1`);
-        
-        return {
-            profitTarget: profitTarget,
-            stopLoss: stopLoss,
-            riskReward: riskReward,
-            signalStrength: signalStrength,
-            volumeRatio: volumeRatio,
-            rsi: rsi
-        };
+   calculateHybridTargets(currentPrice, upperBand, lowerBand, atr, rsi, currentVolume, avgVolume, signalType) {
+    // 1️⃣ الأساس: ATR (علمي ودقيق)
+    let baseTargetMultiplier = this.targetSettings.baseATRMultiplier;
+    let baseStopMultiplier = this.targetSettings.baseStopMultiplier;
+    
+    // 2️⃣ تعديل حسب قوة إشارة UT Bot
+    const bandDistance = Math.abs(upperBand - lowerBand);
+    const signalStrength = signalType === 'BUY' 
+        ? Math.abs(currentPrice - upperBand) / bandDistance
+        : Math.abs(currentPrice - lowerBand) / bandDistance;
+    
+    if (signalStrength > 0.8) {
+        baseTargetMultiplier *= 1.4;
+        baseStopMultiplier *= 0.7;
+        console.log(`🔥 إشارة قوية جداً: ${(signalStrength * 100).toFixed(1)}%`);
+    } else if (signalStrength > 0.5) {
+        baseTargetMultiplier *= 1.2;
+        baseStopMultiplier *= 0.8;
+        console.log(`💪 إشارة قوية: ${(signalStrength * 100).toFixed(1)}%`);
+    } else if (signalStrength < 0.2) {
+        baseTargetMultiplier *= 0.8;
+        baseStopMultiplier *= 1.2;
+        console.log(`⚠️ إشارة ضعيفة: ${(signalStrength * 100).toFixed(1)}%`);
     }
+    
+    // 3️⃣ تعديل حسب RSI
+    if (rsi > 75) {
+        baseTargetMultiplier *= 0.7;
+        baseStopMultiplier *= 1.3;
+        console.log(`📈 RSI مرتفع: ${rsi.toFixed(1)} - أهداف محافظة`);
+    } else if (rsi < 25) {
+        baseTargetMultiplier *= 0.7;
+        baseStopMultiplier *= 1.3;
+        console.log(`📉 RSI منخفض: ${rsi.toFixed(1)} - أهداف محافظة`);
+    } else if (rsi > 45 && rsi < 55) {
+        baseTargetMultiplier *= 1.1;
+        console.log(`⚖️ RSI متوازن: ${rsi.toFixed(1)} - إشارة صحية`);
+    }
+    
+    // 4️⃣ تعديل حسب الحجم
+    const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
+    if (volumeRatio > 2.5) {
+        baseTargetMultiplier *= 1.3;
+        baseStopMultiplier *= 0.9;
+        console.log(`🚀 حجم عالي جداً: ${volumeRatio.toFixed(1)}x - حركة قوية`);
+    } else if (volumeRatio > 1.5) {
+        baseTargetMultiplier *= 1.1;
+        console.log(`📊 حجم جيد: ${volumeRatio.toFixed(1)}x`);
+    } else if (volumeRatio < 0.5) {
+        baseTargetMultiplier *= 0.8;
+        baseStopMultiplier *= 1.1;
+        console.log(`⚠️ حجم ضعيف: ${volumeRatio.toFixed(1)}x - حذر`);
+    }
+    
+    // 5️⃣ حساب الأهداف النهائية - مُصحح! 🔧
+    let profitTarget, stopLoss;
+    
+    if (signalType === 'BUY') {
+        profitTarget = currentPrice + (atr * baseTargetMultiplier);
+        stopLoss = currentPrice - (atr * baseStopMultiplier);
+        console.log(`🟢 BUY: سعر ${currentPrice.toFixed(2)} → هدف ${profitTarget.toFixed(2)} (صعود) | ستوب ${stopLoss.toFixed(2)} (نزول)`);
+    } else if (signalType === 'SELL') {
+        profitTarget = currentPrice - (atr * baseTargetMultiplier);  // هدف البيع = نزول ✅
+        stopLoss = currentPrice + (atr * baseStopMultiplier);        // ستوب البيع = صعود ✅
+        console.log(`🔴 SELL: سعر ${currentPrice.toFixed(2)} → هدف ${profitTarget.toFixed(2)} (نزول) | ستوب ${stopLoss.toFixed(2)} (صعود)`);
+    }
+    
+    // 6️⃣ حساب نسبة المخاطرة/العائد - مُصحح!
+    const riskAmount = Math.abs(currentPrice - stopLoss);
+    const rewardAmount = Math.abs(currentPrice - profitTarget);  // تغيير هنا!
+    const riskReward = riskAmount > 0 ? rewardAmount / riskAmount : 0;
+    
+    // 7️⃣ تأكيد منطقية الأهداف
+    if (signalType === 'BUY' && profitTarget <= currentPrice) {
+        console.error(`❌ خطأ: هدف الشراء أقل من السعر الحالي!`);
+    }
+    if (signalType === 'SELL' && profitTarget >= currentPrice) {
+        console.error(`❌ خطأ: هدف البيع أعلى من السعر الحالي!`);
+    }
+    
+    console.log(`🎯 الأهداف المُصححة: ${signalType} | هدف ${this.formatPrice(profitTarget)} | ستوب ${this.formatPrice(stopLoss)} | نسبة ${riskReward.toFixed(2)}:1`);
+    
+    return {
+        profitTarget: profitTarget,
+        stopLoss: stopLoss,
+        riskReward: riskReward,
+        signalStrength: signalStrength,
+        volumeRatio: volumeRatio,
+        rsi: rsi
+    };
+}
 
     formatPrice(price) {
-        if (price < 0.000001) return price.toFixed(10);
-        if (price < 0.001) return price.toFixed(8);
+        if (price < 0.000001) return price.toFixed(10);        if (price < 0.001) return price.toFixed(8);
         if (price < 1) return price.toFixed(6);
         if (price < 100) return price.toFixed(4);
         return price.toFixed(2);

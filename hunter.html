@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>فرص الصياد اللحظية</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>بوت الصياد - صفحة مستقلة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       background-color: #0d111c;
-      font-family: 'Cairo', sans-serif;
-      color: #ffffff;
-      margin: 0;
-      padding: 20px;
+      color: white;
+      font-family: 'Cairo', sans-serif, sans-serif;
+      margin: 20px;
+      padding: 0;
     }
 
     h1 {
@@ -19,92 +19,160 @@
       margin-bottom: 30px;
     }
 
+    /* تصميم الشبكة */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
 
+    /* تصميم البطاقة */
     .card {
       background-color: #1b2238;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 15px 20px;
+      box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
       transition: transform 0.2s ease;
+      direction: rtl;
+      text-align: right;
     }
 
     .card:hover {
-      transform: scale(1.03);
+      transform: scale(1.05);
     }
 
     .symbol {
+      font-weight: 700;
       font-size: 1.3em;
-      font-weight: bold;
       color: #00ffcc;
+      margin-bottom: 8px;
     }
 
-    .price {
+    .price,
+    .change,
+    .type {
+      font-size: 1em;
+      margin-bottom: 6px;
+      color: #ddd;
+    }
+
+    .strength {
+      font-size: 1.5em;
       margin-top: 10px;
-      font-size: 1.1em;
-      color: #ffffff;
+      text-align: center;
     }
 
-    .details {
-      margin-top: 8px;
-      font-size: 0.95em;
-      color: #ccc;
-    }
-
-    .tag {
-      margin-top: 12px;
-      display: inline-block;
-      background-color: #ff9800;
-      color: #fff;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.9em;
-    }
-
+    /* في حال لا توجد فرص */
     .empty-msg {
+      color: #666;
+      font-size: 1.2em;
       text-align: center;
       margin-top: 100px;
-      font-size: 1.2em;
-      color: #888;
     }
+
+    /* شريط الصياد الأفقي (من الكود المرسل) */
+    .ut-bot-container {
+      background-color: #1b2238;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 40px;
+    }
+
+    .ut-bot-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #00ffc8;
+      margin-bottom: 12px;
+    }
+
+    .ut-bot-icon {
+      font-size: 1.5em;
+    }
+
+    .ut-bot-ticker {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 8px;
+      color: #eee;
+    }
+
+    /* ضع هنا أي تنسيق إضافي تريد للشريط */
   </style>
 </head>
 <body>
-  <h1>📡 فرص الصياد اللحظية</h1>
-  <div class="grid" id="hunter-container">
-    <!-- سيتم تحميل البطاقات هنا -->
+  <h1>بوت الصياد - الصفحة المستقلة</h1>
+
+  <!-- شريط الصياد الأفقي كما في موقعك -->
+  <div class="ut-bot-container">
+    <div class="ut-bot-header">
+      <span class="ut-bot-icon">🤖</span>
+      <span class="ut-bot-title">بوت الصياد</span>
+    </div>
+    <div class="ut-bot-ticker">
+      <div class="ut-bot-content" id="utBotSignals">
+        <div class="ut-bot-loading">جاري فحص السوق...</div>
+      </div>
+    </div>
   </div>
-  <div id="empty" class="empty-msg" style="display: none;">لا توجد فرص حالياً</div>
 
-  <!-- نحمل بيانات الصياد من ملفك الحقيقي -->
-  <script src="https://myzoma.github.io/yaser-crypto/hunter-data.js"></script>
+  <!-- قسم عرض التوصيات بشكل بطاقات -->
+  <div id="hunterGrid" class="grid"></div>
+  <div id="emptyMsg" class="empty-msg" style="display:none;">لا توجد فرص حالياً</div>
 
+  <!-- السكربت الأساسي لعرض التوصيات -->
   <script>
-    const container = document.getElementById('hunter-container');
-    const emptyMsg = document.getElementById('empty');
+    // هنا تفترض أن البيانات تكون موجودة في مصفوفة global مثل window.hunterOpportunities
+    // بس حالياً لا يوجد كود لإحضار هذه البيانات، فسنستخدم التوصيات المعروضة داخل utBotSignals كنص فقط.
 
-    const data = window.hunterOpportunities || [];
+    // دالة لتحويل النص إلى بطاقات (مؤقتًا، لو البيانات ليست مهيكلة)
+    function parseUtBotSignals() {
+      const container = document.getElementById('utBotSignals');
+      const hunterGrid = document.getElementById('hunterGrid');
+      const emptyMsg = document.getElementById('emptyMsg');
 
-    if (data.length === 0) {
-      emptyMsg.style.display = 'block';
-    } else {
-      data.forEach(item => {
+      const rawHtml = container.innerHTML.trim();
+
+      // إذا لا توجد بيانات، أظهر رسالة فارغة
+      if (!rawHtml || rawHtml.includes('جاري فحص السوق')) {
+        hunterGrid.style.display = 'none';
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      // افترض أن كل توصية في <div> داخل utBotSignals, لكن على موقعك ربما تكون بشكل مختلف
+      // هنا فقط ننسخ المحتوى ونعرضه داخل بطاقات بسيطة
+      const divs = container.querySelectorAll('div');
+
+      if (divs.length === 0) {
+        hunterGrid.style.display = 'none';
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      hunterGrid.innerHTML = ''; // تفريغ الشبكة
+
+      divs.forEach(div => {
         const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="symbol">${item.symbol}</div>
-          <div class="price">السعر الحالي: $${item.price}</div>
-          <div class="details">التغير اليومي: ${item.change24h}%</div>
-          <div class="details">نوع الفرصة: ${item.opportunityType}</div>
-          <div class="tag">${item.opportunityStrength}</div>
-        `;
-        container.appendChild(card);
+        card.classList.add('card');
+        card.innerHTML = div.innerHTML;
+        hunterGrid.appendChild(card);
       });
+
+      emptyMsg.style.display = 'none';
+      hunterGrid.style.display = 'grid';
     }
+
+    // ننتظر تحميل الصفحة والبيانات
+    window.addEventListener('load', () => {
+      parseUtBotSignals();
+    });
   </script>
+
+  <!-- هنا تضيف سكربت "بوت الصياد" الخاص بموقعك لو كان خارجي -->
+  <script src="https://myzoma.github.io/yaser-crypto/ut-bot.js"></script>
+
 </body>
 </html>

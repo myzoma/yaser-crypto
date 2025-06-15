@@ -1,7 +1,7 @@
 class UTBotScanner {
     constructor() {
         // استخدام Binance بدلاً من OKX لتجنب حد الطلبات
-        this.apiBase = 'https://api.binance.com/api/v3';
+       this.apiBase = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.binance.com/api/v3');
         this.symbols = [];
         this.isScanning = false;
         this.requestDelay = 200; // تأخير بين الطلبات
@@ -47,7 +47,9 @@ class UTBotScanner {
             console.log('📊 جاري جلب قائمة العملات من Binance...');
             this.updateStatus('جلب قائمة العملات...', '#ff9800');
             
-            const response = await fetch(`${this.apiBase}/ticker/24hr`);
+           const response = await fetch(this.apiBase + encodeURIComponent('/ticker/24hr'));
+const data = await response.json();
+const tickers = JSON.parse(data.contents);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }

@@ -1,7 +1,18 @@
 class UTBotScanner {
-    constructor() {
-        // استخدام Binance بدلاً من OKX لتجنب حد الطلبات
-       this.apiBase = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api1.binance.com/api/v3');
+   this.dataSources = {
+        binance: {
+            base: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api1.binance.com/api/v3'),
+            direct: 'https://api1.binance.com/api/v3'
+        },
+        okx: {
+            base: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.okx.com/api/v5'),
+            direct: 'https://www.okx.com/api/v5',
+            // ضع مفاتيح OKX هنا
+            apiKey: 'b20c667d-ae40-48a6-93f4-a11a64185068',
+            secretKey: 'BD7C76F71D1A4E01B4C7E1A23B620365',
+            passphrase: '212160Nm$#',
+        }
+    };
         this.symbols = [];
         this.isScanning = false;
         this.requestDelay = 200; // تأخير بين الطلبات
@@ -44,27 +55,29 @@ class UTBotScanner {
 
    async fetchTopSymbols() {
     try {
-        console.log('📊 جاري جلب قائمة العملات من Binance...');
+        console.log('📊 جاري جلب قائمة العملات من مصادر متعددة...');
         this.updateStatus('جلب قائمة العملات...', '#ff9800');
         
-        const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
-        const proxyUrl = this.apiBase + encodeURIComponent(binanceUrl);
+        const [binanceSymbols, okxSymbols] = await Promise.allSettled([
+            this.fetchBinanceSymbols(),
+            this.fetchOKXSymbols()
+        ]);
         
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        const tickers = JSON.parse(data.contents);
+        let allSymbols = [];
         
-        this.symbols = tickers
-            .filter(ticker => 
-                ticker.symbol.endsWith('USDT') &&
-                parseFloat(ticker.quoteVolume) > 10000000 &&
-                parseFloat(ticker.count) > 10000
-            )
-            .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-            .slice(0, 30)
-            .map(ticker => ticker.symbol);
-            
-        console.log(`✅ تم تحميل ${this.symbols.length} عملة من Binance`);
+        if (binanceSymbols.status === 'fulfilled') {
+            allSymbols.push(...binanceSymbols.value);
+        }
+        
+        if (okxSymbols.status === 'fulfilled') {
+            allSymbols.push(...okxSymbols.value);
+        }
+        
+        // إزالة المكررات وترتيب حسب الحجم
+        const uniqueSymbols = [...new Set(allSymbols)];
+        this.symbols = uniqueSymbols.slice(0, 50);
+        
+        console.log(`✅ تم تحميل ${this.symbols.length} عملة من مصادر متعددة`);
         return this.symbols;
     } catch (error) {
         console.error('❌ خطأ في جلب العملات:', error);
@@ -72,38 +85,121 @@ class UTBotScanner {
         return [];
     }
 }
+// إضافة بعد دالة fetchTopSymbols
+async fetchBinanceSymbols() {
+    try {
+        const binanceUrl = 'https://api1.binance.com/api/v3/ticker/24hr';
+        const proxyUrl = this.dataSources.binance.base.replace(encodeURIComponent('https://api1.binance.com/api/v3'), '') + encodeURIComponent(binanceUrl);
+        
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const tickers = JSON.parse(data.contents);
+        
+        return tickers
+            .filter(ticker => 
+                ticker.symbol.endsWith('USDT') &&
+                parseFloat(ticker.quoteVolume) > 10000000
+            )
+            .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+            .slice(0, 25)
+            .map(ticker => ticker.symbol);
+    } catch (error) {
+        console.error('❌ خطأ Binance:', error);
+        return [];
+    }
+}
+
+async fetchOKXSymbols() {
+    try {
+        const okxUrl = 'https://www.okx.com/api/v5/market/tickers?instType=SPOT';
+        const proxyUrl = this.dataSources.okx.base.replace(encodeURIComponent('https://www.okx.com/api/v5'), '') + encodeURIComponent(okxUrl);
+        
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const result = JSON.parse(data.contents);
+        
+        return result.data
+            .filter(ticker => 
+                ticker.instId.endsWith('-USDT') &&
+                parseFloat(ticker.volCcy24h) > 5000000
+            )
+            .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
+            .slice(0, 25)
+            .map(ticker => ticker.instId.replace('-', ''));
+    } catch (error) {
+        console.error('❌ خطأ OKX:', error);
+        return [];
+    }
+}
 
 
     async fetchKlines(symbol, interval, limit = 100) {
-        try {
-            await this.delay(this.requestDelay); // تأخير لتجنب Rate Limit
-            
-            const response = await fetch(
-                `${this.apiBase}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
-            );
-            
-            if (!response.ok) {
-                if (response.status === 429) {
-                    console.warn(`⚠️ Rate limit for ${symbol}, waiting...`);
-                    await this.delay(2000);
-                    return null;
-                }
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            const klines = await response.json();
-            return klines.map(k => ({
-                high: parseFloat(k[2]),
-                low: parseFloat(k[3]),
-                close: parseFloat(k[4]),
-                volume: parseFloat(k[5]),
-                hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
-            }));
-        } catch (error) {
-            console.error(`❌ خطأ في جلب بيانات ${symbol}:`, error);
-            return null;
-        }
+    // جرب Binance أولاً
+    const binanceData = await this.fetchBinanceKlines(symbol, interval, limit);
+    if (binanceData) return binanceData;
+    
+    // إذا فشل، جرب OKX
+    const okxData = await this.fetchOKXKlines(symbol, interval, limit);
+    return okxData;
+}
+
+async fetchBinanceKlines(symbol, interval, limit) {
+    try {
+        await this.delay(this.requestDelay);
+        const response = await fetch(
+            `${this.dataSources.binance.base}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
+        );
+        
+        if (!response.ok) return null;
+        
+        const klines = await response.json();
+        return klines.map(k => ({
+            high: parseFloat(k[2]),
+            low: parseFloat(k[3]),
+            close: parseFloat(k[4]),
+            volume: parseFloat(k[5]),
+            hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
+        }));
+    } catch (error) {
+        return null;
     }
+}
+
+async fetchOKXKlines(symbol, interval, limit) {
+    try {
+        await this.delay(this.requestDelay);
+        const okxSymbol = symbol.replace('USDT', '-USDT');
+        const okxInterval = this.convertIntervalToOKX(interval);
+        
+        const url = `${this.dataSources.okx.base}/market/candles?instId=${okxSymbol}&bar=${okxInterval}&limit=${limit}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        const result = JSON.parse(data.contents);
+        
+        return result.data.map(k => ({
+            high: parseFloat(k[2]),
+            low: parseFloat(k[3]),
+            close: parseFloat(k[4]),
+            volume: parseFloat(k[5]),
+            hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
+        }));
+    } catch (error) {
+        return null;
+    }
+}
+
+convertIntervalToOKX(binanceInterval) {
+    const mapping = {
+        '1h': '1H',
+        '4h': '4H',
+        '1d': '1D'
+    };
+    return mapping[binanceInterval] || '1H';
+}
+
 
     calculateATR(candles, period = 14) {
         if (candles.length < period + 1) return 0;

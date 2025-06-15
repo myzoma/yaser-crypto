@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>فرص الصياد اللحظية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #0d111c;
+      font-family: 'Cairo', sans-serif;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffc8;
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #1b2238;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .symbol {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #00ffcc;
+    }
+
+    .price {
+      margin-top: 10px;
+      font-size: 1.1em;
+      color: #ffffff;
+    }
+
+    .details {
+      margin-top: 8px;
+      font-size: 0.95em;
+      color: #ccc;
+    }
+
+    .tag {
+      margin-top: 12px;
+      display: inline-block;
+      background-color: #ff9800;
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9em;
+    }
+
+    .empty-msg {
+      text-align: center;
+      margin-top: 100px;
+      font-size: 1.2em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>📡 فرص الصياد اللحظية</h1>
+  <div class="grid" id="hunter-container">
+    <!-- سيتم تحميل البطاقات هنا -->
+  </div>
+  <div id="empty" class="empty-msg" style="display: none;">لا توجد فرص حالياً</div>
+
+  <!-- نحمل بيانات الصياد من ملفك الحقيقي -->
+  <script src="https://myzoma.github.io/yaser-crypto/hunter-data.js"></script>
+
+  <script>
+    const container = document.getElementById('hunter-container');
+    const emptyMsg = document.getElementById('empty');
+
+    const data = window.hunterOpportunities || [];
+
+    if (data.length === 0) {
+      emptyMsg.style.display = 'block';
+    } else {
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="symbol">${item.symbol}</div>
+          <div class="price">السعر الحالي: $${item.price}</div>
+          <div class="details">التغير اليومي: ${item.change24h}%</div>
+          <div class="details">نوع الفرصة: ${item.opportunityType}</div>
+          <div class="tag">${item.opportunityStrength}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>

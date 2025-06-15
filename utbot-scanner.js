@@ -1,695 +1,642 @@
-class YaserCrypto {
+// UT Bot Scanner - النظام الهجين الذكي المتطور
+class UTBotScanner {
     constructor() {
-        this.coins = [];
-        this.config = {
-            okxApiUrl: "https://www.okx.com/api/v5",
-            binanceApiUrl: "https://api1.binance.com/api/v3",
-            requestDelay: 0,
-            maxCoins: 12,
-            minChange: 1,
-            maxChange: 15,
-            minVolume: 100000,
-            dataSources: ['okx', 'binance']
+        this.apiBase = 'https://www.okx.com/api/v5';
+        this.symbols = [];
+        this.isScanning = false;
+        this.volumeCache = new Map();
+        this.lastUpdateTime = null;
+        
+        // إعدادات النظام الهجين المتقدم
+        this.targetSettings = {
+            baseATRMultiplier: 3.0,
+            baseStopMultiplier: 1.4,
+            atrPeriod: 14,
+            volumePeriod: 20,
+            minVolumeRatio: 0.8,
+            minRiskReward: 1.8,
+            keyValue: 0.8,
+            rsiPeriod: 14
         };
-        this.requestDelay = 0;
-        this.init();
+        
+        console.log('🚀 UT Bot Scanner الهجين تم تهيئته بنجاح');
     }
 
-    async init() {
-        this.showLoading();
-        await this.fetchData();
-        this.analyzeCoins();
-        this.renderCoins();
-    }
-
-    showLoading() {
-        document.getElementById('coinsGrid').innerHTML = '<div class="loading">يتم التحليل الان .. انتظر قليلا من فضلك ؟...</div>';
-        // إظهار شريط التحميل
-        const loader = document.getElementById('pageLoader');
-        if (loader) {
-            loader.style.opacity = "1";
-            loader.style.display = "flex";
-        }
-    }
-
-    hideLoader() {
-        const loader = document.getElementById('pageLoader');
-        if(loader){
-            loader.style.opacity = "0";
-            setTimeout(()=>loader.style.display="none", 400);
-        }
-    }
-
-    showError(message) {
-        document.getElementById('coinsGrid').innerHTML = `<div class="error">${message}</div>`;
-        this.hideLoader(); // إخفاء الشريط في حالة الخطأ أيضًا
-    }
-
-    async fetchData() {
+    // جلب أفضل العملات من OKX
+    async fetchTopSymbols() {
         try {
-            console.log('🚀 بدء عملية جلب البيانات من مصادر متعددة...');
+            console.log('📊 جاري جلب قائمة العملات من OKX...');
             
-            // جلب البيانات من كلا المصدرين بشكل متوازي
-            const [okxSymbols, binanceSymbols] = await Promise.allSettled([
-                this.fetchTopGainersFromOKX(),
-                this.fetchTopGainersFromBinance()
-            ]);
-
-            let candidateSymbols = [];
+            const response = await fetch(`${this.apiBase}/market/tickers?instType=SPOT`);
+            const result = await response.json();
             
-            // دمج النتائج من OKX
-            if (okxSymbols.status === 'fulfilled' && okxSymbols.value) {
-                console.log(`📊 OKX: ${okxSymbols.value.length} عملة`);
-                candidateSymbols = candidateSymbols.concat(
-                    okxSymbols.value.map(symbol => ({ symbol, source: 'okx' }))
-                );
-            } else {
-                console.warn('⚠️ فشل في جلب البيانات من OKX:', okxSymbols.reason);
-            }
-
-            // دمج النتائج من Binance
-            if (binanceSymbols.status === 'fulfilled' && binanceSymbols.value) {
-                console.log(`📊 Binance: ${binanceSymbols.value.length} عملة`);
-                candidateSymbols = candidateSymbols.concat(
-                    binanceSymbols.value.map(symbol => ({ symbol, source: 'binance' }))
-                );
-            } else {
-                console.warn('⚠️ فشل في جلب البيانات من Binance:', binanceSymbols.reason);
-            }
-
-            if (candidateSymbols.length === 0) {
-                throw new Error('لم يتم العثور على عملات مرشحة من أي مصدر');
-            }
-
-            // إزالة التكرارات وإعطاء أولوية للعملات الموجودة في كلا المصدرين
-            const uniqueSymbols = this.mergeDuplicateSymbols(candidateSymbols);
-            console.log(`📋 سيتم تحليل ${uniqueSymbols.length} عملة فريدة`);
-
-            const results = [];
-            for (let i = 0; i < uniqueSymbols.length; i++) {
-                const { symbol, source, priority } = uniqueSymbols[i];
+            if (result.code === '0') {
+                this.symbols = result.data
+                    .filter(ticker => 
+                        ticker.instId.endsWith('-USDT') &&
+                        parseFloat(ticker.vol24h) > 1000000 &&
+                        parseFloat(ticker.last) > 0
+                    )
+                    .sort((a, b) => parseFloat(b.vol24h) - parseFloat(a.vol24h))
+                    .slice(0, 100)
+                    .map(ticker => ticker.instId);
                 
-                try {
-                    console.log(`🔄 تحليل ${symbol} من ${source}... (${i + 1}/${uniqueSymbols.length})`);
-                    
-                    const coin = await this.fetchCoinData(symbol, source);
-                    if (coin && typeof coin.change24h === 'number' && !isNaN(coin.change24h)) {
-                        coin.priority = priority;
-                        coin.dataSource = source;
-                        results.push(coin);
-                        console.log(`✅ ${symbol}: ${coin.change24h.toFixed(2)}% (${source})`);
-                    } else {
-                        console.warn(`⚠️ بيانات غير صالحة لـ ${symbol}`);
-                    }
-
-                    if (i < uniqueSymbols.length - 1) {
-                        await this.delay(this.requestDelay);
-                    }
-
-                } catch (error) {
-                    console.warn(`❌ فشل في تحليل ${symbol}:`, error.message);
-                    continue;
-                }
-            }
-
-            if (results.length === 0) {
-                throw new Error('فشل في الحصول على بيانات صالحة لأي عملة');
-            }
-
-            // 1- تحليل كل العملات المرشحة
-            this.analyzeCoinsList(results);
-
-            // 2- ترتيب النتائج بالنقاط وأخذ أفضل maxCoins فقط
-            const sortedResults = results.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score; // النقاط أولاً
-                }
-                if (b.priority !== a.priority) {
-                    return b.priority - a.priority; // ثم الأولوية
-                }
-                return b.change24h - a.change24h; // ثم التغيير اليومي
-            });
-
-            this.coins = sortedResults.slice(0, this.config.maxCoins);
-
-            // 3- إعادة الترتيب التسلسلي 1 → n
-            this.coins.forEach((coin, idx) => {
-                coin.rank = idx + 1;
-            });
-
-            console.log(`🎉 تم تحليل وترتيب ${this.coins.length} عملة بنجاح وعرض أفضلها فقط`);
-
-        } catch (error) {
-            console.error('💥 خطأ في fetchData:', error);
-            this.showError(`خطأ في جلب البيانات: ${error.message}`);
-            throw error;
-        }
-    }
-
-    // دالة تحليل قائمة كاملة من العملات (حتى يمكن ترتيبها بالنقاط)
-    analyzeCoinsList(coinsList) {
-        coinsList.forEach((coin, index) => {
-            // حساب النقاط بناءً على المؤشرات الفنية
-            let score = 0;
-            const indicators = coin.technicalIndicators;
-            
-            // نقاط RSI
-            if (indicators.rsi >= 30 && indicators.rsi <= 70) {
-                score += 20;
-            } else if (indicators.rsi < 30) {
-                score += 30;
-            }
-            // نقاط MACD
-            if (indicators.macd > indicators.macdSignal) {
-                score += 25;
-            }
-            // نقاط MFI
-            if (indicators.mfi >= 20 && indicators.mfi <= 80) {
-                score += 15;
-            }
-            // نقاط CVD
-            if (indicators.cvd.trend === 'bullish') {
-                score += 20;
-                if (indicators.cvd.strength === 'strong') {
-                    score += 10;
-                }
-            }
-            // نقاط التغيير اليومي
-            if (coin.change24h > 0) {
-                score += Math.min(coin.change24h * 2, 30);
-            }
-            // نقاط الأولوية
-            if (coin.priority === 3) {
-                score += 15;
-            }
-            coin.score = Math.round(score);
-
-            // تحديد الشروط
-            coin.conditions = {
-                rsiGood: indicators.rsi >= 30 && indicators.rsi <= 70,
-                macdBullish: indicators.macd > indicators.macdSignal,
-                mfiHealthy: indicators.mfi >= 20 && indicators.mfi <= 80,
-                cvdBullish: indicators.cvd.trend === 'bullish',
-                priceAboveEMA: coin.price > indicators.ema20,
-                volumeGood: coin.volume > this.config.minVolume,
-                changePositive: coin.change24h > 0,
-                multiSource: coin.priority === 3
-            };
-
-            // أهداف فيبوناتشي
-            coin.targets = {
-                target1: indicators.fibonacci.level236,
-                target2: indicators.fibonacci.level382,
-                target3: indicators.fibonacci.level500,
-                stopLoss: indicators.parabolicSAR
-            };
-        });
-    }
-
-    // الدالة القديمة لتحليل العملات (ستخدم فقط للعرض النهائي)
-    analyzeCoins() {
-        // لا تحتاج فعل أي شيء هنا لأن التحليل تم مسبقاً في analyzeCoinsList
-        // فقط إعادة الترتيب (احتياط)
-        this.coins.sort((a, b) => b.score - a.score);
-        this.coins.forEach((coin, idx) => {
-            coin.rank = idx + 1;
-        });
-    }
-
-    // باقي الدوال كما هي...
-    mergeDuplicateSymbols(candidateSymbols) {
-        const symbolMap = new Map();
-        candidateSymbols.forEach(({ symbol, source }) => {
-            if (symbolMap.has(symbol)) {
-                symbolMap.get(symbol).priority = 3;
-                symbolMap.get(symbol).sources.push(source);
+                console.log(`✅ تم تحميل ${this.symbols.length} عملة من OKX`);
+                return this.symbols;
             } else {
-                symbolMap.set(symbol, {
-                    symbol,
-                    source,
-                    sources: [source],
-                    priority: 1
-                });
-            }
-        });
-        return Array.from(symbolMap.values());
-    }
-
-    async fetchTopGainersFromOKX() {
-        try {
-            console.log('جاري جلب قائمة أعلى الرابحون من OKX...');
-            const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) {
-                throw new Error(`فشل في جلب البيانات: ${response.status}`);
-            }
-            const data = await response.json();
-            if (!data.data || data.data.length === 0) {
-                throw new Error('لا توجد بيانات من OKX API');
-            }
-            const usdtPairs = data.data
-                .filter(ticker => {
-                    if (!ticker.instId || !ticker.instId.endsWith('-USDT')) return false;
-                    const currentPrice = parseFloat(ticker.last);
-                    const openPrice = parseFloat(ticker.open24h);
-                    const volume = parseFloat(ticker.vol24h);
-                    if (!currentPrice || !openPrice || currentPrice <= 0 || openPrice <= 0) return false;
-                    const change24h = ((currentPrice - openPrice) / openPrice) * 100;
-                    const validChange = change24h > 0.5 && change24h < 25;
-                    const validVolume = volume > 10000;
-                    return validChange && validVolume;
-                })
-                .map(ticker => ticker.instId.replace('-USDT', ''))
-                .slice(0, 12);
-            return usdtPairs;
-        } catch (error) {
-            console.error('❌ خطأ في fetchTopGainersFromOKX:', error);
-            throw error;
-        }
-    }
-
-    async fetchTopGainersFromBinance() {
-        try {
-            console.log('جاري جلب قائمة أعلى الرابحون من Binance...');
-            const response = await fetch('https://api1.binance.com/api/v3/ticker/24hr', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) {
-                throw new Error(`فشل في جلب البيانات من Binance: ${response.status}`);
-            }
-            const data = await response.json();
-            if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('لا توجد بيانات من Binance API');
-            }
-            const usdtPairs = data
-                .filter(ticker => {
-                    if (!ticker.symbol || !ticker.symbol.endsWith('USDT')) return false;
-                    const change24h = parseFloat(ticker.priceChangePercent);
-                    const volume = parseFloat(ticker.quoteVolume);
-                    const price = parseFloat(ticker.lastPrice);
-                    if (isNaN(change24h) || isNaN(volume) || isNaN(price) || price <= 0) return false;
-                    const validChange = change24h > 0.5 && change24h < 25;
-                    const validVolume = volume > 10000;
-                    return validChange && validVolume;
-                })
-                .map(ticker => ticker.symbol.replace('USDT', ''))
-                .slice(0, 12);
-            return usdtPairs;
-        } catch (error) {
-            console.error('❌ خطأ في fetchTopGainersFromBinance:', error);
-            throw error;
-        }
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async fetchCoinData(symbol, source = 'okx') {
-        try {
-            if (source === 'binance') {
-                return await this.fetchCoinDataFromBinance(symbol);
-            } else {
-                return await this.fetchCoinDataFromOKX(symbol);
+                console.error('❌ خطأ من OKX API:', result.msg);
+                return [];
             }
         } catch (error) {
-            console.error(`خطأ في جلب بيانات ${symbol} من ${source}:`, error);
-            throw error;
+            console.error('❌ خطأ في جلب العملات:', error);
+            return [];
         }
     }
 
-    async fetchCoinDataFromOKX(symbol) {
-        try {
-            const apiUrl = `https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`;
-            const candlesUrl = `https://www.okx.com/api/v5/market/candles?instId=${symbol}-USDT&bar=1H&limit=100`;
-            const tickerResponse = await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!tickerResponse.ok) {
-                throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
-            }
-            const tickerData = await tickerResponse.json();
-            if (!tickerData.data || tickerData.data.length === 0) {
-                throw new Error(`لا توجد بيانات لـ ${symbol}`);
-            }
-            await this.delay(100);
-            const candlesResponse = await fetch(candlesUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-            let historicalData = [];
-            if (candlesResponse.ok) {
-                const candlesData = await candlesResponse.json();
-                if (candlesData.data && candlesData.data.length > 0) {
-                    historicalData = candlesData.data.map(candle => ({
-                        timestamp: parseInt(candle[0]),
-                        open: parseFloat(candle[1]),
-                        high: parseFloat(candle[2]),
-                        low: parseFloat(candle[3]),
-                        close: parseFloat(candle[4]),
-                        volume: parseFloat(candle[5]),
-                        volumeQuote: parseFloat(candle[6])
-                    }));
-                }
-            }
-            const ticker = tickerData.data[0];
-            const currentPrice = parseFloat(ticker.last);
-            const openPrice24h = parseFloat(ticker.open24h);
-            const change24h = parseFloat(ticker.changePercent) || (openPrice24h > 0 ? ((currentPrice - openPrice24h) / openPrice24h) * 100 : 0);
-            const coin = {
-                symbol: symbol,
-                name: symbol,
-                price: currentPrice,
-                change24h: change24h,
-                volume: parseFloat(ticker.vol24h) || 0,
-                high24h: parseFloat(ticker.high24h) || currentPrice,
-                low24h: parseFloat(ticker.low24h) || currentPrice,
-                historicalData: historicalData,
-                technicalIndicators: {},
-                score: 0,
-                rank: 0,
-                conditions: {},
-                targets: {},
-                dataSource: 'okx'
-            };
-            this.calculateTechnicalIndicators(coin);
-            return coin;
-        } catch (error) {
-            console.error(`خطأ في جلب بيانات ${symbol} من OKX:`, error);
-            throw error;
-        }
-    }
-
-    async fetchCoinDataFromBinance(symbol) {
-        try {
-            const tickerUrl = `https://api1.binance.com/api/v3/ticker/24hr?symbol=${symbol}USDT`;
-            const klinesUrl = `https://api1.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=1h&limit=100`;
-            const tickerResponse = await fetch(tickerUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            if (!tickerResponse.ok) {
-                throw new Error(`HTTP ${tickerResponse.status}: ${tickerResponse.statusText}`);
-            }
-            const tickerData = await tickerResponse.json();
-            await this.delay(100);
-            const klinesResponse = await fetch(klinesUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            let historicalData = [];
-            if (klinesResponse.ok) {
-                const klinesData = await klinesResponse.json();
-                if (Array.isArray(klinesData) && klinesData.length > 0) {
-                    historicalData = klinesData.map(kline => ({
-                        timestamp: kline[0],
-                        open: parseFloat(kline[1]),
-                        high: parseFloat(kline[2]),
-                        low: parseFloat(kline[3]),
-                        close: parseFloat(kline[4]),
-                        volume: parseFloat(kline[5]),
-                        volumeQuote: parseFloat(kline[7])
-                    }));
-                }
-            }
-            const currentPrice = parseFloat(tickerData.lastPrice);
-            const change24h = parseFloat(tickerData.priceChangePercent);
-            const coin = {
-                symbol: symbol,
-                name: symbol,
-                price: currentPrice,
-                change24h: change24h,
-                volume: parseFloat(tickerData.quoteVolume) || 0,
-                high24h: parseFloat(tickerData.highPrice) || currentPrice,
-                low24h: parseFloat(tickerData.lowPrice) || currentPrice,
-                historicalData: historicalData,
-                technicalIndicators: {},
-                score: 0,
-                rank: 0,
-                conditions: {},
-                targets: {},
-                dataSource: 'binance'
-            };
-            this.calculateTechnicalIndicators(coin);
-            return coin;
-        } catch (error) {
-            console.error(`خطأ في جلب بيانات ${symbol} من Binance:`, error);
-            throw error;
-        }
-    }
-
-    calculateTechnicalIndicators(coin) {
-        const historicalData = coin.historicalData || [];
-        if (historicalData.length >= 14) {
-            coin.technicalIndicators.rsi = this.calculateRSI(historicalData);
-        } else {
-            coin.technicalIndicators.rsi = 50 + (coin.change24h * 0.8);
-            if (coin.technicalIndicators.rsi > 100) coin.technicalIndicators.rsi = 100;
-            if (coin.technicalIndicators.rsi < 0) coin.technicalIndicators.rsi = 0;
-        }
-        if (historicalData.length >= 26) {
-            const macdData = this.calculateMACD(historicalData);
-            coin.technicalIndicators.macd = macdData.macd;
-            coin.technicalIndicators.macdSignal = macdData.signal;
-        } else {
-            coin.technicalIndicators.macd = coin.change24h > 0 ? 0.1 : -0.1;
-            coin.technicalIndicators.macdSignal = 0;
-        }
-        if (historicalData.length >= 14) {
-            coin.technicalIndicators.mfi = this.calculateMFI(historicalData);
-        } else {
-            coin.technicalIndicators.mfi = Math.min(100, 50 + (coin.change24h * 1.2));
-        }
-        coin.technicalIndicators.cvd = this.calculateCVD(historicalData, coin);
-        if (historicalData.length >= 2) {
-            coin.technicalIndicators.parabolicSAR = this.calculateParabolicSAR(historicalData);
-        } else {
-            coin.technicalIndicators.parabolicSAR = coin.price * 0.98;
-        }
-        const currentPrice = coin.price;
-        if (historicalData.length >= 50) {
-            coin.technicalIndicators.ema20 = this.calculateEMA(historicalData, 20);
-            coin.technicalIndicators.ema50 = this.calculateEMA(historicalData, 50);
-        } else {
-            coin.technicalIndicators.ema20 = currentPrice;
-            coin.technicalIndicators.ema50 = currentPrice * (1 - (coin.change24h / 100) * 0.3);
-        }
-        const low24h = currentPrice * (1 - (coin.change24h / 100));
-        const high24h = currentPrice;
-        const range = high24h - low24h;
-        coin.technicalIndicators.fibonacci = {
-            level0: high24h,
-            level236: high24h + (range * 0.236),
-            level382: high24h + (range * 0.382),
-            level500: high24h + (range * 0.500),
-            level618: high24h + (range * 0.618),
-            level786: low24h + (range * 0.214),
-            level1000: low24h
-        };
-    }
-
-    calculateRSI(historicalData, period = 14) {
-        if (historicalData.length < period + 1) return 50;
-        let gains = 0, losses = 0;
+    // حساب ATR (Average True Range) بدقة عالية
+    calculateATR(candles, period = 14) {
+        if (candles.length < period + 1) return 0;
+        
+        let atrSum = 0;
         for (let i = 1; i <= period; i++) {
-            const change = historicalData[i].close - historicalData[i - 1].close;
-            if (change > 0) gains += change;
-            else losses += Math.abs(change);
+            const current = candles[candles.length - i];
+            const previous = candles[candles.length - i - 1];
+            
+            const tr = Math.max(
+                current.high - current.low,
+                Math.abs(current.high - previous.close),
+                Math.abs(current.low - previous.close)
+            );
+            atrSum += tr;
         }
-        let avgGain = gains / period, avgLoss = losses / period;
-        for (let i = period + 1; i < historicalData.length; i++) {
-            const change = historicalData[i].close - historicalData[i - 1].close;
-            const gain = change > 0 ? change : 0;
-            const loss = change < 0 ? Math.abs(change) : 0;
-            avgGain = ((avgGain * (period - 1)) + gain) / period;
-            avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+        return atrSum / period;
+    }
+
+    // حساب RSI (Relative Strength Index)
+    calculateRSI(candles, period = 14) {
+        if (candles.length < period + 1) return 50;
+        
+        let gains = 0;
+        let losses = 0;
+        
+        for (let i = candles.length - period; i < candles.length; i++) {
+            const change = candles[i].close - candles[i - 1].close;
+            if (change > 0) {
+                gains += change;
+            } else {
+                losses += Math.abs(change);
+            }
         }
+        
+        const avgGain = gains / period;
+        const avgLoss = losses / period;
+        
         if (avgLoss === 0) return 100;
+        
         const rs = avgGain / avgLoss;
         return 100 - (100 / (1 + rs));
     }
 
-    calculateMACD(historicalData, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
-        if (historicalData.length < slowPeriod) return { macd: 0, signal: 0 };
-        const prices = historicalData.map(d => d.close);
-        const ema12 = this.calculateEMAFromPrices(prices, fastPeriod);
-        const ema26 = this.calculateEMAFromPrices(prices, slowPeriod);
-        const macdLine = ema12 - ema26;
-        const signalLine = macdLine * 0.1;
-        return { macd: macdLine, signal: signalLine };
+    // حساب متوسط الحجم
+    calculateAverageVolume(candles, period = 20) {
+        if (candles.length < period) return 0;
+        
+        let volumeSum = 0;
+        for (let i = candles.length - period; i < candles.length; i++) {
+            volumeSum += candles[i].volume;
+        }
+        return volumeSum / period;
     }
 
-    calculateMFI(historicalData, period = 14) {
-        if (historicalData.length < period + 1) return 50;
-        let positiveFlow = 0, negativeFlow = 0;
-        for (let i = 1; i <= period; i++) {
-            const current = historicalData[i], previous = historicalData[i - 1];
-            const typicalPrice = (current.high + current.low + current.close) / 3;
-            const previousTypicalPrice = (previous.high + previous.low + previous.close) / 3;
-            const moneyFlow = typicalPrice * current.volume;
-            if (typicalPrice > previousTypicalPrice) positiveFlow += moneyFlow;
-            else if (typicalPrice < previousTypicalPrice) negativeFlow += moneyFlow;
-        }
-        if (negativeFlow === 0) return 100;
-        const moneyFlowRatio = positiveFlow / negativeFlow;
-        return 100 - (100 / (1 + moneyFlowRatio));
-    }
+    // النظام الهجين الذكي لحساب الأهداف
+    calculateHybridTargets(currentPrice, upperBand, lowerBand, atr, rsi, currentVolume, avgVolume, signalType) {
+        let baseTargetMultiplier = this.targetSettings.baseATRMultiplier;
+        let baseStopMultiplier = this.targetSettings.baseStopMultiplier;
+        
+        // حساب قوة الإشارة
+        const bandDistance = Math.abs(upperBand - lowerBand);
+        const signalStrength = signalType === 'BUY' 
+            ? Math.abs(currentPrice - upperBand) / bandDistance
+            : Math.abs(currentPrice - lowerBand) / bandDistance;
 
-    calculateCVD(historicalData, coin) {
-        if (!historicalData || historicalData.length === 0) {
-            const volumeDirection = coin.change24h > 0 ? 1 : -1;
-            return {
-                value: coin.volume * volumeDirection,
-                trend: coin.change24h > 0 ? 'bullish' : 'bearish',
-                strength: Math.abs(coin.change24h) > 5 ? 'strong' : 'weak'
-            };
+        // تعديل المضاعفات حسب قوة الإشارة
+        if (signalStrength > 0.8) {
+            baseTargetMultiplier *= 1.4;
+            baseStopMultiplier *= 0.7;
+        } else if (signalStrength > 0.5) {
+            baseTargetMultiplier *= 1.2;
+            baseStopMultiplier *= 0.8;
+        } else if (signalStrength < 0.2) {
+            baseTargetMultiplier *= 0.8;
+            baseStopMultiplier *= 1.2;
         }
-        let cvd = 0, previousCvd = 0;
-        for (let i = 1; i < historicalData.length; i++) {
-            const current = historicalData[i], previous = historicalData[i - 1];
-            let volumeDirection;
-            if (current.close > previous.close) volumeDirection = 1;
-            else if (current.close < previous.close) volumeDirection = -1;
-            else volumeDirection = 0;
-            cvd += current.volume * volumeDirection;
+        
+        // تعديل حسب RSI
+        if (rsi > 75 || rsi < 25) {
+            baseTargetMultiplier *= 0.7;
+            baseStopMultiplier *= 1.3;
+        } else if (rsi > 45 && rsi < 55) {
+            baseTargetMultiplier *= 1.1;
         }
-        const trend = cvd > previousCvd ? 'bullish' : 'bearish';
-        const strength = Math.abs(cvd) > (coin.volume * 10) ? 'strong' : 'weak';
-        return { value: cvd, trend, strength };
-    }
-
-    calculateParabolicSAR(historicalData) {
-        if (historicalData.length < 2) return historicalData[0]?.close || 0;
-        const current = historicalData[historicalData.length - 1];
-        const previous = historicalData[historicalData.length - 2];
-        const af = 0.02;
-        const trend = current.close > previous.close ? 'up' : 'down';
-        if (trend === 'up') {
-            return current.low - (current.high - current.low) * af;
+        
+        // تعديل حسب الحجم
+        const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
+        if (volumeRatio > 2.5) {
+            baseTargetMultiplier *= 1.3;
+            baseStopMultiplier *= 0.9;
+        } else if (volumeRatio > 1.5) {
+            baseTargetMultiplier *= 1.1;
+        } else if (volumeRatio < 1.0) {
+            baseTargetMultiplier *= 0.7;
+            baseStopMultiplier *= 1.2;
+        }
+        
+        // حساب الأهداف النهائية
+        let profitTarget, stopLoss;
+        
+        if (signalType === 'BUY') {
+            profitTarget = currentPrice + (atr * baseTargetMultiplier);
+            stopLoss = currentPrice - (atr * baseStopMultiplier);
         } else {
-            return current.high + (current.high - current.low) * af;
+            profitTarget = currentPrice - (atr * baseTargetMultiplier);
+            stopLoss = currentPrice + (atr * baseStopMultiplier);
         }
+        
+        // حساب نسبة المخاطرة
+        const riskAmount = Math.abs(currentPrice - stopLoss);
+        const rewardAmount = Math.abs(currentPrice - profitTarget);
+        const riskReward = riskAmount > 0 ? rewardAmount / riskAmount : 0;
+        
+        return {
+            profitTarget: profitTarget,
+            stopLoss: stopLoss,
+            riskReward: riskReward,
+            signalStrength: signalStrength,
+            volumeRatio: volumeRatio,
+            rsi: rsi,
+            atrValue: atr
+        };
     }
 
-    calculateEMA(historicalData, period) {
-        if (historicalData.length < period) {
-            return historicalData[historicalData.length - 1]?.close || 0;
-        }
-        const prices = historicalData.map(d => d.close);
-        return this.calculateEMAFromPrices(prices, period);
+    // تنسيق الأسعار
+    formatPrice(price) {
+        if (price < 0.000001) return price.toFixed(10);
+        if (price < 0.001) return price.toFixed(8);
+        if (price < 1) return price.toFixed(6);
+        if (price < 100) return price.toFixed(4);
+        return price.toFixed(2);
     }
 
-    calculateEMAFromPrices(prices, period) {
-        if (prices.length < period) {
-            return prices[prices.length - 1] || 0;
-        }
-        const multiplier = 2 / (period + 1);
-        let ema = prices.slice(0, period).reduce((sum, price) => sum + price, 0) / period;
-        for (let i = period; i < prices.length; i++) {
-            ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
-        }
-        return ema;
-    }
+    // فحص إشارة UT Bot لعملة واحدة
+    async checkUTBotSignal(symbol, timeframe) {
+        try {
+            const response = await fetch(`${this.apiBase}/market/candles?instId=${symbol}&bar=${timeframe}&limit=100`);
+            const result = await response.json();
+            
+            if (result.code !== '0' || !result.data) return null;
+            
+            const klines = result.data;
+            if (klines.length < 50) return null;
 
-     renderCoins() {
-        const coinsGrid = document.getElementById('coinsGrid');
-        if (!coinsGrid) {
-            console.error('عنصر coinsGrid غير موجود');
-            this.hideLoader();
-            return;
-        }
-        if (this.coins.length === 0) {
-            coinsGrid.innerHTML = '<div class="no-data">لا توجد عملات للعرض</div>';
-            this.hideLoader();
-            return;
-        }
-        let html = '';
-        this.coins.forEach(coin => {
-            let rankIcon = '', rankClass = '';
-            if (coin.rank === 1) {
-                rankIcon = '🥇';
-                rankClass = 'first-place';
-            } else if (coin.rank === 2) {
-                rankIcon = '🥈';
-                rankClass = 'second-place';
-            } else if (coin.rank === 3) {
-                rankIcon = '🥉';
-                rankClass = 'third-place';
-            } else {
-                rankIcon = `#${coin.rank}`;
-                rankClass = 'other-place';
+            // تحويل البيانات
+            const candles = klines.map(k => ({
+                high: parseFloat(k[2]),
+                low: parseFloat(k[3]),
+                close: parseFloat(k[4]),
+                volume: parseFloat(k[5]),
+                hl2: (parseFloat(k[2]) + parseFloat(k[3])) / 2
+            }));
+
+            // حساب المؤشرات
+            const atr = this.calculateATR(candles, this.targetSettings.atrPeriod);
+            const rsi = this.calculateRSI(candles, this.targetSettings.rsiPeriod);
+            const avgVolume = this.calculateAverageVolume(candles, this.targetSettings.volumePeriod);
+            const currentVolume = candles[candles.length - 1].volume;
+            
+            // حساب البولينجر باندز المعدلة
+            const current = candles[candles.length - 1];
+            const previous = candles[candles.length - 2];
+            const prev2 = candles[candles.length - 3];
+            
+            const upperBand = current.hl2 + (atr * this.targetSettings.keyValue);
+            const lowerBand = current.hl2 - (atr * this.targetSettings.keyValue);
+            
+            // شروط الشراء المتقدمة
+            const buyConditions = [
+                current.close > upperBand && previous.close <= upperBand,
+                current.close > upperBand * 0.98 && current.close > previous.close && previous.close > prev2.close,
+                current.close > upperBand * 1.01
+            ];
+            
+            // شروط البيع المتقدمة
+            const sellConditions = [
+                current.close < lowerBand && previous.close >= lowerBand,
+                current.close < lowerBand * 1.02 && current.close < previous.close && previous.close < prev2.close,
+                current.close < lowerBand * 0.99
+            ];
+            
+            const isBuySignal = buyConditions.some(condition => condition);
+            const isSellSignal = sellConditions.some(condition => condition);
+            
+            if (isBuySignal || isSellSignal) {
+                const signalType = isBuySignal ? 'BUY' : 'SELL';
+                
+                // فلتر الحجم
+                const volumeRatio = avgVolume > 0 ? currentVolume / avgVolume : 1;
+                if (volumeRatio < this.targetSettings.minVolumeRatio) {
+                    return null;
+                }
+                
+                // حساب الأهداف الهجينة
+                const hybridTargets = this.calculateHybridTargets(
+                    current.close, upperBand, lowerBand, atr, rsi, 
+                    currentVolume, avgVolume, signalType
+                );
+                
+                // فلتر نسبة المخاطرة
+                if (hybridTargets.riskReward < this.targetSettings.minRiskReward) {
+                    return null;
+                }
+                
+                // حساب النتيجة النهائية
+                const baseStrength = signalType === 'BUY'
+                    ? ((current.close - upperBand) / upperBand * 100)
+                    : ((lowerBand - current.close) / lowerBand * 100);
+                
+                const timeframeBonus = timeframe === '1H' ? 15 : 10;
+                const finalScore = Math.abs(baseStrength) + timeframeBonus + (hybridTargets.signalStrength * 20);
+                
+                return {
+                    symbol: symbol,
+                    price: this.formatPrice(current.close),
+                    timeframe: timeframe,
+                    strength: baseStrength,
+                    score: finalScore,
+                    change24h: await this.get24hChange(symbol),
+                    type: signalType,
+                    targets: {
+                        profitTarget: this.formatPrice(hybridTargets.profitTarget),
+                        stopLoss: this.formatPrice(hybridTargets.stopLoss),
+                        riskReward: hybridTargets.riskReward.toFixed(2),
+                        atrValue: this.formatPrice(hybridTargets.atrValue),
+                        rsi: hybridTargets.rsi.toFixed(1),
+                        volumeRatio: hybridTargets.volumeRatio.toFixed(1),
+                        signalStrength: (hybridTargets.signalStrength * 100).toFixed(1)
+                    }
+                };
             }
-            const sourceIcon = coin.dataSource === 'binance' ? '🟡' : '🔵';
-            const priorityBadge = coin.priority === 3 ? '<span class="multi-source">⭐</span>' : '';
-            let scoreClass = '';
-            if (coin.score >= 90) scoreClass = 'score-excellent';
-            else if (coin.score >= 80) scoreClass = 'score-very-good';
-            else if (coin.score >= 70) scoreClass = 'score-good';
-            else if (coin.score >= 60) scoreClass = 'score-average';
-            else scoreClass = 'score-poor';
-            html += `
-                <div class="coin-card ${rankClass}" onclick="window.location.href='coin.html?symbol=${coin.symbol}'">
-                    <div class="rank-badge">
-                        <span class="rank-icon">${rankIcon}</span>
-                    </div>
-                    <div class="coin-header">
-                        <div class="coin-symbol">
-                            ${sourceIcon} ${coin.symbol} ${priorityBadge}
-                        </div>
-                        <div class="coin-score ${scoreClass}">
-                            ${coin.score}
-                        </div>
-                    </div>
-                    <div class="coin-price">
-                        $${coin.price.toFixed(6)}
-                    </div>
-                    <div class="coin-change ${coin.change24h >= 0 ? 'positive' : 'negative'}">
-                        ${coin.change24h >= 0 ? '+' : ''}${coin.change24h.toFixed(2)}%
-                    </div>
-                    <div class="coin-volume">
-                        الحجم: ${this.formatNumber(coin.volume)}
-                    </div>
-                </div>
-            `;
-        });
-        localStorage.setItem('yaserCryptoCoins', JSON.stringify(this.coins));
-        coinsGrid.innerHTML = html;
-        this.hideLoader();
-        console.log('✅ تم عرض البطاقات بنجاح');
-    }
-    formatNumber(num) {
-        if (num >= 1000000000) {
-            return (num / 1000000000).toFixed(1) + 'B';
-        } else if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
+            
+            return null;
+        } catch (error) {
+            console.error(`❌ خطأ في فحص ${symbol}:`, error);
+            return null;
         }
-        return num.toFixed(0);
+    }
+    
+    // جلب التغيير اليومي
+    async get24hChange(symbol) {
+        try {
+            const response = await fetch(`${this.apiBase}/market/ticker?instId=${symbol}`);
+            const result = await response.json();
+            
+            if (result.code === '0' && result.data && result.data.length > 0) {
+                const data = result.data[0];
+                let change = parseFloat(data.changePercent);
+                
+                if (isNaN(change) || change === 0) {
+                    const lastPrice = parseFloat(data.last);
+                    const openPrice = parseFloat(data.open24h);
+                    
+                    if (openPrice && openPrice > 0) {
+                        change = ((lastPrice - openPrice) / openPrice) * 100;
+                    }
+                }
+                
+                return isNaN(change) ? '0.00' : change.toFixed(2);
+            }
+            return '0.00';
+        } catch (error) {
+            return '0.00';
+        }
+    }
+
+    // فحص السوق بالكامل
+    async scanAllMarket() {
+        if (this.isScanning) {
+            console.log('⏳ الفحص الهجين جاري بالفعل...');
+            return [];
+        }
+        
+        this.isScanning = true;
+        console.log('🔥 بدء الفحص الهجين الذكي للسوق...');
+        
+        try {
+            // تحميل العملات إذا لم تكن محملة
+            if (this.symbols.length === 0) {
+                await this.fetchTopSymbols();
+            }
+            const allSignals = [];
+            const timeframes = ['1H', '30m'];
+            
+            for (const timeframe of timeframes) {
+                console.log(`📊 فحص هجين لفريم ${timeframe}...`);
+                let signalsFound = 0;
+                
+                const batchSize = 6;
+                for (let i = 0; i < this.symbols.length; i += batchSize) {
+                    const batch = this.symbols.slice(i, i + batchSize);
+                    
+                    const promises = batch.map(async symbol => {
+                        try {
+                            return await this.checkUTBotSignal(symbol, timeframe);
+                        } catch (error) {
+                            return null;
+                        }
+                    });
+                    
+                    const results = await Promise.all(promises);
+                    
+                    results.forEach(result => {
+                        if (result) {
+                            allSignals.push(result);
+                            signalsFound++;
+                        }
+                    });
+                    
+                    // تأخير بسيط لتجنب حدود API
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
+                console.log(`🎯 فريم ${timeframe}: ${signalsFound} إشارة هجينة`);
+            }
+
+            // فلترة الإشارات المكررة واختيار الأقوى
+            const uniqueSignals = new Map();
+            
+            allSignals.forEach(signal => {
+                const key = signal.symbol;
+                if (!uniqueSignals.has(key) || uniqueSignals.get(key).score < signal.score) {
+                    uniqueSignals.set(key, signal);
+                }
+            });
+
+            // ترتيب حسب النتيجة المركبة وأخذ أفضل 8 (لملء الشبكة)
+            const finalSignals = Array.from(uniqueSignals.values())
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 8);
+
+            const buyCount = finalSignals.filter(s => s.type === 'BUY').length;
+            const sellCount = finalSignals.filter(s => s.type === 'SELL').length;
+
+            console.log(`🎉 الفحص الهجين اكتمل: ${allSignals.length} إشارة تم تحليلها`);
+            console.log(`🏆 أفضل 8 إشارات هجينة: ${buyCount} شراء، ${sellCount} بيع`);
+            
+            if (finalSignals.length > 0) {
+                finalSignals.forEach(signal => {
+                    console.log(`🎯 ${signal.symbol}: نسبة ${signal.targets.riskReward}:1 | RSI: ${signal.targets.rsi} | حجم: ${signal.targets.volumeRatio}x`);
+                });
+            }
+            
+            this.lastUpdateTime = new Date();
+            return finalSignals;
+            
+        } catch (error) {
+            console.error('❌ خطأ في الفحص الهجين:', error);
+            return [];
+        } finally {
+            this.isScanning = false;
+        }
+    }
+
+    // تحديث الإحصائيات
+    updateStats(signals) {
+        const buySignals = signals.filter(s => s.type === 'BUY').length;
+        const sellSignals = signals.filter(s => s.type === 'SELL').length;
+        
+        // تحديث عناصر الإحصائيات
+        const activeSignalsEl = document.getElementById('active-signals');
+        const buySignalsEl = document.getElementById('buy-signals');
+        const sellSignalsEl = document.getElementById('sell-signals');
+        const lastUpdateEl = document.getElementById('last-update');
+        
+        if (activeSignalsEl) activeSignalsEl.textContent = signals.length;
+        if (buySignalsEl) buySignalsEl.textContent = buySignals;
+        if (sellSignalsEl) sellSignalsEl.textContent = sellSignals;
+        if (lastUpdateEl) {
+            const now = new Date();
+            lastUpdateEl.textContent = now.toLocaleTimeString('ar-SA', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+    }
+
+    // تحديث حالة الفحص
+    updateScanStatus(status, isScanning = false) {
+        const statusEl = document.querySelector('.scan-status span');
+        const indicatorEl = document.querySelector('.status-indicator');
+        
+        if (statusEl) statusEl.textContent = status;
+        if (indicatorEl) {
+            indicatorEl.className = `fas fa-circle status-indicator ${isScanning ? 'scanning' : 'ready'}`;
+        }
     }
 }
 
-// تشغيل التطبيق عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 بدء تشغيل محلل العملات المشفرة - نسخة مطورة مع مصادر متعددة');
-    window.yaserCryptoInstance = new YaserCrypto();
- 
-});
+// إنشاء مثيل من الماسح الضوئي
+const utScanner = new UTBotScanner();
+
+// تحديث دالة loadUTBotSignals لعرض البطاقات
+async function loadUTBotSignals() {
+    const container = document.getElementById('utBotSignals');
+    
+    if (!container) {
+        console.error('❌ عنصر utBotSignals غير موجود في الصفحة');
+        return;
+    }
+    
+    try {
+        // تحديث حالة الفحص
+        utScanner.updateScanStatus('جاري الفحص الهجين...', true);
+        container.innerHTML = '<div class="ut-bot-loading">🔥 جاري الفحص الهجين الذكي للسوق...</div>';
+        
+        const signals = await utScanner.scanAllMarket();
+        
+        // تحديث الإحصائيات
+        utScanner.updateStats(signals);
+        utScanner.updateScanStatus('نشط - جاهز للفحص', false);
+        
+        if (signals.length === 0) {
+            container.innerHTML = '<div class="ut-bot-loading">لا توجد إشارات هجينة حالياً 📊</div>';
+            return;
+        }
+
+        const cardsHTML = signals.map(signal => {
+            const cardClass = signal.type === 'BUY' ? 'buy-card' : 'sell-card';
+            const signalIcon = signal.type === 'BUY' ? '🟢' : '🔴';
+            const signalText = signal.type === 'BUY' ? 'شراء' : 'بيع';
+            const signalTypeClass = signal.type === 'BUY' ? 'buy' : 'sell';
+            const changeClass = parseFloat(signal.change24h) >= 0 ? 'positive' : 'negative';
+            
+            return `
+                <div class="ut-bot-card ${cardClass}">
+                    <div class="card-header">
+                        <div class="signal-type ${signalTypeClass}">
+                            <span>${signalIcon}</span>
+                            <span>${signalText}</span>
+                        </div>
+                        <div class="timeframe-badge">${signal.timeframe}</div>
+                    </div>
+                    
+                    <div class="symbol-info">
+                        <div class="symbol-name">${signal.symbol.replace('-USDT', '/USDT')}</div>
+                        <div class="symbol-price">
+                            $${signal.price}
+                            <span class="price-change ${changeClass}">(${signal.change24h}%)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="targets-section">
+                        <div class="target-row">
+                            <span class="target-label">🎯 الهدف:</span>
+                            <span class="target-value profit">$${signal.targets.profitTarget}</span>
+                        </div>
+                        <div class="target-row">
+                            <span class="target-label">🛑 الستوب:</span>
+                            <span class="target-value stop">$${signal.targets.stopLoss}</span>
+                        </div>
+                        <div class="target-row">
+                            <span class="target-label">📊 النسبة:</span>
+                            <span class="target-value ratio">${signal.targets.riskReward}:1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="indicators-section">
+                        <div class="indicator-item">
+                            <span class="indicator-label">RSI:</span>
+                            <span class="indicator-value">${signal.targets.rsi}</span>
+                        </div>
+                        <div class="indicator-item">
+                            <span class="indicator-label">الحجم:</span>
+                            <span class="indicator-value">${signal.targets.volumeRatio}x</span>
+                        </div>
+                        <div class="indicator-item">
+                            <span class="indicator-label">القوة:</span>
+                            <span class="indicator-value">${signal.targets.signalStrength}%</span>
+                        </div>
+                        <div class="indicator-item">
+                            <span class="indicator-label">ATR:</span>
+                            <span class="indicator-value">${signal.targets.atrValue}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = cardsHTML;
+        
+        console.log(`🎉 تم عرض ${signals.length} إشارة هجينة ذكية في البطاقات`);
+        
+    } catch (error) {
+        console.error('❌ خطأ في تحديث الإشارات الهجينة:', error);
+        container.innerHTML = '<div class="ut-bot-loading">❌ خطأ في تحميل البيانات الهجينة</div>';
+        utScanner.updateScanStatus('خطأ في الاتصال', false);
+    }
+}
+
+// دوال إضافية للتحكم في الإعدادات
+function updateHybridSettings(baseATR, baseStop, atrPeriod, volumePeriod, minRiskReward) {
+    utScanner.targetSettings.baseATRMultiplier = baseATR || 3.0;
+    utScanner.targetSettings.baseStopMultiplier = baseStop || 1.4;
+    utScanner.targetSettings.atrPeriod = atrPeriod || 14;
+    utScanner.targetSettings.volumePeriod = volumePeriod || 20;
+    utScanner.targetSettings.minRiskReward = minRiskReward || 1.8;
+    
+    console.log('🔧 تم تحديث إعدادات النظام الهجين:', utScanner.targetSettings);
+}
+
+// دالة لاختبار إشارة واحدة
+async function testHybridSignal(symbol, timeframe = '1H') {
+    try {
+        console.log(`🧪 اختبار الإشارة الهجينة لـ ${symbol}...`);
+        const signal = await utScanner.checkUTBotSignal(symbol, timeframe);
+        if (signal) {
+            console.log('🎯 نتيجة الاختبار:', signal);
+            return signal;
+        } else {
+            console.log('❌ لا توجد إشارة حالياً');
+            return null;
+        }
+    } catch (error) {
+        console.error(`❌ خطأ في اختبار ${symbol}:`, error);
+        return null;
+    }
+}
+
+// دالة الفحص اليدوي
+async function manualScan() {
+    console.log('🔍 بدء الفحص اليدوي...');
+    await loadUTBotSignals();
+}
+
+// إعداد الأحداث عند تحميل الصفحة
+function setupEventListeners() {
+    // زر الفحص اليدوي
+    const manualScanBtn = document.getElementById('manual-scan-btn');
+    if (manualScanBtn) {
+        manualScanBtn.addEventListener('click', manualScan);
+    }
+    
+    console.log('🎮 تم إعداد أحداث التحكم');
+}
+
+// تهيئة النظام
+function initializeSystem() {
+    console.log('🚀 تهيئة UT Bot Scanner الهجين...');
+    
+    // إعداد الأحداث
+    setupEventListeners();
+    
+    // تحديث حالة البداية
+    utScanner.updateScanStatus('جاري التهيئة...', true);
+    
+    // بدء الفحص الأول
+    setTimeout(() => {
+        loadUTBotSignals();
+    }, 1000);
+    
+    console.log('✅ النظام جاهز للعمل');
+}
+
+// بدء التشغيل
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSystem);
+} else {
+    initializeSystem();
+}
+
+// تحديث تلقائي كل 12 دقيقة
+setInterval(loadUTBotSignals, 720000);
+
+// رسائل النظام
+console.log('🚀🔥 UT Bot Scanner الهجين الذكي - جاهز للعمل!');
+console.log('🎯 الميزات الهجينة الجديدة:');
+console.log('   ✅ حساب ATR علمي دقيق');
+console.log('   ✅ تحليل قوة إشارة UT Bot');
+console.log('   ✅ مؤشر RSI للتشبع');
+console.log('   ✅ تحليل الحجم والسيولة');
+console.log('   ✅ أهداف ديناميكية ذكية');
+console.log('   ✅ نسب مخاطرة محسوبة بدقة');
+console.log('   ✅ عرض بطاقات شبكية 4x2');
+console.log('   ✅ تحديث إحصائيات مباشر');
+console.log('   ✅ فحص يدوي وتلقائي');
+console.log('🔧 للتحكم: updateHybridSettings(baseATR, baseStop, atrPeriod, volumePeriod, minRiskReward)');
+console.log('🧪 للاختبار: testHybridSignal("BTC-USDT", "1H")');
+console.log('🔍 للفحص اليدوي: manualScan()');
+
+// تصدير الدوال للاستخدام العام
+window.utScanner = utScanner;
+window.loadUTBotSignals = loadUTBotSignals;
+window.updateHybridSettings = updateHybridSettings;
+window.testHybridSignal = testHybridSignal;
+window.manualScan = manualScan;

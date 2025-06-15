@@ -50,10 +50,6 @@ class UTBotScanner {
            const response = await fetch(this.apiBase + encodeURIComponent('/ticker/24hr'));
 const data = await response.json();
 const tickers = JSON.parse(data.contents);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
             const tickers = await response.json();
             
             this.symbols = tickers

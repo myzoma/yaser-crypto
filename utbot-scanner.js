@@ -115,10 +115,14 @@ async fetchBinanceSymbols() {
 
 async fetchOKXSymbols() {
     try {
-        const response = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT');
+        const okxUrl = 'https://www.okx.com/api/v5/market/tickers?instType=SPOT';
+        const proxyUrl = 'https://corsproxy.io/?' + okxUrl;
+        
+        const response = await fetch(proxyUrl);
         const result = await response.json();
         
         if (!result.data || !Array.isArray(result.data)) {
+            console.error('❌ بيانات OKX غير صحيحة');
             return [];
         }
         
@@ -135,6 +139,7 @@ async fetchOKXSymbols() {
         return [];
     }
 }
+
 
         return result.data
             .filter(ticker => 

@@ -229,7 +229,7 @@ class UTBotScanner {
             const avgVolume = this.calculateAverageVolume(candles, this.targetSettings.volumePeriod);
             const currentVolume = candles[candles.length - 1].volume;
             
-            const keyValue = 1;
+            const keyValue = 2;
             const current = candles[candles.length - 1];
             const previous = candles[candles.length - 2];
             const prev2 = candles[candles.length - 3];

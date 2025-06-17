@@ -10,7 +10,7 @@ class UTBotScanner {
         this.passphrase = '212160Nm$#';
         
       this.targetSettings = {
-    baseATRMultiplier: 3.0,      // زيادة للنسب الأفضل
+    baseATRMultiplier: 1.0,      // زيادة للنسب الأفضل
     baseStopMultiplier: 1.4,     // تحسين النسبة
     atrPeriod: 14,
     volumePeriod: 20,
@@ -229,7 +229,7 @@ class UTBotScanner {
             const avgVolume = this.calculateAverageVolume(candles, this.targetSettings.volumePeriod);
             const currentVolume = candles[candles.length - 1].volume;
             
-            const keyValue = 0.8;
+            const keyValue = 1;
             const current = candles[candles.length - 1];
             const previous = candles[candles.length - 2];
             const prev2 = candles[candles.length - 3];

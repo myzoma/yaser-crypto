@@ -229,7 +229,7 @@ class UTBotScanner {
             const avgVolume = this.calculateAverageVolume(candles, this.targetSettings.volumePeriod);
             const currentVolume = candles[candles.length - 1].volume;
             
-            const keyValue = 0.1;
+            const keyValue = 1;
             const current = candles[candles.length - 1];
             const previous = candles[candles.length - 2];
             const prev2 = candles[candles.length - 3];
@@ -490,7 +490,7 @@ async function loadUTBotSignals() {
 function updateHybridSettings(baseATR, baseStop, atrPeriod, volumePeriod) {
     utScanner.targetSettings.baseATRMultiplier = baseATR || 2.5;
     utScanner.targetSettings.baseStopMultiplier = baseStop || 1.5;
-    utScanner.targetSettings.atrPeriod = atrPeriod || 14;
+    utScanner.targetSettings.atrPeriod = atrPeriod || 2;
     utScanner.targetSettings.volumePeriod = volumePeriod || 20;
     
     console.log('🔧 تم تحديث إعدادات النظام الهجين:', utScanner.targetSettings);
